@@ -1,0 +1,18 @@
+# Codex MCP servers — see https://github.com/openai/codex
+# Sourced by Codex when run from this project root.
+# Requires `serena` and `codebase-memory-mcp` on PATH; install via
+#   pipx install serena && pipx install codebase-memory-mcp
+# (or any equivalent that puts the binaries on PATH).
+
+[mcp_servers.serena]
+command = "serena"
+args = ["start-mcp-server", "--context=codex", "--project-from-cwd"]
+
+[mcp_servers.codebase-memory-mcp]
+command = "codebase-memory-mcp"
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.context7.env_http_headers]
+x-api-key = "CONTEXT7_API_KEY"

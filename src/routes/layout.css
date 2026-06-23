@@ -1,0 +1,156 @@
+@import 'tailwindcss';
+
+/* Design tokens. OKLCH values are canonical here. Brand names (canvas, ink,
+   primary, etc.) and shadcn names (background, foreground, primary, etc.)
+   carry the same value where they map to the same color; both sets live in
+   @theme so Tailwind v4 generates utilities for both naming families
+   (bg-canvas / bg-background, text-ink / text-foreground, etc.). */
+@theme {
+	--color-canvas: oklch(1 0 0);
+	--color-surface: oklch(0.985 0.005 110);
+	--color-ink: oklch(0.22 0.01 110);
+	--color-muted: oklch(0.52 0.012 110);
+	--color-hairline: oklch(0.9 0.005 110);
+	--color-primary: oklch(0.72 0.135 95);
+	--color-primary-hover: oklch(0.66 0.14 95);
+
+	--color-background: oklch(1 0 0);
+	--color-foreground: oklch(0.22 0.01 110);
+	--color-primary-foreground: oklch(1 0 0);
+	--color-secondary: oklch(0.985 0.005 110);
+	--color-secondary-foreground: oklch(0.22 0.01 110);
+	--color-muted-foreground: oklch(0.52 0.012 110);
+	--color-border: oklch(0.9 0.005 110);
+	--color-input: oklch(0.9 0.005 110);
+	--color-ring: oklch(0.72 0.135 95);
+	--color-accent: oklch(0.985 0.005 110);
+	--color-accent-foreground: oklch(0.22 0.01 110);
+	--color-destructive: oklch(0.55 0.2 25);
+	--color-destructive-foreground: oklch(1 0 0);
+	--color-popover: oklch(1 0 0);
+	--color-popover-foreground: oklch(0.22 0.01 110);
+	--color-card: oklch(1 0 0);
+	--color-card-foreground: oklch(0.22 0.01 110);
+
+	--font-display: 'Spectral', Georgia, 'Times New Roman', serif;
+	--font-body: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+
+	--text-display: clamp(2.5rem, 6vw, 4rem);
+	--text-headline: clamp(1.75rem, 3.5vw, 2.25rem);
+	--text-title: 1.25rem;
+	--text-body: 1rem;
+	--text-label: 0.8125rem;
+
+	--radius-card: 12px;
+	--radius-pill: 9999px;
+	--radius-md: 8px;
+}
+
+@layer base {
+	html {
+		font-family: var(--font-body);
+		color: var(--color-ink);
+		background-color: var(--color-canvas);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	body {
+		margin: 0;
+		line-height: 1.6;
+		font-feature-settings:
+			'kern' 1,
+			'liga' 1;
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-family: var(--font-display);
+		text-wrap: balance;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		font-weight: 500;
+		margin: 0;
+	}
+
+	p {
+		text-wrap: pretty;
+		margin: 0;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
+
+	::selection {
+		background: oklch(0.72 0.135 95 / 0.22);
+		color: var(--color-ink);
+	}
+}
+
+@layer components {
+	.container-page {
+		max-width: 72rem;
+		margin-inline: auto;
+		padding-inline: clamp(1.25rem, 4vw, 3rem);
+	}
+
+	.measure-prose {
+		max-width: 70ch;
+	}
+
+	.label-meta {
+		font-size: var(--text-label);
+		font-weight: 500;
+		letter-spacing: 0.01em;
+		color: var(--color-muted);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.link-quiet {
+		border-bottom: 1px solid var(--color-hairline);
+		transition:
+			border-color 0.18s ease,
+			color 0.18s ease;
+	}
+	.link-quiet:hover {
+		border-color: var(--color-primary);
+		color: var(--color-primary);
+	}
+}
+
+@layer utilities {
+	.animate-fade-up {
+		animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-fade-up {
+		animation: none;
+	}
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+	}
+}
