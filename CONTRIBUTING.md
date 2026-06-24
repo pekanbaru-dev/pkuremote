@@ -38,6 +38,19 @@ Open `http://localhost:5173` in your browser.
 - **Prettier** uses tabs, single quotes, no trailing commas, 100-char print width. Run `pnpm format` before committing.
 - **shadcn-svelte** components live under `$lib/components/ui/`. Add new ones with `pnpm dlx shadcn-svelte@latest add <component> --yes --overwrite`.
 
+## Branch naming
+
+Use `type/short-description` where `type` matches conventional commit types:
+
+```
+feat/add-login
+fix/nav-overflow
+chore/update-deps
+docs/api-readme
+refactor/extract-utils
+test/button-spec
+```
+
 ## Commit convention
 
 Use [conventional commits](https://www.conventionalcommits.org/):
@@ -56,7 +69,7 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
 2. Make your changes. Keep them focused on a single concern.
 3. Run `pnpm check` and `pnpm lint` to verify no regressions.
 4. Open a pull request using the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
-5. A maintainer will review your changes.
+5. A maintainer will review your changes. See [MAINTAINERS.md](./MAINTAINERS.md) for the core team.
 
 ## OpenSpec workflow
 

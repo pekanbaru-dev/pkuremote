@@ -18,6 +18,7 @@ Closes #
 ## Checklist
 
 - [ ] I have read the [contributing guide](../CONTRIBUTING.md).
+- [ ] Branch name follows the `type/short-description` convention.
 - [ ] Tests have been added or updated for the changes.
 - [ ] `pnpm check` passes without errors.
 - [ ] `pnpm lint` passes without errors.

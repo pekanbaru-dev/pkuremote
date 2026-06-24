@@ -3,7 +3,7 @@
 	"mcp": {
 		"serena": {
 			"type": "local",
-			"command": ["serena", "start-mcp-server", "--context=opencode", "--project-from-cwd"],
+			"command": ["serena", "start-mcp-server", "--context=codex", "--project-from-cwd"],
 			"enabled": true
 		},
 		"codebase-memory-mcp": {
