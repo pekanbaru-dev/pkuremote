@@ -32,3 +32,6 @@ playwright/.cache
 
 # Serena (local project cache, machine-specific)
 .serena
+
+# Caddy (bind-mount fallback for prod stack)
+caddy_data/

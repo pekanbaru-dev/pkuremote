@@ -1,0 +1,35 @@
+# Local dev stack for the SvelteKit FE.
+#
+# Brings up Vite's dev server on http://localhost:5173 with hot reload, backed
+# by the Supabase Cloud project configured in `.env`. No Caddy, no HTTPS.
+#
+# Usage:
+#   docker compose up --build
+#   # then open http://localhost:5173
+#
+# Edit a `.svelte` or `.ts` file under the repo root and Vite HMR picks it up.
+
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    command: pnpm dev --host 0.0.0.0
+    ports:
+      - 127.0.0.1:5173:5173
+    environment:
+      # SvelteKit reads $PUBLIC_* at build time and at runtime.
+      PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
+      PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+    volumes:
+      # Bind-mount the source so HMR sees live edits.
+      - .:/app
+      # Override the bind-mounted `node_modules` and `.svelte-kit` so
+      # the image's installed deps win and Vite can use its cache dir.
+      - app_node_modules:/app/node_modules
+      - app_svelte_kit:/app/.svelte-kit
+    restart: unless-stopped
+
+volumes:
+  app_node_modules:
+  app_svelte_kit:
