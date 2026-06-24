@@ -100,18 +100,12 @@ pipx install codebase-memory-mcp
 
 ## OpenSpec workflow
 
-Changes are proposed, implemented, and archived via OpenSpec. Install the CLI globally first:
+Changes are proposed, implemented, and archived via OpenSpec. The OpenSpec CLI must be installed globally (see [CONTRIBUTING.md](CONTRIBUTING.md) for install steps); in agent sessions, trigger the OpenSpec skills by name:
 
-```sh
-npm install -g @fission-ai/openspec   # or: pnpm add -g @fission-ai/openspec
-openspec --version                    # verify (1.4.0 or later)
-```
-
-Then use it to manage changes:
-
-```sh
-openspec new change "<name>"          # scaffold a change
-openspec status --change "<name>"    # check artifact status
-```
+- `openspec-propose` — scaffold a new change (proposal, design, specs, tasks) from a short description.
+- `openspec-explore` — think through an idea or investigate a problem before or during a change.
+- `openspec-apply-change` — implement tasks from an existing change.
+- `openspec-sync-specs` — sync delta specs into canonical specs without archiving.
+- `openspec-archive-change` — finalize and archive a completed change.
 
 Active changes live at `openspec/changes/<name>/`; archived changes at `openspec/changes/archive/YYYY-MM-DD-<name>/`; canonical specs at `openspec/specs/<capability>/spec.md`.
