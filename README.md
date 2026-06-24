@@ -2,13 +2,9 @@
 
 The public site for the Pekanbaru remote-worker community — a quiet, editorial bulletin for events, announcements, and blog posts.
 
-## Stack
-
-- **SvelteKit** (Svelte 5 runes mode) + TypeScript
-- **Tailwind CSS v4** (tokens via `@theme` in `src/routes/layout.css`)
-- **shadcn-svelte** components (`src/lib/components/ui/`)
-- **Vitest** + **Playwright** for tests
-- **pnpm** as the package manager
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Build status](https://img.shields.io/badge/build-passing-brightgreen)
+![SvelteKit](https://img.shields.io/badge/SvelteKit-5-ff3e00)
 
 ## Getting started
 
@@ -19,38 +15,18 @@ pnpm dev
 
 Open `http://localhost:5173`.
 
-## rtk (token-optimized CLI proxy)
-
-[rtk](https://github.com/cyber-rico/rtk) is a CLI proxy that filters and summarizes command output before it reaches AI agents, saving 60–90% of tokens on common commands. It is optional for humans but recommended when using AI coding agents in this repo.
-
-Install:
-
-```sh
-brew install rtk   # or see https://github.com/cyber-rico/rtk
-```
-
-Then prefix shell commands with `rtk`:
-
-```sh
-rtk git status
-rtk pnpm install
-rtk pnpm check
-```
-
-Meta commands (use bare): `rtk gain` (token savings analytics), `rtk discover` (find what rtk can optimize), `rtk proxy <cmd>` (run raw command without filtering).
-
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Dev server on `http://localhost:5173` |
-| `pnpm build` | Production build (SvelteKit + Vite) |
-| `pnpm check` | `svelte-kit sync` then `svelte-check` (typecheck + Svelte diagnostics) |
-| `pnpm lint` | `prettier --check . && eslint .` |
-| `pnpm format` | `prettier --write .` |
-| `pnpm test:unit` | Vitest (unit + component). Add `-- --run` for a single run. |
-| `pnpm test:e2e` | Playwright (installs browsers first) |
-| `pnpm test` | Unit then e2e, in that order |
+| Command          | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`       | Dev server on `http://localhost:5173`                                  |
+| `pnpm build`     | Production build (SvelteKit + Vite)                                    |
+| `pnpm check`     | `svelte-kit sync` then `svelte-check` (typecheck + Svelte diagnostics) |
+| `pnpm lint`      | `prettier --check . && eslint .`                                       |
+| `pnpm format`    | `prettier --write .`                                                   |
+| `pnpm test:unit` | Vitest (unit + component). Add `-- --run` for a single run.            |
+| `pnpm test:e2e`  | Playwright (installs browsers first)                                   |
+| `pnpm test`      | Unit then e2e, in that order                                           |
 
 Verify after edits: `pnpm check` → `pnpm lint` → `pnpm test`.
 
@@ -74,6 +50,36 @@ src/
 - **DESIGN.md** — the "Quiet Bulletin" visual spec: OKLCH palette, Spectral (display) + Source Sans 3 (body) typography, flat-by-default elevation, the One Voice Rule (ochre accent ≤10% of any screen).
 
 Read both before any UI work.
+
+## Contributing
+
+We welcome contributions. Please read:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — setup, code style, commit convention, PR process
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — community standards
+- [SECURITY.md](SECURITY.md) — vulnerability reporting
+
+## Tooling
+
+### rtk (token-optimized CLI proxy)
+
+[rtk](https://github.com/cyber-rico/rtk) is a CLI proxy that filters and summarizes command output before it reaches AI agents, saving 60–90% of tokens on common commands. It is optional for humans but recommended when using AI coding agents in this repo.
+
+Install:
+
+```sh
+brew install rtk   # or see https://github.com/cyber-rico/rtk
+```
+
+Then prefix shell commands with `rtk`:
+
+```sh
+rtk git status
+rtk pnpm install
+rtk pnpm check
+```
+
+Meta commands (use bare): `rtk gain` (token savings analytics), `rtk discover` (find what rtk can optimize), `rtk proxy <cmd>` (run raw command without filtering).
 
 ## Agent setup (optional)
 
