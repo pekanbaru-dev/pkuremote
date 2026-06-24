@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Bug report
+    url: https://github.com/pekanbaru-dev/pkuremote/issues/new?template=bug_report.yml
+    about: Report a bug using the bug report template.
+  - name: Feature request
+    url: https://github.com/pekanbaru-dev/pkuremote/issues/new?template=feature_request.yml
+    about: Suggest a feature using the feature request template.
