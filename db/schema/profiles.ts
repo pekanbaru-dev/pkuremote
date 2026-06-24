@@ -8,6 +8,7 @@ export const profiles = pgTable('profiles', {
 		.references(() => authUsers.id, { onDelete: 'cascade' })
 		.default(sql`gen_random_uuid()`),
 	displayName: text('display_name').notNull(),
+	avatarUrl: text('avatar_url'),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 });
 

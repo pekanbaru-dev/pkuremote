@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 
@@ -16,6 +17,8 @@
 		excerpt: string;
 		href: string;
 	};
+
+	const user = $derived(page.data.user);
 
 	const featuredEvent = {
 		date: 'Thu 11 Jul',
@@ -86,7 +89,7 @@
 	<div class="container-page flex items-center justify-between py-4">
 		<a href="/" class="font-display text-lg font-medium tracking-tight text-ink">PKU Remote</a>
 		<nav class="hidden sm:block" aria-label="Primary">
-			<ul class="flex gap-6 text-[0.9375rem]">
+			<ul class="flex items-center gap-6 text-[0.9375rem]">
 				{#each navLinks as link (link.href)}
 					<li>
 						<a
@@ -97,6 +100,23 @@
 						</a>
 					</li>
 				{/each}
+				<li>
+					{#if user}
+						<a
+							href="/myprofile"
+							class="rounded-pill border border-hairline px-4 py-1.5 text-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+						>
+							My profile
+						</a>
+					{:else}
+						<a
+							href="/login"
+							class="rounded-pill border border-hairline px-4 py-1.5 text-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+						>
+							Sign in
+						</a>
+					{/if}
+				</li>
 			</ul>
 		</nav>
 		<details class="sm:hidden">
@@ -110,6 +130,21 @@
 						{link.label}
 					</a>
 				{/each}
+				{#if user}
+					<a
+						href="/myprofile"
+						class="mt-2 inline-block rounded-pill border border-hairline px-4 py-1.5 text-center text-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+					>
+						My profile
+					</a>
+				{:else}
+					<a
+						href="/login"
+						class="mt-2 inline-block rounded-pill border border-hairline px-4 py-1.5 text-center text-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+					>
+						Sign in
+					</a>
+				{/if}
 			</nav>
 		</details>
 	</div>
