@@ -25,6 +25,11 @@ describe('safeRedirectTarget', () => {
 		expect(safeRedirectTarget('//evil.com')).toBe('/myprofile');
 	});
 
+	it('rejects a backslash-prefixed path that browsers normalize to a protocol-relative URL', () => {
+		expect(safeRedirectTarget('/\\evil.com/pwn')).toBe('/myprofile');
+		expect(safeRedirectTarget('/\\evil.com')).toBe('/myprofile');
+	});
+
 	it('rejects an absolute URL', () => {
 		expect(safeRedirectTarget('https://evil.com/pwn')).toBe('/myprofile');
 		expect(safeRedirectTarget('http://localhost/pwn')).toBe('/myprofile');
