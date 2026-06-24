@@ -5,5 +5,12 @@ yarn.lock
 bun.lock
 bun.lockb
 
+# Config / infra files (not source code)
+*.yml
+*.yaml
+Dockerfile
+Caddyfile
+.dockerignore
+
 # Miscellaneous
 /static/

@@ -1,0 +1,38 @@
+# PKU Remote — production Caddyfile
+#
+# Operator must set $SITE_DOMAIN (the FQDN this site serves, e.g. pkuremote.example.com)
+# and $ACME_EMAIL (the contact address for Let's Encrypt account registration).
+# Both are read by the `caddy` service in docker-compose.prod.yml.
+#
+# ACME: we use Let's Encrypt's production server (Caddy's default). The `email`
+# global option registers the LE account on first cert request and is used by
+# LE to warn about expiring certs.
+
+# ----- Global options --------------------------------------------------------
+{
+  email {$ACME_EMAIL}
+}
+
+# ----- HTTP :80 -> HTTPS redirect + ACME challenge handler -------------------
+http://{$SITE_DOMAIN:pkuremote.example.com} {
+  redir https://{host}{uri} permanent
+}
+
+# ----- HTTPS :443 ------------------------------------------------------------
+https://{$SITE_DOMAIN:pkuremote.example.com} {
+  encode gzip
+
+  # HSTS: a year, all subdomains, eligible for browser preload lists.
+  header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+  # Pass the visitor's real IP and scheme to the SvelteKit Node server so
+  # server-side form actions and logging see the correct origin.
+  header X-Forwarded-For {http.request.header.X-Forwarded-For}
+  header X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+  header X-Real-IP {http.request.header.X-Real-IP}
+
+  # Caddy's default active health check (against the upstream `/`) is fine
+  # for a SvelteKit app. If a `/healthz` route is added later, point the
+  # health check at it via the `health_uri` subdirective in a future change.
+  reverse_proxy http://app:3000
+}
