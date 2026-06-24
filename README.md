@@ -45,6 +45,26 @@ Prerequisites: **Node 22+** (for the host-Node path), **Docker** (for the Docker
 
 > Free-tier projects pause after 7 days of inactivity. Unpause from the dashboard; the data is preserved.
 
+### 1a. Enable the Google sign-in provider
+
+The Supabase side is one toggle. The reason it's not "just a switch" is that Google requires **you** to register an OAuth client (Supabase can't share a generic one). Two prep steps in Google Cloud, one toggle in Supabase, one allow-list entry.
+
+**In Google Cloud Console** — [console.cloud.google.com](https://console.cloud.google.com/):
+
+1. **APIs & Services → OAuth consent screen** → External → fill in app name + support email → save.
+2. **APIs & Services → Credentials → Create Credentials → OAuth client ID** → **Web application** → under **Authorized redirect URIs** add:
+   ```
+   https://<your-project-ref>.supabase.co/auth/v1/callback
+   ```
+   Save and copy the **Client ID** and **Client secret**.
+
+**In Supabase** — [supabase.com/dashboard](https://supabase.com/dashboard):
+
+3. **Authentication → Providers → Google** → toggle on → paste the Client ID and Client secret → save. The Supabase callback URL shown on this page must match step 2 byte-for-byte.
+4. **Authentication → URL Configuration** → add `http://localhost:5173` (dev) and your prod domain to the redirect allow-list. (`/login` passes the absolute URL of the post-sign-in destination to `signInWithOAuth`; it has to be in this list or Google refuses the round-trip.)
+
+That's it. A `profiles` row is created automatically the first time a Google identity signs in, by the `handle_new_user` trigger in `db/migrations/0001_*.sql`.
+
 ### 2. Configure environment
 
 ```sh
@@ -105,7 +125,6 @@ Open `http://localhost:5173` once any of the dev-server options is up. Run `pnpm
 | `pnpm db:push`     | Push schema directly to Supabase (no migration file)                   |
 | `pnpm db:studio`   | Open Drizzle Studio                                                    |
 | `pnpm db:seed`     | Insert dev data (idempotent)                                           |
-
 
 Verify after edits: `pnpm check` → `pnpm lint` → `pnpm test`.
 
