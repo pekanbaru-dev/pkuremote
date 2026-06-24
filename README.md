@@ -2,17 +2,9 @@
 
 The public site for the Pekanbaru remote-worker community — a quiet, editorial bulletin for events, announcements, and blog posts.
 
-## Stack
-
-- **SvelteKit** (Svelte 5 runes mode) + TypeScript — production build via `@sveltejs/adapter-node` (Node SSR)
-- **Tailwind CSS v4** (tokens via `@theme` in `src/routes/layout.css`)
-- **shadcn-svelte** components (`src/lib/components/ui/`)
-- **Supabase** (Auth, Postgres, Storage, Realtime) — same project for dev and prod
-- **Drizzle ORM** for typed DB access from the FE
-- **Docker** for local dev (`docker compose up`) and production (`docker compose -f docker-compose.prod.yml up -d`)
-- **Caddy** as the production HTTPS reverse proxy with automatic Let's Encrypt certs
-- **Vitest** + **Playwright** for tests
-- **pnpm** as the package manager
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Build status](https://img.shields.io/badge/build-passing-brightgreen)
+![SvelteKit](https://img.shields.io/badge/SvelteKit-5-ff3e00)
 
 ## Local development
 
@@ -96,26 +88,6 @@ Open `http://localhost:5173` once any of the dev-server options is up. Run `pnpm
 | `pnpm db:studio`    | Open Drizzle Studio against the configured Supabase project                   |
 | `pnpm db:seed`      | Idempotently insert dev data                                                  |
 
-## rtk (token-optimized CLI proxy)
-
-[rtk](https://github.com/cyber-rico/rtk) is a CLI proxy that filters and summarizes command output before it reaches AI agents, saving 60–90% of tokens on common commands. It is optional for humans but recommended when using AI coding agents in this repo.
-
-Install:
-
-```sh
-brew install rtk   # or see https://github.com/cyber-rico/rtk
-```
-
-Then prefix shell commands with `rtk`:
-
-```sh
-rtk git status
-rtk pnpm install
-rtk pnpm check
-```
-
-Meta commands (use bare): `rtk gain` (token savings analytics), `rtk discover` (find what rtk can optimize), `rtk proxy <cmd>` (run raw command without filtering).
-
 ## Commands
 
 | Command            | Description                                                            |
@@ -133,6 +105,7 @@ Meta commands (use bare): `rtk gain` (token savings analytics), `rtk discover` (
 | `pnpm db:push`     | Push schema directly to Supabase (no migration file)                   |
 | `pnpm db:studio`   | Open Drizzle Studio                                                    |
 | `pnpm db:seed`     | Insert dev data (idempotent)                                           |
+
 
 Verify after edits: `pnpm check` → `pnpm lint` → `pnpm test`.
 
@@ -219,6 +192,36 @@ Caddyfile                 # Caddy v2 config (HTTP→HTTPS, HSTS, reverse proxy)
 
 Read both before any UI work.
 
+## Contributing
+
+We welcome contributions. Please read:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — setup, code style, commit convention, PR process
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — community standards
+- [SECURITY.md](SECURITY.md) — vulnerability reporting
+
+## Tooling
+
+### rtk (token-optimized CLI proxy)
+
+[rtk](https://github.com/cyber-rico/rtk) is a CLI proxy that filters and summarizes command output before it reaches AI agents, saving 60–90% of tokens on common commands. It is optional for humans but recommended when using AI coding agents in this repo.
+
+Install:
+
+```sh
+brew install rtk   # or see https://github.com/cyber-rico/rtk
+```
+
+Then prefix shell commands with `rtk`:
+
+```sh
+rtk git status
+rtk pnpm install
+rtk pnpm check
+```
+
+Meta commands (use bare): `rtk gain` (token savings analytics), `rtk discover` (find what rtk can optimize), `rtk proxy <cmd>` (run raw command without filtering).
+
 ## Agent setup (optional)
 
 This repo is configured for AI coding agents (OpenCode, Claude Code, Codex). Three MCP servers are wired up:
@@ -238,12 +241,13 @@ pipx install codebase-memory-mcp
 
 ## OpenSpec workflow
 
-Changes are proposed, implemented, and archived via OpenSpec. Install the CLI globally first:
+Changes are proposed, implemented, and archived via OpenSpec. The OpenSpec CLI must be installed globally (see [CONTRIBUTING.md](CONTRIBUTING.md) for install steps); in agent sessions, trigger the OpenSpec skills by name:
 
-```sh
-npm install -g @fission-ai/openspec   # or: pnpm add -g @fission-ai/openspec
-openspec --version                    # verify (1.4.0 or later)
-```
+- `openspec-propose` — scaffold a new change (proposal, design, specs, tasks) from a short description.
+- `openspec-explore` — think through an idea or investigate a problem before or during a change.
+- `openspec-apply-change` — implement tasks from an existing change.
+- `openspec-sync-specs` — sync delta specs into canonical specs without archiving.
+- `openspec-archive-change` — finalize and archive a completed change.
 
 Then use it to manage changes:
 

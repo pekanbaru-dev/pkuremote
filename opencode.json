@@ -6,7 +6,7 @@
       "command": [
         "serena",
         "start-mcp-server",
-        "--context=agent",
+        "--context=codex",
         "--project-from-cwd"
       ],
       "enabled": true
