@@ -29,10 +29,9 @@ CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 FROM node:22-alpine AS runtime
 WORKDIR /app
 
-ENV HOST=127.0.0.1 \
+ENV HOST=0.0.0.0 \
 	PORT=3000 \
-	NODE_ENV=production \
-	ORIGIN=http://localhost:3000
+	NODE_ENV=production
 
 # Copy just what the Node server needs at runtime: the build output, the
 # production node_modules, and the package manifest.

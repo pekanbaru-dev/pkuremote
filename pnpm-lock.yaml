@@ -14,6 +14,12 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(postgres@3.4.9)
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -60,9 +66,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
-      drizzle-orm:
-        specifier: ^0.45.2
-        version: 0.45.2(postgres@3.4.9)
       eslint:
         specifier: ^10.4.1
         version: 10.5.0(jiti@2.7.0)
@@ -78,9 +81,6 @@ importers:
       playwright:
         specifier: ^1.60.0
         version: 1.61.0
-      postgres:
-        specifier: ^3.4.9
-        version: 3.4.9
       prettier:
         specifier: ^3.8.3
         version: 3.8.4
@@ -90,9 +90,6 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.8.0
         version: 0.8.0(prettier-plugin-svelte@4.1.1(prettier@3.8.4)(svelte@5.56.3(@typescript-eslint/types@8.62.0)))(prettier@3.8.4)
-      server-only:
-        specifier: ^0.0.1
-        version: 0.0.1
       svelte:
         specifier: ^5.56.1
         version: 5.56.3(@typescript-eslint/types@8.62.0)
@@ -2029,9 +2026,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  server-only@0.0.1:
-    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
-
   set-cookie-parser@3.1.0:
     resolution: {integrity: sha512-kjnC1DXBHcxaOaOXBHBeRtltsDG2nUiUni+jP92M9gYdW12rsmx92UsfpH7o5tDRs7I1ZZPSQJQGv3UaRfCiuw==}
 
@@ -3832,8 +3826,6 @@ snapshots:
       mri: 1.2.0
 
   semver@7.8.5: {}
-
-  server-only@0.0.1: {}
 
   set-cookie-parser@3.1.0: {}
 
