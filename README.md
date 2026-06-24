@@ -61,7 +61,7 @@ The Supabase side is one toggle. The reason it's not "just a switch" is that Goo
 **In Supabase** — [supabase.com/dashboard](https://supabase.com/dashboard):
 
 3. **Authentication → Providers → Google** → toggle on → paste the Client ID and Client secret → save. The Supabase callback URL shown on this page must match step 2 byte-for-byte.
-4. **Authentication → URL Configuration** → add `http://localhost:5173` (dev) and your prod domain to the redirect allow-list. (`/login` passes the absolute URL of the post-sign-in destination to `signInWithOAuth`; it has to be in this list or Google refuses the round-trip.)
+4. **Authentication → URL Configuration** → add `http://localhost:5173/auth/callback` (dev) and your prod origin + `/auth/callback` (e.g. `https://example.com/auth/callback`) to the redirect allow-list. Supabase validates the **full** `redirectTo` URL — including the `/auth/callback` path — against this list, so a bare-origin entry like `http://localhost:5173` is not enough and the OAuth round-trip will be rejected. (`/login` builds the `redirectTo` as `<origin>/auth/callback?next=<safe-target>`.)
 
 That's it. A `profiles` row is created automatically the first time a Google identity signs in, by the `handle_new_user` trigger in `db/migrations/0001_*.sql`.
 

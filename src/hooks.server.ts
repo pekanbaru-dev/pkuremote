@@ -1,21 +1,25 @@
 import { createServerClient } from '@supabase/ssr';
 import { type Handle, redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 const GUARDED_PREFIXES = ['/myprofile'];
 
 const supabase: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-		cookies: {
-			getAll: () => event.cookies.getAll(),
-			setAll: (cookiesToSet) => {
-				for (const { name, value, options } of cookiesToSet) {
-					event.cookies.set(name, value, { ...options, path: options?.path ?? '/' });
+	event.locals.supabase = createServerClient(
+		env.PUBLIC_SUPABASE_URL,
+		env.PUBLIC_SUPABASE_ANON_KEY,
+		{
+			cookies: {
+				getAll: () => event.cookies.getAll(),
+				setAll: (cookiesToSet) => {
+					for (const { name, value, options } of cookiesToSet) {
+						event.cookies.set(name, value, { ...options, path: options?.path ?? '/' });
+					}
 				}
 			}
 		}
-	});
+	);
 
 	event.locals.safeGetSession = async () => {
 		const {
