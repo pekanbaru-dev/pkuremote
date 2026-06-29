@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { Separator as SeparatorPrimitive } from "bits-ui";
 	import { cn } from "$lib/utils.js";
+	import { Separator as SeparatorPrimitive } from "bits-ui";
 
 	let {
 		ref = $bindable(null),
 		class: className,
-		"data-slot": dataSlot = "separator",
-		...restProps
+		"data-slot": dataSlot = "separator"
 	}: SeparatorPrimitive.RootProps = $props();
 </script>
 
@@ -19,5 +18,4 @@
 		"data-[orientation=vertical]:h-full",
 		className
 	)}
-	{...restProps}
 />

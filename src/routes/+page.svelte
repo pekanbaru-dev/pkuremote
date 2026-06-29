@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { page } from "$app/state";
+	import { Button } from "$lib/components/ui/button/index.js";
+	import { Separator } from "$lib/components/ui/separator/index.js";
 
 	type Announcement = {
 		date: string;
@@ -21,67 +21,67 @@
 	const user = $derived(page.data.user);
 
 	const featuredEvent = {
-		date: 'Thu 11 Jul',
-		title: 'Coffee & Code — July Meetup',
-		location: 'Kopi Senja, Jalan Gajah',
-		time: '18:30–21:00',
+		date: "Thu 11 Jul",
+		title: "Coffee & Code — July Meetup",
+		location: "Kopi Senja, Jalan Gajah",
+		time: "18:30–21:00",
 		excerpt:
-			'Bring whatever you are working on — a side project, a client brief, a tricky PR — and work alongside other remote folks from the city. We wrap with a round of show-and-tell at twenty past eight.',
-		rsvpHref: '#events'
+			"Bring whatever you are working on — a side project, a client brief, a tricky PR — and work alongside other remote folks from the city. We wrap with a round of show-and-tell at twenty past eight.",
+		rsvpHref: "#events"
 	};
 
 	const announcements: Announcement[] = [
 		{
-			date: 'Jul 02',
-			headline: 'New community Discord is live',
-			excerpt: 'We moved off the old WhatsApp group. Grab an invite in the footer.'
+			date: "Jul 02",
+			headline: "New community Discord is live",
+			excerpt: "We moved off the old WhatsApp group. Grab an invite in the footer."
 		},
 		{
-			date: 'Jun 24',
-			headline: 'Call for talk proposals — August meetup',
-			excerpt: 'Ten-minute lightning talks on anything you ship. Proposals open until 4 August.'
+			date: "Jun 24",
+			headline: "Call for talk proposals — August meetup",
+			excerpt: "Ten-minute lightning talks on anything you ship. Proposals open until 4 August."
 		},
 		{
-			date: 'Jun 18',
-			headline: 'Venue partnership with Kopi Senja extended through October',
-			excerpt: 'Same room, same coffee, four more months of quiet evenings.'
+			date: "Jun 18",
+			headline: "Venue partnership with Kopi Senja extended through October",
+			excerpt: "Same room, same coffee, four more months of quiet evenings."
 		}
 	];
 
 	const posts: Post[] = [
 		{
-			title: 'How we run a remote standup without standing up',
-			author: 'Dewi Anggraini',
-			date: '28 Jun 2026',
-			readingTime: '6 min',
+			title: "How we run a remote standup without standing up",
+			author: "Dewi Anggraini",
+			date: "28 Jun 2026",
+			readingTime: "6 min",
 			excerpt:
-				'Async by default, sync on Fridays, and one rule we stole from Basecamp: no status updates, only blockers. Three months in, here is what stuck and what we dropped.',
-			href: '#posts'
+				"Async by default, sync on Fridays, and one rule we stole from Basecamp: no status updates, only blockers. Three months in, here is what stuck and what we dropped.",
+			href: "#posts"
 		},
 		{
-			title: 'The Pekanbaru coffee shop index, ranked by outlet count',
-			author: 'Rizky Pratama',
-			date: '14 Jun 2026',
-			readingTime: '4 min',
+			title: "The Pekanbaru coffee shop index, ranked by outlet count",
+			author: "Rizky Pratama",
+			date: "14 Jun 2026",
+			readingTime: "4 min",
 			excerpt:
-				'A working spreadsheet of thirty-two cafes across the city, scored on three things that actually matter when you work from a table all day: power outlets, Wi-Fi stability, and how long a single kopi tubruk buys you.',
-			href: '#posts'
+				"A working spreadsheet of thirty-two cafes across the city, scored on three things that actually matter when you work from a table all day: power outlets, Wi-Fi stability, and how long a single kopi tubruk buys you.",
+			href: "#posts"
 		},
 		{
 			title: 'Why we stopped calling it a "networking event"',
-			author: 'Siti Rahmah',
-			date: '02 Jun 2026',
-			readingTime: '3 min',
+			author: "Siti Rahmah",
+			date: "02 Jun 2026",
+			readingTime: "3 min",
 			excerpt:
-				'The word networking makes remote workers tense. We renamed the monthly meetup, rewrote the invite, and watched RSVPs climb. The framing was the whole problem.',
-			href: '#posts'
+				"The word networking makes remote workers tense. We renamed the monthly meetup, rewrote the invite, and watched RSVPs climb. The framing was the whole problem.",
+			href: "#posts"
 		}
 	];
 
 	const navLinks = [
-		{ label: 'Events', href: '#events' },
-		{ label: 'Announcements', href: '#announcements' },
-		{ label: 'Posts', href: '#posts' }
+		{ label: "Events", href: "#events" },
+		{ label: "Announcements", href: "#announcements" },
+		{ label: "Posts", href: "#posts" }
 	];
 </script>
 
@@ -293,7 +293,7 @@
 			<p class="font-display text-lg font-medium text-ink">PKU Remote</p>
 			<nav aria-label="Footer" class="mt-3">
 				<ul class="flex flex-wrap gap-x-5 gap-y-1 text-[0.9375rem]">
-					{#each [...navLinks, { label: 'About', href: '#about' }] as link (link.href)}
+					{#each [...navLinks, { label: "About", href: "#about" }] as link (link.href)}
 						<li>
 							<a
 								href={link.href}

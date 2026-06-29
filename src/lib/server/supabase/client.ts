@@ -1,7 +1,7 @@
-import { createServerClient } from '@supabase/ssr';
-import { env } from '$env/dynamic/public';
-import type { RequestEvent } from '@sveltejs/kit';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createServerClient } from "@supabase/ssr";
+import { env } from "$env/dynamic/public";
+import type { RequestEvent } from "@sveltejs/kit";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Build a Supabase client bound to the current request's cookies.
@@ -17,7 +17,7 @@ export function createServerSupabase(event: RequestEvent): SupabaseClient {
 			getAll: () => event.cookies.getAll(),
 			setAll: (cookies) => {
 				for (const { name, value, options } of cookies) {
-					event.cookies.set(name, value, { ...options, path: options?.path ?? '/' });
+					event.cookies.set(name, value, { ...options, path: options?.path ?? "/" });
 				}
 			}
 		}

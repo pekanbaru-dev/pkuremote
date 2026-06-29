@@ -5,6 +5,7 @@ The landing page (`src/routes/+page.svelte`) currently renders its interactive p
 PRODUCT.md and DESIGN.md define the brand ("The Quiet Bulletin" — calm, minimal, focused, restrained ochre accent ≤10%, flat-by-default, no ghost cards, no gradient text). The previous change (`add-landing-page`, archived) shipped the first page against that direction. This change introduces shadcn-svelte as the component layer and migrates the landing page onto it without altering the visual direction.
 
 Constraints:
+
 - Tailwind v4 is installed (4.3.1); shadcn-svelte must work with the v4 `@theme` token setup, not a v3 `tailwind.config.js`.
 - The OKLCH tokens in `layout.css @theme` are the single source of truth for colors. shadcn's CSS variables must reference those tokens, not redefine them.
 - Svelte 5 runes mode is the project default; shadcn-svelte v1.3.0+ supports Svelte 5.
@@ -13,6 +14,7 @@ Constraints:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Initialize shadcn-svelte: `components.json`, CSS variable bridge, `$lib/components/ui/` directory.
 - Install the shadcn primitives that map to the landing page's current elements: `button`, `separator`, and `navigation-menu` (or a simpler nav primitive if `navigation-menu` is overkill for a 3-link header).
 - Map shadcn's CSS variables (`--background`, `--foreground`, `--primary`, `--primary-foreground`, `--border`, `--muted`, `--muted-foreground`, `--ring`) to the OKLCH tokens in `@theme` so generated components inherit the brand palette.
@@ -20,6 +22,7 @@ Constraints:
 - Remove `.btn-primary` from `layout.css`; keep `.container-page`, `.measure-prose`, `.label-meta`, `.link-quiet` as hand-rolled utilities (shadcn ships no equivalents).
 
 **Non-Goals:**
+
 - Adding shadcn components the landing page does not need (Card, Dialog, Dropdown, Input, Select, etc.). Those land when a future surface requires them.
 - Replacing `.link-quiet` or `.label-meta` with shadcn primitives — shadcn has no link or meta-label component.
 - Changing the visual direction. The ochre accent, flat-by-default elevation, hairline dividers, and Spectral/Source Sans 3 typography all stay. shadcn components are styled to match what is already shipping.

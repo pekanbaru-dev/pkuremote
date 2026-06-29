@@ -12,9 +12,11 @@ The repository has CONTRIBUTING.md with a commit convention section, but no docu
 ## Capabilities
 
 ### New Capabilities
+
 - `contributor-conventions`: Branch naming convention documented in CONTRIBUTING.md, CODEOWNERS file for automatic maintainer assignment, and PR template update to reference branch naming.
 
 ### Modified Capabilities
+
 - `community-template`: CONTRIBUTING.md gets a new "Branch naming" section; PULL_REQUEST_TEMPLATE.md gets a branch naming reminder.
 
 ## Impact

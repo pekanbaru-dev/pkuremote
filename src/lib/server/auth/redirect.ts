@@ -1,4 +1,4 @@
-export const DEFAULT_REDIRECT = '/myprofile';
+export const DEFAULT_REDIRECT = "/myprofile";
 
 /**
  * Validate a `?redirect=` query string. Accepts only same-origin paths that
@@ -9,8 +9,8 @@ export const DEFAULT_REDIRECT = '/myprofile';
  */
 export function safeRedirectTarget(raw: string | null | undefined): string {
 	if (!raw) return DEFAULT_REDIRECT;
-	if (!raw.startsWith('/')) return DEFAULT_REDIRECT;
-	if (raw.startsWith('//')) return DEFAULT_REDIRECT;
-	if (raw.startsWith('/\\')) return DEFAULT_REDIRECT;
+	if (!raw.startsWith("/")) return DEFAULT_REDIRECT;
+	if (raw.startsWith("//")) return DEFAULT_REDIRECT;
+	if (raw.startsWith("/\\")) return DEFAULT_REDIRECT;
 	return raw;
 }
