@@ -53,7 +53,7 @@ This change stands up the data layer for that stack:
 
 ### D4. Drizzle migrations live in `db/migrations/`, schema in `db/schema/`, seed in `db/seed.ts`.
 
-- **Choice:** Keep Drizzle artifacts at the repo root under `db/` so they are easy to find and not nested inside `src/`. The Drizzle *client* (the runtime query API used by the FE) lives at `src/lib/server/db/client.ts` — that one is server-only.
+- **Choice:** Keep Drizzle artifacts at the repo root under `db/` so they are easy to find and not nested inside `src/`. The Drizzle _client_ (the runtime query API used by the FE) lives at `src/lib/server/db/client.ts` — that one is server-only.
 - **Why:** Migrations and schema are build-time / dev-time artifacts; the client is runtime. Splitting them mirrors this and lets the FE import `$lib/server/db` cleanly while the rest of the repo touches `db/` only from scripts.
 
 ### D5. Initial schema is intentionally small.

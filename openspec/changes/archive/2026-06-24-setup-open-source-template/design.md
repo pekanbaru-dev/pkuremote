@@ -3,6 +3,7 @@
 The PKU Remote repository is a SvelteKit community site that currently has no community-facing files. The `README.md` covers stack and commands but lacks badges, contributor onboarding, and links to contribution guides. The `.github/` directory contains only agent prompt/skill scaffolding — no issue templates, PR template, funding config, or health files. The project needs to become ready for external contributions.
 
 Existing constraints:
+
 - Package manager is **pnpm** (not npm/yarn) — all contribution instructions must use pnpm commands.
 - Svelte 5 runes mode, Tailwind v4, shadcn-svelte — CONTRIBUTING must mention the runes constraint and the Tailwind v4 `@theme` token system so contributors do not introduce legacy patterns.
 - The repo already documents conventions in `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md` — CONTRIBUTING should link to these rather than duplicate them.
@@ -11,6 +12,7 @@ Existing constraints:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Provide a LICENSE so contributors and users know the terms under which the code is shared.
 - Give contributors a single, clear path from clone to first PR via CONTRIBUTING.md.
 - Set behavioral expectations via CODE_OF_CONDUCT.md.
@@ -19,6 +21,7 @@ Existing constraints:
 - Rewrite README.md so it serves as both a project landing page (badges, description, install, usage) and a contributor onboarding entry point (links to all community files).
 
 **Non-Goals:**
+
 - Setting up CI/CD pipelines or GitHub Actions workflows.
 - Creating a documentation site or storybook.
 - Changing any source code, build configuration, or dependencies.
@@ -34,6 +37,7 @@ Existing constraints:
 **Rationale:** MIT is permissive, widely understood, and appropriate for a small community open-source project. It imposes minimal friction on adoption and contribution. The copyright holder will be "Pekanbaru Dev" (the GitHub org name).
 
 **Alternatives considered:**
+
 - Apache 2.0 — adds patent grant complexity unnecessary for a community site.
 - GPL — copyleft would restrict derivative use; not the intent for a public community site.
 
@@ -44,6 +48,7 @@ Existing constraints:
 **Rationale:** It is the de facto standard for open-source community projects, well-maintained, and available in a stable, widely-recognized form. Enforcement contact will point to the repository maintainer email (or a placeholder to be filled before first external contribution).
 
 **Alternatives considered:**
+
 - A custom code of conduct — unnecessary effort and lower recognition.
 - Citizen Code of Conduct — less common and harder for contributors to recognize.
 
@@ -54,6 +59,7 @@ Existing constraints:
 **Rationale:** YAML forms render as structured web forms in GitHub's issue editor, guiding contributors to fill each field. They reduce incomplete reports compared to plain markdown templates. The repo has no `config.yml` blank-issue redirect yet — we add one to discourage empty issues by pointing to the templates.
 
 **Alternatives considered:**
+
 - Plain markdown templates — less structured, higher rate of incomplete reports.
 - Single generic template — does not differentiate bug vs feature intake.
 
@@ -64,6 +70,7 @@ Existing constraints:
 **Rationale:** A visitor scanning the README should understand what the project is, how to run it, and how to contribute within the first screen. Existing technical sections remain valuable but are reorganized so the contributor onboarding path is visible without scrolling past tooling details.
 
 **Alternatives considered:**
+
 - Keep current README, append a Contributing section — the current README leads with tooling (rtk) before commands; a contributor-first restructure is cleaner.
 - Move all agent/tooling content to a separate docs file — would break the existing convention of keeping it in README.
 
@@ -74,6 +81,7 @@ Existing constraints:
 **Rationale:** Having the file present signals intent and avoids a future "forgot to add it" gap. Keeping it minimal avoids linking to personal accounts prematurely.
 
 **Alternatives considered:**
+
 - Omit FUNDING.yml entirely — loses the signal and requires a future change.
 - Link to a maintainer Ko-fi/Patreon — premature; no decision made on funding platform.
 

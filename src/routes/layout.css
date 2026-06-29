@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Design tokens. OKLCH values are canonical here. Brand names (canvas, ink,
    primary, etc.) and shadcn names (background, foreground, primary, etc.)
@@ -32,8 +32,8 @@
 	--color-card: oklch(1 0 0);
 	--color-card-foreground: oklch(0.22 0.01 110);
 
-	--font-display: 'Spectral', Georgia, 'Times New Roman', serif;
-	--font-body: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+	--font-display: "Spectral", Georgia, "Times New Roman", serif;
+	--font-body: "Source Sans 3", system-ui, -apple-system, sans-serif;
 
 	--text-display: clamp(2.5rem, 6vw, 4rem);
 	--text-headline: clamp(1.75rem, 3.5vw, 2.25rem);
@@ -59,8 +59,8 @@
 		margin: 0;
 		line-height: 1.6;
 		font-feature-settings:
-			'kern' 1,
-			'liga' 1;
+			"kern" 1,
+			"liga" 1;
 	}
 
 	h1,

@@ -13,6 +13,7 @@
 Three MCP servers are configured for this repo and MUST be used for the workflows below. Do not fall back to manual `grep`/`cat`/`Read` for what they cover.
 
 **MCP config locations** (same servers, each tool's native format):
+
 - `opencode.json` (project root) — OpenCode (`mcp` key, `type: "local"`)
 - `.agents/mcp.json` — generic/cross-tool reference (same schema as `opencode.json`)
 - `.claude/.mcp.json` — Claude Code (`mcpServers` key, `type: "stdio"`)

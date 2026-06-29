@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from "$app/forms";
+	import { Button } from "$lib/components/ui";
 
 	let { data } = $props();
 
-	const displayName = $derived(data.profile?.displayName ?? data.user.email ?? 'Pengguna');
+	const displayName = $derived(data.profile?.displayName ?? data.user.email ?? "Pengguna");
 	const email = $derived(data.user.email);
 	const avatarUrl = $derived(data.profile?.avatarUrl ?? null);
 	const monogram = $derived(displayName.charAt(0).toUpperCase());
@@ -53,12 +54,14 @@
 		{/if}
 
 		<form method="POST" action="?/signOut" use:enhance class="mt-12 border-t border-hairline pt-8">
-			<button
+			<Button
 				type="submit"
+				variant="default"
+				size="default"
 				class="rounded-md border border-hairline bg-canvas px-5 py-2.5 text-body text-ink transition hover:border-destructive hover:text-destructive focus-visible:border-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
 			>
 				Sign out
-			</button>
+			</Button>
 		</form>
 	</section>
 </main>

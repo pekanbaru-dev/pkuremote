@@ -1,18 +1,18 @@
-import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { pgTable, uuid, text, timestamp, index } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const announcements = pgTable(
-	'announcements',
+	"announcements",
 	{
-		id: uuid('id')
+		id: uuid("id")
 			.primaryKey()
 			.default(sql`gen_random_uuid()`),
-		title: text('title').notNull(),
-		body: text('body').notNull(),
-		publishedAt: timestamp('published_at', { withTimezone: true }).notNull().defaultNow()
+		title: text("title").notNull(),
+		body: text("body").notNull(),
+		publishedAt: timestamp("published_at", { withTimezone: true }).notNull().defaultNow()
 	},
 	(table) => ({
-		publishedAtIdx: index('announcements_published_at_idx').on(table.publishedAt)
+		publishedAtIdx: index("announcements_published_at_idx").on(table.publishedAt)
 	})
 );
 
