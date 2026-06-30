@@ -37,6 +37,6 @@
 			{initials}
 		</span>
 	{:else}
-		<img {src} alt="" on:error={() => (imgError = true)} />
+		<img {src} alt="" onerror={() => (imgError = true)} />
 	{/if}
 </span>

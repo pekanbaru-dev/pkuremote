@@ -28,7 +28,7 @@
 
 	const groupId = nextRgId();
 	const msgId = `${groupId}-msg`;
-	const describedBy = (error ?? hint) ? msgId : undefined;
+	const describedBy = $derived((error ?? hint) ? msgId : undefined);
 </script>
 
 <fieldset

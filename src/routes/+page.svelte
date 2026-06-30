@@ -562,46 +562,46 @@
 				Cultivating connection through Riau's rich cultural tapestry.
 			</p>
 			<div class="flex gap-md">
-				<a class="text-primary hover:opacity-70 transition-all" href="#">
+				<span class="text-primary hover:opacity-70 transition-all">
 					<span class="material-symbols-outlined">public</span>
-				</a>
+				</span>
 				<a class="text-primary hover:opacity-70 transition-all" href="mailto:hello@pkubersua.com">
 					<span class="material-symbols-outlined">alternate_email</span>
 				</a>
-				<a class="text-primary hover:opacity-70 transition-all" href="#">
+				<span class="text-primary hover:opacity-70 transition-all">
 					<span class="material-symbols-outlined">share</span>
-				</a>
+				</span>
 			</div>
 		</div>
 
 		<div class="space-y-md">
 			<h4 class="font-bold text-primary">The Community</h4>
 			<nav class="flex flex-col gap-sm" aria-label="The Community">
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">About Us</a
+				<span class="text-on-surface-variant hover:text-primary transition-colors">About Us</span>
+				<span class="text-on-surface-variant hover:text-primary transition-colors"
+					>Local Culture</span
 				>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
-					>Local Culture</a
-				>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
+				<a class="text-on-surface-variant hover:text-primary transition-colors" href="/events"
 					>Events Calendar</a
 				>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Our Blog</a
-				>
+				<span class="text-on-surface-variant hover:text-primary transition-colors">Our Blog</span>
 			</nav>
 		</div>
 
 		<div class="space-y-md">
 			<h4 class="font-bold text-primary">Support &amp; Partnership</h4>
 			<nav class="flex flex-col gap-sm" aria-label="Support and Partnership">
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
-					>Sponsorship</a
+				<span class="text-on-surface-variant hover:text-primary transition-colors">Sponsorship</span
 				>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
-					>Partner Directory</a
+				<span class="text-on-surface-variant hover:text-primary transition-colors"
+					>Partner Directory</span
 				>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
-				<a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
-					>Terms of Service</a
+				<a
+					class="text-on-surface-variant hover:text-primary transition-colors"
+					href="mailto:hello@pkubersua.com">Contact</a
+				>
+				<span class="text-on-surface-variant hover:text-primary transition-colors"
+					>Terms of Service</span
 				>
 			</nav>
 		</div>

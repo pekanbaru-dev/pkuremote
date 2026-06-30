@@ -24,9 +24,9 @@
 		...rest
 	}: InputProps = $props();
 
-	const inputId = id ?? nextInputId();
-	const msgId = `${inputId}-msg`;
-	const describedBy = (error ?? hint) ? msgId : undefined;
+	const inputId = $derived(id ?? nextInputId());
+	const msgId = $derived(`${inputId}-msg`);
+	const describedBy = $derived((error ?? hint) ? msgId : undefined);
 </script>
 
 {#if label}
