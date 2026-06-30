@@ -3,9 +3,8 @@ import { PUBLIC_SITE_URL } from "$env/static/public";
 
 /**
  * Build the JSON-LD `<script type="application/ld+json">` string for an
- * event. The script tag is built as a string and inserted into `<svelte:head>`
- * via `{@html ...}`. The opening `<script` is escaped to `<\u003cscript`
- * to prevent the Svelte parser from closing the outer `<script>` block.
+ * event. The string is inserted via `{@html ...}` in `<svelte:head>` — Svelte's
+ * parser treats `{@html}` arguments opaquely, so no tag escaping is needed.
  */
 export function buildEventJsonLd(event: Event): string {
 	const payload = {
@@ -41,7 +40,5 @@ export function buildEventJsonLd(event: Event): string {
 				})
 	};
 	const json = JSON.stringify(payload);
-	const safeOpen = '<\\u003cscript type="application/ld+json">';
-	const safeClose = "<\\u003c/script>";
-	return safeOpen + json + safeClose;
+	return `<script type="application/ld+json">${json}</script>`;
 }
