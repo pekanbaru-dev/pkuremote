@@ -15,6 +15,11 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # ----- Build stage (prod bundle + pruned deps) ------------------------------
 FROM base AS build
 COPY . .
+# PUBLIC_SITE_URL is baked into the bundle by $env/static/public; must be
+# available when `pnpm build` runs, otherwise canonical/OG/sitemap/JSON-LD
+# URLs render empty. Passed as a build arg from docker-compose.prod.yml.
+ARG PUBLIC_SITE_URL
+ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
 RUN pnpm build
 RUN pnpm prune --prod
 
