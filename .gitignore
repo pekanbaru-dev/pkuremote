@@ -35,3 +35,6 @@ playwright/.cache
 
 # Caddy (bind-mount fallback for prod stack)
 caddy_data/
+
+# Agent / agentic tool config (local-only; contains MCP keys & project-specific settings)
+opencode.json
