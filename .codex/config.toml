@@ -16,3 +16,9 @@ url = "https://mcp.context7.com/mcp"
 
 [mcp_servers.context7.env_http_headers]
 x-api-key = "CONTEXT7_API_KEY"
+
+[mcp_servers.stitch]
+url = "https://stitch.googleapis.com/mcp"
+
+[mcp_servers.stitch.env_http_headers]
+X-Goog-Api-Key = "STITCH_API_KEY"

@@ -98,7 +98,12 @@ export default defineConfig(
 		}
 	},
 	{
-		files: ["src/lib/components/ui/**/*.ts", "src/lib/components/ui/**/*.svelte"],
+		files: [
+			"src/lib/components/ui/**/*.ts",
+			"src/lib/components/ui/**/*.svelte",
+			"src/lib/components/primitives/**/*.ts",
+			"src/lib/components/primitives/**/*.svelte"
+		],
 		rules: {
 			"svelte/no-restricted-html-elements": "off",
 			"no-restricted-imports": "off"

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { page } from "$app/state";
-	import { Button, Input } from "$lib/components/ui";
+	import { Button, Input } from "$lib/components/primitives";
 
 	let { data, form } = $props();
 
@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — PKU Remote</title>
+	<title>Masuk — PKUBersua</title>
 	<meta name="description" content="Sign in or register with your Google account." />
 </svelte:head>
 
@@ -36,9 +36,7 @@
 		<Input type="hidden" name="redirect" value={data.redirectTo} />
 		<Button
 			type="submit"
-			variant="default"
-			size="default"
-			class="w-full rounded-md border border-hairline bg-canvas px-6 py-3 text-body text-ink transition hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			class="w-full rounded-md border border-hairline bg-canvas hover:bg-canvas/80 px-6 py-3 text-body text-ink transition hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 		>
 			Continue with Google
 		</Button>

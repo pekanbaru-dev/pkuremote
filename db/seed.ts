@@ -17,7 +17,7 @@ import * as schema from "./schema";
 import { profiles, events, announcements, posts } from "./schema";
 
 const SEED_USER_ID = "00000000-0000-0000-0000-000000000001";
-const SEED_USER_EMAIL = "seed-author@pkuremote.local";
+const SEED_USER_EMAIL = "seed-author@pkubersua.local";
 
 async function ensureSeedUser(): Promise<void> {
 	const url = process.env.PUBLIC_SUPABASE_URL;
@@ -77,7 +77,7 @@ async function seedContent(): Promise<void> {
 
 	console.log("  · inserting announcement");
 	await db.insert(announcements).values({
-		title: "Welcome to PKU Remote",
+		title: "Welcome to PKUBersua",
 		body: "This is a test announcement inserted by the seed script."
 	});
 

@@ -57,7 +57,8 @@
 		href = undefined,
 		type = "button",
 		disabled,
-		children
+		children,
+		...restProps
 	}: ButtonProps = $props();
 </script>
 
@@ -70,6 +71,7 @@
 		aria-disabled={disabled}
 		role={disabled ? "link" : undefined}
 		tabindex={disabled ? -1 : undefined}
+		{...restProps}
 	>
 		{@render children?.()}
 	</a>
@@ -80,6 +82,7 @@
 		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
 		{disabled}
+		{...restProps}
 	>
 		{@render children?.()}
 	</button>

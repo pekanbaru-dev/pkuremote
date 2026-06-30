@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
-	import { Button } from "$lib/components/ui";
+	import { Button } from "$lib/components/primitives";
 
 	let { data } = $props();
 
@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-	<title>Profil saya — PKU Remote</title>
+	<title>Profil saya — PKUBersua</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -56,9 +56,7 @@
 		<form method="POST" action="?/signOut" use:enhance class="mt-12 border-t border-hairline pt-8">
 			<Button
 				type="submit"
-				variant="default"
-				size="default"
-				class="rounded-md border border-hairline bg-canvas px-5 py-2.5 text-body text-ink transition hover:border-destructive hover:text-destructive focus-visible:border-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+				class="rounded-md border border-hairline bg-canvas hover:bg-canvas/80 px-5 py-2.5 text-body text-ink transition hover:border-destructive hover:text-destructive focus-visible:border-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
 			>
 				Sign out
 			</Button>
