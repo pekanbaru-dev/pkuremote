@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_SITE_URL } from "$env/static/public";
+	import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
 	import { getUpcomingEvents, EventCard } from "$lib/features/events";
 	import { Button, Badge, Input } from "$lib/components/primitives";
 	import { Card } from "$lib/components/ui/card";

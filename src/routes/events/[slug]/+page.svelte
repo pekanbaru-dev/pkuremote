@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { PUBLIC_SITE_URL } from "$env/static/public";
+	import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
 	import type { PageData } from "./$types.js";
 	import {
 		EventDetailHero,

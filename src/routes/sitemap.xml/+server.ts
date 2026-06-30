@@ -1,4 +1,4 @@
-import { PUBLIC_SITE_URL } from "$env/static/public";
+import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
 import { getUpcomingEvents, getPastEvents } from "$lib/features/events";
 
 export const GET = (): Response => {

@@ -1,5 +1,5 @@
 import type { Event } from "../types.ts";
-import { PUBLIC_SITE_URL } from "$env/static/public";
+import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
 
 /**
  * Build the JSON-LD `<script type="application/ld+json">` string for an
