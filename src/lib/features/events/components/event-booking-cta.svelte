@@ -29,7 +29,7 @@
 </script>
 
 {#if showDesktop}
-	<div class={cn("flex flex-col gap-2", className)}>
+	<div class={cn("hidden table:block flex flex-col gap-2", className)}>
 		<a
 			href={isSoldOut ? undefined : mailtoHref}
 			aria-disabled={isSoldOut}
@@ -56,7 +56,7 @@
 		aria-disabled={isSoldOut}
 		aria-label={isSoldOut ? "Kuota penuh" : "Booking Sekarang"}
 		class={cn(
-			"fixed right-4 bottom-4 z-50 inline-flex h-14 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-transform duration-200",
+			"fixed right-4 bottom-4 z-50 desktop:hidden inline-flex h-14 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-transform duration-200",
 			isSoldOut
 				? "pointer-events-none cursor-not-allowed opacity-50"
 				: "hover:scale-105 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
