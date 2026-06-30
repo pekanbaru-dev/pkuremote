@@ -1,8 +1,7 @@
 <script lang="ts" module>
 	import { inputVariants, type InputProps } from "./input.style.js";
 
-	let _idCounter = 0;
-	const nextInputId = () => `input-${(_idCounter += 1)}`;
+	const nextInputId = () => `input-${crypto.randomUUID()}`;
 </script>
 
 <script lang="ts">

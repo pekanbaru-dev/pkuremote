@@ -1,8 +1,7 @@
 <script lang="ts" module>
 	import { positionVariants, legendVariants, type RadioGroupProps } from "./radio-group.style.js";
 
-	let _rgCounter = 0;
-	const nextRgId = () => `rg-${(_rgCounter += 1)}`;
+	const nextRgId = () => `rg-${crypto.randomUUID()}`;
 </script>
 
 <script lang="ts">
