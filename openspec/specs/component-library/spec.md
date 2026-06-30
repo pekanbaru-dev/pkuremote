@@ -8,26 +8,43 @@ TBD - created by archiving change port-react-components. Update Purpose after ar
 
 ### Requirement: Component library lives under `src/lib/components/ui/`
 
-The project SHALL organize all reusable UI components under `src/lib/components/ui/<name>/`. Each component folder SHALL contain at minimum a `<name>.svelte` file and an `index.ts` re-export. A top-level `src/lib/components/ui/index.ts` barrel SHALL re-export the public component surface so consumers can `import { Button, StatCard } from '$lib/components/ui'`. Components SHALL be importable from `$lib/components/ui/<name>` (folder) or `$lib/components/ui` (barrel).
+The project SHALL organize reusable UI components across two folders by complexity. **Simple, hand-rolled primitives** (`button`, `input`, `radio`, `radio-group`, `avatar`, `badge`, `checkbox`, and future components that do not require headless behavior) SHALL live under `src/lib/components/primitives/<name>/`. **Headless/complex components** that delegate to `bits-ui` (dropdown, dialog, navigation-menu, sheet, select, tabs, popover, etc.) SHALL live under `src/lib/components/ui/<name>/` and are managed by shadcn-svelte (`components.json` aliases shadcn to `$lib/components/ui`).
 
-#### Scenario: New component lives at the canonical path
+Each component folder SHALL contain at minimum a `<name>.svelte` file and an `index.ts` re-export. A top-level barrel SHALL re-export the public surface of each folder: `src/lib/components/primitives/index.ts` for primitives, `src/lib/components/ui/index.ts` for shadcn components. Consumers SHALL import primitives from `$lib/components/primitives` (barrel) or `$lib/components/primitives/<name>` (folder), and shadcn components from `$lib/components/ui` or `$lib/components/ui/<name>`.
 
-- **WHEN** a new component is added to the library
-- **THEN** its source is `src/lib/components/ui/<name>/<name>.svelte` and its `index.ts` re-exports the default component, its `Props` type, and any named subcomponents.
+#### Scenario: A simple primitive lives at the primitives path
 
-#### Scenario: Consumer imports from the barrel
+- **WHEN** a new hand-rolled primitive (e.g., `checkbox`) is added to the library
+- **THEN** its source is `src/lib/components/primitives/checkbox/checkbox.svelte` and its `index.ts` re-exports the component, its `Props` type, and any named subcomponents.
+
+#### Scenario: A shadcn component lives at the ui path
+
+- **WHEN** a headless/complex component (e.g., `dropdown`) is added via shadcn-svelte
+- **THEN** its source is `src/lib/components/ui/dropdown/` and it is registered in `src/lib/components/ui/index.ts`.
+
+#### Scenario: Consumer imports a primitive from the barrel
+
+- **WHEN** a route or page imports from `$lib/components/primitives`
+- **THEN** SvelteKit resolves the barrel and tree-shakes unused exports so only the imported primitives are bundled.
+
+#### Scenario: Consumer imports a shadcn component from the barrel
 
 - **WHEN** a route or page imports from `$lib/components/ui`
-- **THEN** SvelteKit resolves the barrel and tree-shakes unused exports so only the imported components are bundled.
+- **THEN** SvelteKit resolves the barrel and tree-shakes unused exports so only the imported shadcn components are bundled.
 
 ### Requirement: Variants are authored with `tailwind-variants`
 
-Every component with a variant prop surface SHALL define its variants with a `tv({ base, variants, compoundVariants, defaultVariants })` call. The TV config SHALL live in a `<script lang="ts" module>` block at the top of the `<name>.svelte` file, with the resulting variant function exported as a named const (`<name>Variants`). The component SHALL type its variant props with `VariantProps<typeof <name>Variants>` and SHALL NOT use `class-variance-authority`, custom variant objects, or hand-rolled conditional class strings for variant logic.
+Every component with a variant prop surface SHALL define its variants with a `tv({ base, variants, compoundVariants, defaultVariants })` call. The TV config SHALL live in a co-located `<name>.style.ts` file (preferred) OR in a `<script lang="ts" module>` block at the top of the `<name>.svelte` file. The resulting variant function SHALL be exported as a named const (`<name>Variants`) from the `.style.ts` (or the `<script module>`), and the `<name>.svelte` file SHALL import it. The component SHALL type its variant props with `VariantProps<typeof <name>Variants>` and SHALL NOT use `class-variance-authority` (not installed; SHALL NOT be added), custom variant objects, or hand-rolled conditional class strings for variant logic. The `cn` helper from `$lib/utils.js` SHALL compose the variant output with the consumer's `class` prop at the call site: `class={cn(buttonVariants({ intent, size, ... }), className)}`.
 
-#### Scenario: A reader finds the variant config in one place
+#### Scenario: A reader finds the variant config in the style file
 
-- **WHEN** a reader opens a component file to learn its variants
-- **THEN** the first `<script module>` block in the file contains the entire `tv({...})` call, and the variant keys map 1:1 to the component's exported type.
+- **WHEN** a reader opens a component folder to learn its variants
+- **THEN** `<name>.style.ts` contains the entire `tv({...})` call and the exported `VariantProps`-derived types, and the variant keys map 1:1 to the component's exported prop types.
+
+#### Scenario: The svelte file imports the variant function
+
+- **WHEN** a reader opens `<name>.svelte`
+- **THEN** its `<script module>` block re-exports the variant function and types from `<name>.style.ts`, and the markup calls `cn(<name>Variants({...}), className)`.
 
 #### Scenario: A composite reuses a primitive's variant base
 
@@ -36,31 +53,56 @@ Every component with a variant prop surface SHALL define its variants with a `tv
 
 ### Requirement: Components are rebrand to brand tokens
 
-Components SHALL use the existing OKLCH brand tokens defined in `src/routes/layout.css` (`--color-canvas`, `--color-ink`, `--color-primary`, `--color-primary-foreground`, `--color-muted`, `--color-muted-foreground`, `--color-hairline`, plus shadcn-mapped names like `--color-background`, `--color-foreground`, `--color-border`, `--color-destructive`, `--color-ring`). Components SHALL NOT introduce new shade-scale tokens (`primary-50..900`, `success-*`, `danger-*`, `gray-*`) into `@theme` and SHALL NOT use raw Tailwind palette utilities (`bg-emerald-500`, `text-red-600`, `text-gray-900`) in their TV configs.
+Components SHALL use the existing OKLCH brand tokens defined in `src/routes/layout.css` (`--color-canvas`, `--color-ink`, `--color-primary`, `--color-primary-foreground`, `--color-muted`, `--color-muted-foreground`, `--color-hairline`, plus shadcn-mapped names like `--color-background`, `--color-foreground`, `--color-border`, `--color-destructive`, `--color-ring`). Components SHALL ALSO use the status-color tokens defined in `@theme` for functional status feedback: `--color-danger`, `--color-success`, `--color-warning`, `--color-info`, plus their `on-*`, `*-container`, and `on-*-container` role companions. These four status-color families SHALL follow the Material-3 role pattern (exactly 4 tokens per family: base, on-base, container, on-container) and SHALL be expressed in OKLCH. Components SHALL NOT introduce 50–900 shade-scale tokens (`primary-50..900`, `success-50..900`, `danger-50..900`, `gray-50..900`) into `@theme`. Raw Tailwind palette utilities (`bg-emerald-500`, `text-red-600`, `text-gray-900`) SHALL NOT be used in TV configs.
 
 #### Scenario: A reader audits a component for token compliance
 
 - **WHEN** a component is reviewed for brand consistency
-- **THEN** every color class in the TV config is either a Tailwind utility that maps to an `@theme` token (e.g., `bg-primary`, `text-ink`, `border-hairline`, `text-destructive`) or a kept-as-is non-color utility (e.g., spacing, radius, typography utilities, transition utilities).
+- **THEN** every color class in the TV config is either a Tailwind utility that maps to an `@theme` token (e.g., `bg-primary`, `text-ink`, `border-hairline`, `text-destructive`, `bg-success`, `text-on-danger-container`) or a kept-as-is non-color utility (e.g., spacing, radius, typography, transition utilities).
 
-#### Scenario: No new shade-scale tokens leak into the theme
+#### Scenario: Status-color families follow the M3 role pattern
+
+- **WHEN** the `@theme` block is audited for the four status-color families
+- **THEN** each of `danger`, `success`, `warning`, `info` has exactly 4 tokens: `--color-<family>`, `--color-on-<family>`, `--color-<family>-container`, `--color-on-<family>-container`, all expressed in OKLCH.
+
+#### Scenario: No 50–900 ramp tokens leak into the theme
 
 - **WHEN** the project is audited for `@theme` token growth after this change
-- **THEN** the `@theme` block in `src/routes/layout.css` contains the same OKLCH tokens it contained before this change, plus any tokens added by separate, unrelated changes.
+- **THEN** no token matching the pattern `--color-<family>-<number>` (e.g., `--color-primary-500`, `--color-success-100`, `--color-danger-900`) exists in `src/routes/layout.css`.
+
+#### Scenario: Status colors are scoped to functional feedback
+
+- **WHEN** a component uses a status color (`bg-danger`, `bg-success`, `bg-warning`, `bg-info`) in its TV config or inline class list
+- **THEN** the component's purpose is functional status feedback (form validation, action outcomes, alerts, toasts), not decorative accent.
+
+#### Scenario: Danger and destructive alias share the same literal
+
+- **WHEN** the `@theme` block is audited for the `danger` and `destructive` tokens
+- **THEN** `--color-danger` and `--color-destructive` carry the same literal OKLCH value (literal duplication, no `var()` reference), and `--color-on-danger` and `--color-destructive-foreground` also share the same literal.
 
 ### Requirement: Success, warning, and info intents collapse to the brand accent
 
-Intent-based variants in the React source (e.g., button `intent: success | warning | info`) SHALL be collapsed to the brand ochre accent in the Svelte target, per the Quiet Bulletin One Voice Rule. Only `destructive` retains a distinct visual treatment via the `--color-destructive` token.
+The One Voice Rule (DESIGN.md) preserves ochre as the sole decorative accent. Functional status feedback colors (`danger`, `success`, `warning`, `info`) are an explicit, scoped exception: components that convey status (form validation, action outcomes, alerts, toasts) SHALL retain distinct visual treatments using the corresponding `@theme` status-color tokens. Decorative use of status colors (e.g., as accent fills on landing-page hero sections, non-functional splashes of color) remains governed by the One Voice Rule and SHALL collapse to the brand ochre (`bg-primary`).
 
-#### Scenario: A success button uses the brand ochre
+#### Scenario: A success button uses the success color
 
-- **WHEN** a button with a "success" semantic is rendered
-- **THEN** it uses `bg-primary` (ochre) and `text-primary-foreground`, indistinguishable from a "primary" intent button.
+- **WHEN** a button with a "success" semantic is rendered (e.g., a "Save" confirmation)
+- **THEN** it uses `bg-success` and `text-on-success`, visually distinct from a "primary" intent button.
 
 #### Scenario: A destructive button retains its distinct treatment
 
 - **WHEN** a button with a "destructive" semantic is rendered
-- **THEN** it uses `bg-destructive` and `text-destructive` (or the existing destructive styling from `button.svelte`), visually distinct from the primary ochre.
+- **THEN** it uses `bg-danger` (or the alias `bg-destructive`) and `text-on-danger` (or `text-destructive-foreground`), visually distinct from the primary ochre.
+
+#### Scenario: A decorative accent collapses to ochre
+
+- **WHEN** a status color is used as a decorative accent (e.g., a hero-section fill, a non-functional splash of green or blue)
+- **THEN** the One Voice Rule applies and the accent SHALL use `bg-primary` (ochre), not `bg-success` or any other status color.
+
+#### Scenario: Status feedback on a form input uses the status token
+
+- **WHEN** an input is rendered with `aria-invalid="true"` (functional error feedback)
+- **THEN** the input's border and ring use `border-danger` / `ring-danger`, not the brand ochre.
 
 ### Requirement: Icons come from `@lucide/svelte`
 
@@ -172,3 +214,83 @@ The component library SHALL include a `DatePicker` component at `src/lib/compone
 
 - **WHEN** the `DatePicker` is reviewed for brand consistency
 - **THEN** every color class in its TV config and inline class lists maps to an `@theme` token (e.g., `bg-canvas`, `text-ink`, `border-hairline`, `text-destructive`); no raw Tailwind palette utilities (e.g., `bg-blue-500`) are used.
+
+### Requirement: Primitives follow the canonical 6-axis variant contract
+
+Hand-rolled primitives in `src/lib/components/primitives/` SHALL share a canonical variant vocabulary of up to 6 axes: `intent` (`primary` | `secondary` | `danger` | `success` | `warning` | `info` | `clean`), `variant` (`solid` | `outline` | `text`), `size` (`xs` | `sm` | `md` | `lg` | `xl`), `uppercase` (boolean), `rounded` (`none` | `tiny` | `small` | `medium` | `large` | `full`), and `fullWidth` (boolean). Each component SHALL adopt only the axes meaningful to its domain (e.g., `input` drops `variant`/`fullWidth`/`uppercase`; `radio-group` adds `position`) plus additive component-specific extensions. `button` is the reference implementation exposing all 6 axes. The `variant` axis (`solid` | `outline` | `text`) SHALL replace the legacy `bordered` and `textOnly` boolean axes and SHALL map to the Material-3 role pattern: `solid` → `bg-X` + `text-on-X`; `outline` → `border-X` + `text-X` + transparent bg; `text` → `text-X`. The `size` axis SHALL use the `xs`/`sm`/`md`/`lg`/`xl` naming (aligned with shadcn-svelte/Tailwind convention) — NOT `tiny`/`small`/`medium`/`large`/`giant`.
+
+#### Scenario: Button exposes all six canonical axes
+
+- **WHEN** the `button` primitive is authored
+- **THEN** its `tv()` config defines `intent`, `variant`, `size`, `uppercase`, `rounded`, and `fullWidth` variant keys with the canonical value sets above.
+
+#### Scenario: A component omits non-meaningful axes
+
+- **WHEN** the `input` primitive is authored
+- **THEN** its `tv()` config defines `intent`, `size`, and `rounded` but omits `variant`, `uppercase`, and `fullWidth` (not meaningful for a text field), and adds `hasError`/`hasLeftIcon`/`hasRightIcon` extensions.
+
+#### Scenario: The variant axis maps to M3 roles
+
+- **WHEN** a button is rendered with `intent="primary"` and `variant="outline"`
+- **THEN** its classes include `border-primary text-primary` and a transparent background, per the M3 border-only role.
+
+### Requirement: `disabled` is a native attribute, not a variant
+
+Primitives SHALL treat `disabled` as a native HTML attribute, not a `tv()` variant. Disabled styling SHALL live in the `base` string as Tailwind `disabled:` pseudo-classes (e.g., `disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed`). The component SHALL pass `disabled` straight to the underlying element (`<button {disabled}>`, `<input {disabled}>`). The `tv()` config SHALL NOT define a `disabled` variant. When a component has a `loading` state, `loading` SHALL force `disabled: disabled || loading` on the element and set `aria-busy="true"`.
+
+#### Scenario: A disabled button uses native disabled styling
+
+- **WHEN** a button is rendered with `disabled={true}`
+- **THEN** the `<button>` element carries the native `disabled` attribute, the `tv()` config has no `disabled` variant, and the visual disabled state comes from `disabled:` pseudo-classes in the `base` string.
+
+#### Scenario: Loading forces disabled and aria-busy
+
+- **WHEN** a button is rendered with `loading={true}`
+- **THEN** the `<button>` element has `disabled` set, `aria-busy="true"`, and renders the loading spinner instead of the icon/children snippets.
+
+### Requirement: Primitives ship an accessibility baseline
+
+Every primitive in `src/lib/components/primitives/` SHALL ship a minimum accessibility surface. `button` SHALL set `type="button"` by default, expose `aria-busy` while loading, and when rendering a disabled link (`href` + `disabled`) SHALL set `aria-disabled`, `role="link"`, `tabindex={-1}`, and omit the `href`; the `base` string SHALL include `focus-visible:ring-2 focus-visible:ring-ring`. `input` SHALL set `aria-invalid` when `hasError`, associate its `<label>` via `for`/`id`, and wire `aria-describedby` to the error/hint element. `radio-group` SHALL use `<fieldset>`/`<legend>`, set `role="radiogroup"` on the list, support arrow-key navigation, and set `aria-checked` on each radio. `checkbox` SHALL set `role="checkbox"`, reflect `aria-checked` (`true`/`false`/`"mixed"` for indeterminate), associate its label, and toggle on Space. `avatar` SHALL set a meaningful `alt` on the `<img>` (derived from `name`) and `role="img"` on the fallback. `badge` SHALL set `aria-hidden` when decorative.
+
+#### Scenario: A disabled link is not focusable
+
+- **WHEN** a button is rendered with `href` and `disabled={true}`
+- **THEN** the rendered `<a>` has `aria-disabled="true"`, `role="link"`, `tabindex={-1}`, and no `href` attribute.
+
+#### Scenario: An invalid input exposes its error to assistive tech
+
+- **WHEN** an input is rendered with `hasError={true}` and an error message
+- **THEN** the `<input>` has `aria-invalid="true"`, an `id`, and `aria-describedby` referencing the error element's `id`, and the `<label>` has `for` matching the input `id`.
+
+#### Scenario: A radio group supports keyboard navigation
+
+- **WHEN** focus is on a radio inside a radio-group and the user presses ArrowDown
+- **THEN** focus moves to the next radio (wrapping at the end), and the newly-focused radio's `aria-checked` reflects the selection.
+
+### Requirement: Primitives preserve functional features idiomatically
+
+Primitives SHALL preserve the functional (non-variant) features of their `temp/components/` React source, re-expressed in Svelte 5 idioms. `button` SHALL support `loading` (boolean; renders a `@lucide/svelte` spinner and forces `disabled`), `href` (renders `<a>` instead of `<button>` when set), and `leftIcon`/`rightIcon` as Svelte 5 snippets rendered via `{@render leftIcon?.()}`. `input` SHALL support `hasLeftIcon`/`hasRightIcon` as snippets positioned absolutely. Icon imports SHALL come from `@lucide/svelte` only.
+
+#### Scenario: A button renders an anchor when href is set
+
+- **WHEN** a button is rendered with `href="/login"`
+- **THEN** the rendered element is `<a href="/login">` (not `<button>`), styled by the same `buttonVariants` call.
+
+#### Scenario: A button renders a left-icon snippet
+
+- **WHEN** a button is rendered with a `leftIcon` snippet
+- **THEN** the snippet renders before the children via `{@render leftIcon?.()}`, and the icon is a `@lucide/svelte` component.
+
+### Requirement: Primitive file structure is split into style and markup
+
+Each primitive folder under `src/lib/components/primitives/<name>/` SHALL contain `<name>.svelte` (markup + `$props()` + `<script module>` re-exports), `<name>.style.ts` (the `tv()` config + `VariantProps`-derived type exports), and `index.ts` (re-exports the component, its types, and the variant function). A top-level `src/lib/components/primitives/index.ts` barrel SHALL re-export all primitives.
+
+#### Scenario: A primitive folder has the three files
+
+- **WHEN** the `button` primitive is added
+- **THEN** `src/lib/components/primitives/button/` contains `button.svelte`, `button.style.ts`, and `index.ts`, and `src/lib/components/primitives/index.ts` exports `Button`, `buttonVariants`, and `ButtonProps`.
+
+#### Scenario: The barrel re-exports all primitives
+
+- **WHEN** a consumer imports from `$lib/components/primitives`
+- **THEN** `Button`, `Input`, `Radio`, `RadioGroup`, `Avatar`, `Badge`, and `Checkbox` are all resolvable named exports.
