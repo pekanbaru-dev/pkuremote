@@ -19,16 +19,13 @@ COPY . .
 # must be available when `pnpm build` runs, otherwise canonical/OG/sitemap/
 # JSON-LD/contact-mailto URLs render empty. Passed as build args from
 # docker-compose.prod.yml.
+# DATABASE_URL is intentionally NOT a build arg: $lib/server/db/client.ts
+# opens the connection lazily on first query, so the build (including
+# SvelteKit's postbuild `analyse` step) no longer needs it.
 ARG PUBLIC_SITE_URL
 ARG PUBLIC_CONTACT_EMAIL
-# DATABASE_URL is consumed at module-load by $lib/server/db/client.ts, which
-# SvelteKit's postbuild `analyse` step imports to discover server endpoints.
-# A placeholder would also work — the build never opens a connection — but
-# passing the real value keeps dev and prod build envs identical.
-ARG DATABASE_URL
 ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL} \
-	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL} \
-	DATABASE_URL=${DATABASE_URL}
+	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL}
 RUN pnpm build
 COPY .env ./
 RUN pnpm prune --prod

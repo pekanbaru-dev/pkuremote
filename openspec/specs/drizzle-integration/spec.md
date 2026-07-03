@@ -41,7 +41,7 @@ The `package.json` SHALL expose `db:generate` (runs `drizzle-kit generate`), `db
 
 ### Requirement: Drizzle ORM is the FE's typed database client
 
-The project SHALL use Drizzle ORM as the typed database access layer for the SvelteKit FE. The Drizzle client SHALL be defined at `src/lib/server/db/client.ts` and SHALL live under the `src/lib/server/` segment so SvelteKit's bundler never includes it in the client bundle. The client SHALL connect to the URL specified by the `DATABASE_URL` environment variable using a `postgres` driver.
+The project SHALL use Drizzle ORM as the typed database access layer for the SvelteKit FE. The Drizzle client SHALL be defined at `src/lib/server/db/client.ts` and SHALL live under the `src/lib/server/` segment so SvelteKit's bundler never includes it in the client bundle. The client SHALL be lazily initialized: importing the module SHALL NOT open a connection or read environment variables, so the build (including SvelteKit's postbuild `analyse` step) succeeds without `DATABASE_URL`. The first query that touches the client SHALL validate `DATABASE_URL` and open a `postgres` connection to it, throwing the documented "DATABASE_URL is not set" error if the variable is missing.
 
 #### Scenario: Server-only enforcement
 
@@ -50,8 +50,15 @@ The project SHALL use Drizzle ORM as the typed database access layer for the Sve
 
 #### Scenario: Connection uses the configured URL
 
-- **WHEN** the FE starts and `DATABASE_URL` is set
-- **THEN** the Drizzle client is constructed with that URL and a query through the client reaches the configured Supabase Postgres
+- **WHEN** a query reaches the client and `DATABASE_URL` is set
+- **THEN** the Drizzle client is constructed with that URL and the query reaches the configured Supabase Postgres
+
+#### Scenario: The build does not require DATABASE_URL
+
+- **WHEN** `pnpm build` runs (or SvelteKit's postbuild `analyse` step imports `$lib/server/db/client`) and `DATABASE_URL` is not set
+- **THEN** the build completes without error and no `postgres` connection is opened
+- **WHEN** a request later reaches a route that queries the client and `DATABASE_URL` is still not set
+- **THEN** the documented "DATABASE_URL is not set" error is thrown at query time, not at build time
 
 ### Requirement: Drizzle config and migrations folder
 
