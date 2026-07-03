@@ -7,7 +7,10 @@
 		class?: string;
 	};
 
-	function formatDateLong(iso: string): string {
+	// Formatter is exported so a unit test can pin the `timeZone` to
+	// `Asia/Jakarta` and lock the rendered label to WIB regardless of the
+	// server/browser locale (the original codex review 3502986909).
+	export function formatDateLong(iso: string): string {
 		return new Intl.DateTimeFormat("id-ID", {
 			weekday: "long",
 			day: "numeric",
