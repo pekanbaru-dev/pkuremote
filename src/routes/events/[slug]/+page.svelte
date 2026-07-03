@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
-	import type { PageData } from "./$types.js";
+	import type { PageData, ActionData } from "./$types.js";
 	import {
 		EventDetailHero,
 		EventBookingCta,
@@ -9,8 +9,14 @@
 		buildEventJsonLd
 	} from "$lib/features/events";
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const event = $derived(data.event);
+	const formState = $derived(
+		form && (form.attendeeName || form.attendeePhone)
+			? { attendeeName: form.attendeeName ?? "", attendeePhone: form.attendeePhone ?? "" }
+			: { attendeeName: data.defaultAttendeeName ?? "", attendeePhone: "" }
+	);
+	const formError = $derived((form?.message as string | undefined) ?? data.bookingError);
 
 	const canonical = $derived(`${PUBLIC_SITE_URL}/events/${event.slug}`);
 	const ogImage = $derived(event.bannerUrl ? event.bannerUrl : `${PUBLIC_SITE_URL}/og-default.png`);
@@ -51,6 +57,9 @@
 
 <main class="container-page py-[clamp(3rem,7vw,5rem)]">
 	<article class="flex flex-col gap-12">
+		<a class="link-quiet text-label-lg text-on-surface-variant self-start" href="/events"
+			>← Kembali ke semua event</a
+		>
 		<EventDetailHero {event} />
 
 		<div class="grid grid-cols-1 gap-12 desktop:grid-cols-3">
@@ -65,12 +74,35 @@
 			<aside class="flex flex-col gap-6 desktop:sticky desktop:top-24 desktop:self-start">
 				<EventPriceBlock {event} />
 				<EventQuotaMeter {event} />
-				<EventBookingCta {event} mode="desktop" />
+				{#if event.registrationClosesAt}
+					<p class="label-meta text-on-surface-variant">
+						Pendaftaran ditutup pada {new Date(event.registrationClosesAt).toLocaleString("id-ID", {
+							day: "numeric",
+							month: "long",
+							year: "numeric",
+							hour: "2-digit",
+							minute: "2-digit"
+						})} WIB
+					</p>
+				{/if}
+				<EventBookingCta
+					{event}
+					authenticated={data.authenticated}
+					bookingError={formError}
+					{formState}
+					mode="desktop"
+				/>
 			</aside>
 		</div>
 	</article>
 
-	<EventBookingCta {event} mode="mobile" />
+	<EventBookingCta
+		{event}
+		authenticated={data.authenticated}
+		bookingError={formError}
+		{formState}
+		mode="mobile"
+	/>
 </main>
 
 <footer class="container-page py-12">

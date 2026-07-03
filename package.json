@@ -32,6 +32,7 @@
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
+		"@types/qrcode": "^1.5.6",
 		"@vitest/browser-playwright": "^4.1.8",
 		"bits-ui": "^2.18.1",
 		"dotenv": "^17.4.2",
@@ -59,7 +60,9 @@
 		"@supabase/supabase-js": "^2.108.2",
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.45.2",
+		"nanoid": "^5.1.16",
 		"postgres": "^3.4.9",
+		"qrcode": "^1.5.4",
 		"tailwind-merge": "^3.6.0",
 		"tailwind-variants": "^3.2.2"
 	}

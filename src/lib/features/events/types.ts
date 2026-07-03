@@ -1,15 +1,25 @@
 /**
- * Event type — strict superset of the `events` DB row in db/schema/events.ts.
+ * Event type — a feature-layer superset of the `events` Drizzle row plus
+ * the eager-loaded M2M `categories` array.
  *
- * Required fields mirror the DB schema. Optional fields (banner, status,
- * quota, prices, category) are supplied by the dummy data service and let
- * the UI render a richer page without requiring a schema migration. A real
- * backend that returns only the DB row will see the optional fields as
- * `undefined` and the UI degrades gracefully.
+ * - The Drizzle `events` table (in `db/schema/events.ts`) holds the row.
+ * - The `categories` array is loaded via the `event_categories` join table
+ *   and exposes each linked category's `id`, `name`, and `slug`.
+ * - The optional typed `category` enum (separate from the M2M list) is the
+ *   "primary category" used for the EventCard footer CTA label
+ *   (`workshop` → "Book Now", `meetup` / `talk` → "RSVP", else "Register").
+ *   It is independent from the M2M `categories` array and may not overlap
+ *   with it; the two fields have different roles.
  */
 export type EventStatus = "upcoming" | "live" | "past";
 
 export type EventCategory = "workshop" | "talk" | "meetup" | "social" | "other";
+
+export type EventCategoryRef = {
+	id: string;
+	name: string;
+	slug: string;
+};
 
 export type Event = {
 	id: string;
@@ -27,11 +37,12 @@ export type Event = {
 	priceNormal?: number;
 	pricePromo?: number;
 	category?: EventCategory;
-	/** Free-form category label (max 16 chars) shown as a primary-tinted pill
-	 *  on the event card. Distinct from the typed `category` enum — the pill
-	 *  text is operator-controlled copy. */
-	categoryLabel?: string;
-	/** Free-form secondary category label (max 16 chars) shown as a
-	 *  secondary-tinted pill. */
-	categorySecondary?: string;
+	/** ISO-8601 string. When set and the current time is past this value,
+	 *  the event is no longer bookable. When undefined, no registration
+	 *  deadline applies (bookings accepted up to `startsAt`). */
+	registrationClosesAt?: string;
+	/** M2M list of categories this event is tagged with. Empty when the
+	 *  event has no categories assigned. Always populated as an array
+	 *  (never `undefined`) so callers can iterate without a guard. */
+	categories: EventCategoryRef[];
 };
