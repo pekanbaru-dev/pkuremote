@@ -15,6 +15,14 @@
 			"type": "local",
 			"command": ["npx", "-y", "@upstash/context7-mcp"],
 			"enabled": true
+		},
+		"stitch": {
+			"type": "remote",
+			"url": "https://stitch.googleapis.com/mcp",
+			"enabled": true,
+			"headers": {
+				"X-Goog-Api-Key": "{env:STITCH_API_KEY}"
+			}
 		}
 	},
 	"instructions": ["AGENTS.md"]

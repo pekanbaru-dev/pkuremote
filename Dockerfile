@@ -15,6 +15,14 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # ----- Build stage (prod bundle + pruned deps) ------------------------------
 FROM base AS build
 COPY . .
+# PUBLIC_* env vars are baked into the bundle by $env/static/public; they
+# must be available when `pnpm build` runs, otherwise canonical/OG/sitemap/
+# JSON-LD/contact-mailto URLs render empty. Passed as build args from
+# docker-compose.prod.yml.
+ARG PUBLIC_SITE_URL
+ARG PUBLIC_CONTACT_EMAIL
+ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL} \
+	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL}
 RUN pnpm build
 RUN pnpm prune --prod
 

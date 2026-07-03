@@ -13,6 +13,7 @@
 Three MCP servers are configured for this repo and MUST be used for the workflows below. Do not fall back to manual `grep`/`cat`/`Read` for what they cover.
 
 **MCP config locations** (same servers, each tool's native format):
+
 - `opencode.json` (project root) — OpenCode (`mcp` key, `type: "local"`)
 - `.agents/mcp.json` — generic/cross-tool reference (same schema as `opencode.json`)
 - `.claude/.mcp.json` — Claude Code (`mcpServers` key, `type: "stdio"`)
@@ -53,6 +54,19 @@ Use for **external library/framework documentation** instead of guessing APIs or
 - Use for SvelteKit, shadcn-svelte, Tailwind v4, Vitest, Playwright, bits-ui — anything where the exact API matters.
 - Do not call more than 3 times per question. If the API key is invalid, state that and proceed from local knowledge.
 
+### MCP server configuration
+
+MCP server auth uses an **env-var reference, never a hardcoded key**. The literal value lives only in `.env` (gitignored) and the operator's `~/.zshenv`; tracked files reference the var by name. `.env.example` is the single place that documents the var name and lists the consumer configs.
+
+| Config file          | Tool            | Header syntax                                 |
+| -------------------- | --------------- | --------------------------------------------- |
+| `opencode.json`      | opencode        | `"{env:VAR_NAME}"`                            |
+| `.agents/mcp.json`   | opencode schema | `"{env:VAR_NAME}"`                            |
+| `.claude/.mcp.json`  | Claude Code     | `"${VAR_NAME}"` (`type: "http"`)              |
+| `.codex/config.toml` | Codex           | `[mcp_servers.<name>.env_http_headers]` table |
+
+A new server is added in **all four** config files in one commit (use `enabled: false` to disable, not deletion). For the full convention see `openspec/specs/mcp-config/spec.md`; for a per-server contract (e.g., Stitch), see `openspec/specs/stitch-mcp/spec.md`.
+
 ### Tool-selection order for code work
 
 1. `codebase-memory-mcp` → find symbols and call graphs.
@@ -79,7 +93,9 @@ Verify order after edits: `pnpm check` → `pnpm lint` (or `pnpm format` first i
 
 - **Svelte 5 runes mode is forced** in `vite.config.ts` for all files except those under `node_modules`. Use `$props` / `$state` / `$derived` etc.; do not use legacy `export let` reactivity.
 - **Tailwind v4, not v3.** Tokens live in `@theme { ... }` in `src/routes/layout.css`. There is no `tailwind.config.js` — do not create one. Tailwind v4 `@theme` blocks accept **literal values only** (no `var()` references); if you need a token alias, define it with the literal OKLCH value, not via `var(--other-token)`.
-- **Two token naming families coexist in `@theme`:** brand names (`--color-canvas`, `--color-ink`, `--color-primary`, `--color-muted`, `--color-hairline`) and shadcn names (`--color-background`, `--color-foreground`, `--color-primary-foreground`, `--color-border`, `--color-ring`, `--color-muted-foreground`, etc.). Where they map to the same color, the literal OKLCH value is duplicated across both names — this is intentional so Tailwind generates both `bg-canvas` and `bg-background` utilities. Do not try to deduplicate with `var()`.
+- **Two token naming families coexist in `@theme`:** brand names (`--color-canvas`, `--color-ink`, `--color-primary`, `--color-primary-container`, `--color-muted`, `--color-hairline`) and shadcn names (`--color-background`, `--color-foreground`, `--color-primary-foreground`, `--color-border`, `--color-ring`, `--color-muted-foreground`, etc.). Where they map to the same color, the literal OKLCH value is duplicated across both names — this is intentional so Tailwind generates both `bg-canvas` and `bg-background` utilities. Do not try to deduplicate with `var()`. The canonical palette is the Stitch Material-3 golden palette (canvas cream `#fefae0`, primary deep amber `#765a05`).
+- **Semantic breakpoint names, not Tailwind defaults.** The project uses `mobile:` (40rem / 640px), `tablet:` (48rem / 768px), and `desktop:` (64rem / 1024px) as responsive variant prefixes — defined as `--breakpoint-mobile`, `--breakpoint-tablet`, `--breakpoint-desktop` in `@theme`. The default Tailwind v4 breakpoints (`sm`, `md`, `lg`, `xl`, `2xl`) are removed (`--breakpoint-*: initial` in `@theme`), so `sm:`/`md:`/`lg:`/`xl:`/`2xl:` produce **no CSS**. Use only `mobile:`/`tablet:`/`desktop:` in class strings. Future `pnpm dlx shadcn-svelte add <component>` additions should be checked for `sm:`/`md:`/`lg:` usage and converted to the semantic names.
+- **Typography:** Hanken Grotesk (display + body, weights 400/600/800) and Manrope (label, weights 500/600), loaded from Google Fonts via the `<link>` in `src/app.html`. Use `--font-display` and `--font-body` for both Hanken Grotesk roles; use `--font-label` (new token) for the Manrope label role. The previous Spectral + Source Sans 3 pairing is retired.
 - **`svelte/no-navigation-without-resolve` is disabled** in `eslint.config.js`. Plain `href="#events"` and `href={someVar}` are fine; do not wrap in `$app/paths`'s `resolve()` unless you have a typed route literal.
 - **`@lucide/svelte`** is the icon library (installed, not yet used on the page). Use it for any future icons; do not add another set.
 - **Playwright browsers must be installed** before E2E or screenshots: `pnpm exec playwright install chromium webkit`. The first `pnpm test:e2e` run will do this automatically.
@@ -89,6 +105,17 @@ Verify order after edits: `pnpm check` → `pnpm lint` (or `pnpm format` first i
 - `PRODUCT.md` — register (`brand`), users, purpose, brand personality (calm, minimal, focused), anti-references (no generic community/club website, no SaaS gradient hero), design principles.
 - `DESIGN.md` — the "Quiet Bulletin" visual spec: OKLCH palette, Spectral (display) + Source Sans 3 (body) typography, flat-by-default elevation, the One Voice Rule (ochre accent ≤10% of any screen), the Eyebrow Ban, the Display Tracking floor (≥ -0.04em). Treat the absolute-bans list in DESIGN.md as non-negotiable.
 - Both files are referenced by the `impeccable` skill; editing UI without reading them produces off-brand output.
+
+## Component folders (primitives vs ui)
+
+Reusable components live in **two** folders, split by complexity:
+
+- **`src/lib/components/primitives/`** — hand-rolled **simple** Svelte 5 components that do not need headless behavior: `button`, `input`, `radio`, `radio-group`, `avatar`, `badge`, `checkbox`. Built with `tailwind-variants` (`tv`) + `cn`, no `bits-ui`. Each folder has `<name>.svelte` (markup + `$props()`) + `<name>.style.ts` (`tv()` + types) + `index.ts`. Barrel: `src/lib/components/primitives/index.ts`. `disabled` is a native attribute (not a `tv` variant); styling via `disabled:` pseudo-classes. Canonical 6-axis variant contract: `intent` | `variant` (solid/outline/text) | `size` | `uppercase` | `rounded` | `fullWidth` — each component adopts only the axes meaningful to it. Intent colors map to the M3 token roles (`bg-X`/`text-on-X`/`border-X`/`bg-X-container`), never the legacy `-500`/`-50` shade scale.
+- **`src/lib/components/ui/`** — shadcn-svelte components that delegate to `bits-ui` (dropdown, dialog, navigation-menu, sheet, select, tabs, popover, …). Managed by shadcn-svelte via `components.json`.
+
+When adding a component: simple → `primitives/`; headless/complex → `ui/` (shadcn). The `eslint.config.js` exempts **both** folders from the `svelte/no-restricted-html-elements` and `no-restricted-imports` rules (the component definitions legitimately use raw `<button>`/`<input>`/etc.).
+
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full layering (horizontal `components/` vs vertical `features/<name>/`), dependency rules (features → components ✓, reverse ✗), the feature-barrel-only import contract + enforcement status, and the new-feature recipe.
 
 ## shadcn-svelte
 
@@ -113,7 +140,7 @@ Verify order after edits: `pnpm check` → `pnpm lint` (or `pnpm format` first i
 
 ## Conventions that differ from defaults
 
-- **Prettier uses tabs** (`.prettierrc` `useTabs: true`), single quotes, no trailing commas, 100-char print width. Match this; do not reformat with spaces.
+- **Prettier uses tabs** (`.prettierrc` `useTabs: true`), **double quotes** (`singleQuote: false`), no trailing commas, 100-char print width. Match this; do not reformat with spaces or single quotes.
 - **`$lib` is the only path alias.** No `@/` or `@components/`. shadcn components import from `$lib/utils.js` (note the `.js` extension even though the source is `utils.ts` — SvelteKit/Vite resolves it).
 - Demo routes under `src/routes/demo/` are SvelteKit scaffold leftovers (Vitest + Playwright examples). Do not edit them; a future change can remove them.
 - The `playwright.config.ts` uses `npm run build && npm run preview` (not pnpm) for the E2E web server. This is intentional — do not "fix" it to pnpm.

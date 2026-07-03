@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
-import { db } from '$lib/server/db/client';
-import { profiles, type Profile } from '../../../../db/schema';
+import { eq } from "drizzle-orm";
+import { db } from "$lib/server/db/client";
+import { profiles, type Profile } from "../../../../db/schema";
 
 export type MyProfileResult = {
 	user: { id: string; email: string | null };
@@ -23,7 +23,7 @@ export async function loadMyProfile(
 		const [row] = await db.select().from(profiles).where(eq(profiles.id, userId)).limit(1);
 		profile = row ?? null;
 	} catch (err) {
-		console.error('Failed to load profile', err);
+		console.error("Failed to load profile", err);
 		profile = null;
 	}
 

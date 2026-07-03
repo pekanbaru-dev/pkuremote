@@ -204,6 +204,8 @@ Caddyfile                 # Caddy v2 config (HTTP→HTTPS, HSTS, reverse proxy)
 .dockerignore             # keep the build context small
 ```
 
+**[ARCHITECTURE.md](./ARCHITECTURE.md)** — how `src/lib/` is organized (components vs features vs server), dependency rules, and the recipe for adding a new feature.
+
 ## Design system
 
 - **PRODUCT.md** — register, users, purpose, brand personality, anti-references.

@@ -1,9 +1,9 @@
-import { createServerClient } from '@supabase/ssr';
-import { type Handle, redirect } from '@sveltejs/kit';
-import { sequence } from '@sveltejs/kit/hooks';
-import { env } from '$env/dynamic/public';
+import { createServerClient } from "@supabase/ssr";
+import { type Handle, redirect } from "@sveltejs/kit";
+import { sequence } from "@sveltejs/kit/hooks";
+import { env } from "$env/dynamic/public";
 
-const GUARDED_PREFIXES = ['/myprofile'];
+const GUARDED_PREFIXES = ["/myprofile"];
 
 const supabase: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(
@@ -14,7 +14,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 				getAll: () => event.cookies.getAll(),
 				setAll: (cookiesToSet) => {
 					for (const { name, value, options } of cookiesToSet) {
-						event.cookies.set(name, value, { ...options, path: options?.path ?? '/' });
+						event.cookies.set(name, value, { ...options, path: options?.path ?? "/" });
 					}
 				}
 			}
@@ -42,7 +42,7 @@ const supabase: Handle = async ({ event, resolve }) => {
 
 	return resolve(event, {
 		filterSerializedResponseHeaders: (name) =>
-			name === 'content-range' || name === 'x-supabase-api-version'
+			name === "content-range" || name === "x-supabase-api-version"
 	});
 };
 

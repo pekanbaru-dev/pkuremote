@@ -1,58 +1,74 @@
 <!-- SEED: re-run $impeccable document once there's code to capture the actual tokens and components. -->
 
 ---
-name: PKU Remote
-description: Calm, editorial site for the Pekanbaru remote-worker community — events, announcements, and blog posts.
+
+name: PKUBersua
+description: Warm, editorial event site for the lintas-profesi Pekanbaru community — find and book the next meetup, workshop, or talk.
+
 ---
 
-# Design System: PKU Remote
+# Design System: PKUBersua
 
 ## 1. Overview
 
-**Creative North Star: "The Quiet Bulletin"**
+**Creative North Star: "The Warm Bulletin"**
 
-A calm, reading-first publication surface for the Pekanbaru remote-worker community. The site behaves like a well-edited bulletin board: events, announcements, and posts lead; chrome recedes. Whitespace and type hierarchy carry the layout — not boxes, borders, or decoration. One restrained ochre accent marks what's timely (the next event, a fresh post); everything else lives on a true neutral canvas so the content does the talking.
+A warm, reading-first event surface for a lintas-profesi Pekanbaru community. The site behaves like a well-edited community notice board: upcoming and past events lead; chrome recedes. Whitespace and type hierarchy carry the layout — not boxes, borders, or decoration. A single restrained golden accent marks what's timely (the next event, a live link); the rest of the surface lives on a warm cream canvas so the accent reads as deliberate warmth, not as ambient noise.
 
 The system rejects the generic community/club website — crowded sidebars, event-countdown widgets, stock illustrations, WordPress-theme chrome — and it rejects the SaaS-landing gradient hero. Energy comes from the content's timeliness, not from the UI. Motion is responsive: state changes and feedback are animated, but there is no scroll-driven choreography or orchestrated entrances.
 
 **Key Characteristics:**
-- Reading-first: editorial serif display, generous measure, generous whitespace.
-- Restrained color: true neutral canvas, one ochre accent used sparingly.
+
+- Reading-first: editorial sans display, generous measure, generous whitespace.
+- Warm, restrained color: cream canvas, one golden accent used sparingly.
 - Responsive motion: hover/focus/transition only; no entrance choreography.
 - Flat by default; depth conveyed by tonal layering, not shadows.
-- Calm, minimal, focused — the site itself is evidence the community cares about craft.
+- Warm, calm, focused — the site itself is evidence the community cares about craft.
 
-## 2. Colors: The Quiet Bulletin Palette
+## 2. Colors: The Stitch Material-3 Golden Palette
 
-A single restrained accent against a true neutral canvas. The accent marks timeliness — the next event, a new post, a live link — and is used on ≤10% of any screen. The canvas stays true-neutral (no cream/sand tint) so the ochre reads as deliberate, not as ambient warmth.
+A warm cream canvas with a single restrained golden accent. The accent marks timeliness — the next event, a primary action — and is used on ≤10% of any screen. The canvas is intentionally warm (chroma ≈ 0.03, hue 100) so the golden accent reads as warm but deliberate, not as a default off-white.
 
-**The One Voice Rule.** The ochre accent is used on ≤10% of any given screen. Its rarity is the point. It marks what's timely; it is never decorative.
-
-**The True Neutral Rule.** Body backgrounds are true-neutral (chroma ≈ 0), not warm cream, sand, or parchment. Warmth is carried by the accent and the typography, not by the canvas.
+**The One Voice Rule.** The golden accent is used on ≤10% of any given screen. Its rarity is the point. It marks what's timely; it is never decorative.
 
 ### Primary
-- **Goldenrod Ochre** `[to be resolved during implementation]`: The single accent. Used for event dates, "new" markers, primary links, and primary button fills. Saturated enough to read as intentional; never pale or pastel.
+
+- **Goldenrod Amber** (`#765a05`, oklch 0.483 0.097 87): The single accent. Used for event dates, primary links, primary button fills, and the status badge for upcoming events. Saturated enough to read as intentional; never pale or pastel.
+- **Goldenrod Container** (`#e9c46a`, oklch 0.834 0.117 87): Soft golden fill for highlighted cards, the focus-ring tint, and "promo" callouts. Sits behind primary; carries the accent into surfaces without competing with it.
 
 ### Neutral
-- **Ink** `[to be resolved during implementation]`: Body text and headings. Near-black with a faint warm lean.
-- **Muted Ink** `[to be resolved during implementation]`: Secondary text, dates, meta. Stays ≥4.5:1 against the canvas — never the "light gray for elegance" trap.
-- **Canvas** `[to be resolved during implementation]`: Page background. True neutral, chroma toward 0.
-- **Surface** `[to be resolved during implementation]`: Subtle tonal lift for cards/sections (one step up from canvas).
-- **Hairline** `[to be resolved during implementation]`: 1px dividers and borders. A hair of ink at low opacity.
+
+- **Canvas** (`#fefae0`, oklch 0.981 0.034 100): Page background. Warm cream.
+- **Surface** (`#fefae0`, oklch 0.981 0.034 100): One tonal step up from canvas for sections; same value, used where structure needs a faint lift.
+- **Surface Container** (`#f2efd5`, oklch 0.948 0.034 102): Tonal lift for cards.
+- **Ink** (`#1d1c0d`, oklch 0.223 0.027 105): Body text and headings. Near-black with a faint green-warm lean. ≥7:1 against the canvas.
+- **Muted Ink** (`#4d4638`, oklch 0.397 0.024 85): Secondary text, dates, meta. ≥4.5:1 against the canvas.
+- **Hairline** (`#d0c5b2`, oklch 0.827 0.029 81): 1px dividers and borders. Warm low-contrast.
+
+### Secondary & Tertiary
+
+- **Secondary** (`#6b5e0d`, oklch 0.480 0.095 99): Olive-gold for secondary actions and meta accents.
+- **Tertiary** (`#825424`, oklch 0.488 0.088 64): Warm amber-brown for tertiary callouts (e.g., "limited slots").
+- **Outline** (`#7f7666`, oklch 0.569 0.026 82): Warm gray for input borders and form outlines.
+
+### Error
+
+- **Error** (`#ba1a1a`, oklch 0.506 0.193 28): Reserved for destructive states only (e.g., "Kuota penuh" badge, form errors). The success / warning / info intents collapse to the brand ochre per the component-library spec.
 
 ## 3. Typography
 
-**Display Font:** A contemporary editorial serif (e.g. Fraunces, Source Serif 4) `[font pairing to be chosen at implementation]`
-**Body Font:** A humanist sans (e.g. Inter, Source Sans 3) `[font pairing to be chosen at implementation]`
+**Display & Body Font:** Hanken Grotesk (weights 400, 600, 800). Loaded from Google Fonts with `display=swap`.
+**Label Font:** Manrope (weights 500, 600). Used for the small label role (meta rows, status badges, button labels).
 
-**Character:** Serif display gives the site its editorial, Substack-adjacent reading feel; the humanist sans body keeps posts and UI legible at small sizes. The pairing reads as quiet and credible, not decorative.
+**Character:** The single-family display/body pairing (Hanken Grotesk) keeps the site readable at all sizes; Manrope's slight geometric character (in label only) provides a quiet counterpoint. The pairing reads as warm, modern, and accessible, not editorial-decorative. Note: this is a deliberate move away from the previous Spectral + Source Sans 3 editorial pairing — see the brand-pkubersua spec for rationale.
 
 ### Hierarchy
-- **Display** (serif, weight 400–500, `clamp(2.5rem, 6vw, 4rem)`, line-height 1.05, letter-spacing ≥ -0.03em): Hero/post titles only. `text-wrap: balance`.
-- **Headline** (serif, weight 500, ~2rem, line-height 1.15): Section and event titles. `text-wrap: balance`.
-- **Title** (sans, weight 600, ~1.25rem, line-height 1.3): Card titles, subsection headings.
-- **Body** (sans, weight 400, 1rem, line-height 1.6, max-width 65–75ch): Post body, descriptions, announcements. `text-wrap: pretty`.
-- **Label** (sans, weight 500, 0.8125rem, letter-spacing 0.02em, normal case): Dates, meta, tags, button labels. No wide-tracked uppercase eyebrows.
+
+- **Display** (Hanken Grotesk 800, `clamp(2.5rem, 6vw, 4rem)`, line-height 1.05, letter-spacing -0.02em): Hero only. `text-wrap: balance`.
+- **Headline** (Hanken Grotesk 600, `clamp(1.75rem, 3.5vw, 2.25rem)`, line-height 1.15): Section and event titles. `text-wrap: balance`.
+- **Title** (Hanken Grotesk 600, 1.25rem, line-height 1.3): Card titles, subsection headings.
+- **Body** (Hanken Grotesk 400, 1rem, line-height 1.6, max-width 65–75ch): Post body, descriptions, announcements. `text-wrap: pretty`.
+- **Label** (Manrope 500, 0.8125rem, letter-spacing 0.01em, normal case): Dates, meta, tags, button labels. No wide-tracked uppercase eyebrows.
 
 **The Eyebrow Ban Rule.** No tiny uppercase tracked eyebrows above every section. A kicker may appear once as a deliberate brand system element; an eyebrow on every section is an AI grammar tell and is prohibited.
 
@@ -66,21 +82,23 @@ Flat by default. Depth is conveyed by tonal layering (Surface vs Canvas) and 1px
 
 ## 5. Components
 
-No components exist yet. Canonical primitives (button, card, input, navigation, chip) will be synthesized from these tokens during implementation, following the Flat-By-Default and One Voice rules. Re-run `$impeccable document` once components are built.
+Canonical primitives live in `src/lib/components/ui/` and follow the Flat-By-Default and One Voice rules. The full set (button, card, input, navigation, status-badge, empty-state, currency-display, panel-card, separator, dialog, drawer, sheet, skeleton, aspect-ratio, plus the per-event feature components in `src/lib/features/events/components/`) is built from these tokens. Re-run `$impeccable document` once per quarter to capture drift.
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** use the ochre accent only for what's timely — the next event, a new post, a primary action — and keep it ≤10% of any screen (One Voice Rule).
-- **Do** keep the body canvas true-neutral (chroma ≈ 0); carry warmth through the accent and typography, not the background (True Neutral Rule).
-- **Do** use an editorial serif for display/headlines and a humanist sans for body; cap body measure at 65–75ch.
+
+- **Do** use the golden accent only for what's timely — the next event, a primary action — and keep it ≤10% of any screen (One Voice Rule).
+- **Do** let the cream canvas carry the warmth; pair the golden accent with it intentionally rather than fighting it.
+- **Do** cap body measure at 65–75ch; use the editorial display font only for the hero `<h1>` and section `<h2>`s.
 - **Do** keep display letter-spacing ≥ -0.04em and apply `text-wrap: balance` to headings.
 - **Do** keep depth tonal (Surface vs Canvas + 1px hairlines); reserve shadow for state changes only, with blur ≤8px.
 - **Do** ship a `prefers-reduced-motion: reduce` alternative for every animation (crossfade or instant).
 - **Do** pair color with text or icon — never signal state by color alone (color-blind safe).
 
 ### Don't:
-- **Don't** use a warm cream/sand/parchment body background. The whole warm-neutral band reads as the saturated AI default of 2026 and is prohibited here.
+
+- **Don't** go back to a true-neutral canvas. The cream is now part of the brand; switching to pure white would read as a regression.
 - **Don't** put a tiny uppercase tracked eyebrow above every section. It's the saturated AI scaffold and a 2023-era kicker tell (Eyebrow Ban Rule).
 - **Don't** add a `border-left` / `border-right` colored stripe greater than 1px on cards, list items, callouts, or alerts.
 - **Don't** use gradient text (`background-clip: text` + gradient). Emphasize with weight or size, not gradients.

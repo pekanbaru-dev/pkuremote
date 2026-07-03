@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type OAuthCallbackInput = {
 	supabase: SupabaseClient;
@@ -7,7 +7,7 @@ export type OAuthCallbackInput = {
 	next: string;
 };
 
-export type OAuthCallbackResult = { kind: 'redirect'; location: string };
+export type OAuthCallbackResult = { kind: "redirect"; location: string };
 
 /**
  * Resolve an OAuth callback to a redirect location. The route handler is a
@@ -27,16 +27,16 @@ export async function resolveOAuthCallback(
 	const { supabase, code, errorParam, next } = input;
 
 	if (errorParam) {
-		return { kind: 'redirect', location: `/login?error=${encodeURIComponent(errorParam)}` };
+		return { kind: "redirect", location: `/login?error=${encodeURIComponent(errorParam)}` };
 	}
 
 	if (code) {
 		const { error } = await supabase.auth.exchangeCodeForSession(code);
 		if (error) {
-			console.error('exchangeCodeForSession failed', error);
-			return { kind: 'redirect', location: '/login?error=oauth_callback' };
+			console.error("exchangeCodeForSession failed", error);
+			return { kind: "redirect", location: "/login?error=oauth_callback" };
 		}
 	}
 
-	return { kind: 'redirect', location: next };
+	return { kind: "redirect", location: next };
 }

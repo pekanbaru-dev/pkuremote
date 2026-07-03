@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import { page } from '$app/state';
+	import { enhance } from "$app/forms";
+	import { page } from "$app/state";
+	import { Button, Input } from "$lib/components/primitives";
 
 	let { data, form } = $props();
 
@@ -8,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — PKU Remote</title>
+	<title>Masuk — PKUBersua</title>
 	<meta name="description" content="Sign in or register with your Google account." />
 </svelte:head>
 
@@ -32,17 +33,17 @@
 	{/if}
 
 	<form method="POST" use:enhance class="measure-prose w-full">
-		<input type="hidden" name="redirect" value={data.redirectTo} />
-		<button
+		<Input type="hidden" name="redirect" value={data.redirectTo} />
+		<Button
 			type="submit"
-			class="w-full rounded-md border border-hairline bg-canvas px-6 py-3 text-body text-ink transition hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+			class="w-full rounded-md border border-hairline bg-canvas hover:bg-canvas/80 px-6 py-3 text-body text-ink transition hover:border-primary hover:text-primary focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 		>
 			Continue with Google
-		</button>
+		</Button>
 	</form>
 
 	<p class="measure-prose mt-6 text-center text-label text-muted-foreground">
-		{#if page.url.searchParams.get('redirect')}
+		{#if page.url.searchParams.get("redirect")}
 			You'll be returned to <code class="text-ink">{data.redirectTo}</code> after sign-in.
 		{:else}
 			You'll land on your profile after sign-in.

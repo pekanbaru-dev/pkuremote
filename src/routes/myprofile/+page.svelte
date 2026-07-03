@@ -1,16 +1,17 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from "$app/forms";
+	import { Button } from "$lib/components/primitives";
 
 	let { data } = $props();
 
-	const displayName = $derived(data.profile?.displayName ?? data.user.email ?? 'Pengguna');
+	const displayName = $derived(data.profile?.displayName ?? data.user.email ?? "Pengguna");
 	const email = $derived(data.user.email);
 	const avatarUrl = $derived(data.profile?.avatarUrl ?? null);
 	const monogram = $derived(displayName.charAt(0).toUpperCase());
 </script>
 
 <svelte:head>
-	<title>Profil saya — PKU Remote</title>
+	<title>Profil saya — PKUBersua</title>
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -53,12 +54,12 @@
 		{/if}
 
 		<form method="POST" action="?/signOut" use:enhance class="mt-12 border-t border-hairline pt-8">
-			<button
+			<Button
 				type="submit"
-				class="rounded-md border border-hairline bg-canvas px-5 py-2.5 text-body text-ink transition hover:border-destructive hover:text-destructive focus-visible:border-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+				class="rounded-md border border-hairline bg-canvas hover:bg-canvas/80 px-5 py-2.5 text-body text-ink transition hover:border-destructive hover:text-destructive focus-visible:border-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
 			>
 				Sign out
-			</button>
+			</Button>
 		</form>
 	</section>
 </main>

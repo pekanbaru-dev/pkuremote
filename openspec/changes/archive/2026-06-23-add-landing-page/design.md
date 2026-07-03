@@ -5,6 +5,7 @@ The project is a fresh SvelteKit + TypeScript + Tailwind v4 scaffold with no rea
 Current state: `src/routes/+page.svelte` is the default SvelteKit welcome page. `src/routes/layout.css` imports Tailwind but defines no tokens. `src/app.html` has no web font links. No design tokens, component classes, or semantic page structure exist yet.
 
 Constraints:
+
 - Tailwind v4 is already installed; tokens MUST be defined via `@theme` in `layout.css` (Tailwind v4's native mechanism), not a `tailwind.config.js`.
 - Fonts load via Google Fonts CDN (preconnect + stylesheet link). No `@fontsource` package; the project has no runtime font dependency yet and the CDN path is the lightest for a single-page surface.
 - Svelte 5 runes mode (`$props`, `$state`) is the project default; components use the runes API.
@@ -12,6 +13,7 @@ Constraints:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Build the landing page at `/` as a single `+page.svelte` with seven semantic sections (header, hero, next event, announcements, recent posts, about strip, footer).
 - Establish the design-token system (OKLCH colors, typography, radii) in `layout.css` via Tailwind v4 `@theme`, reusable across future pages.
 - Define reusable component classes (`.container-page`, `.measure-prose`, `.label-meta`, `.link-quiet`, `.btn-primary`) so future pages compose without restyling.
@@ -19,6 +21,7 @@ Constraints:
 - Use clearly-marked dummy content that content owners can swap without touching structure.
 
 **Non-Goals:**
+
 - Real content wiring (CMS, markdown sources, database). Dummy data only.
 - Event detail pages, full About page, individual post pages. Those are follow-up changes that will reuse the tokens and classes established here.
 - Dark mode. The brand scene (daytime, reading-first, Pekanbaru community) lands on light mode; dark mode is a separate decision.

@@ -1,13 +1,13 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import { fail, redirect } from '@sveltejs/kit';
-import { DEFAULT_REDIRECT, safeRedirectTarget } from './redirect';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { fail, redirect } from "@sveltejs/kit";
+import { DEFAULT_REDIRECT, safeRedirectTarget } from "./redirect";
 
 /**
  * Absolute path of the OAuth callback route. The `next` query parameter is
  * the post-sign-in destination; the callback handler exchanges the code
  * for a session, sets the session cookie, then redirects to `next`.
  */
-export const AUTH_CALLBACK_PATH = '/auth/callback';
+export const AUTH_CALLBACK_PATH = "/auth/callback";
 
 export type StartGoogleSignInResult =
 	| { ok: true; url: string }
@@ -36,16 +36,16 @@ export async function startGoogleSignIn(
 	const redirectTo = `${origin}${AUTH_CALLBACK_PATH}?next=${encodeURIComponent(safeTarget)}`;
 
 	const { data, error } = await supabase.auth.signInWithOAuth({
-		provider: 'google',
+		provider: "google",
 		options: { redirectTo }
 	});
 
 	if (error || !data?.url) {
-		console.error('signInWithOAuth failed', error);
+		console.error("signInWithOAuth failed", error);
 		return {
 			ok: false,
 			status: 500,
-			message: 'Login dengan Google belum tersedia. Hubungi admin.'
+			message: "Login dengan Google belum tersedia. Hubungi admin."
 		};
 	}
 
