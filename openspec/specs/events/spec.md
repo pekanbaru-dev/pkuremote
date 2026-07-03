@@ -183,11 +183,239 @@ The folder `src/lib/features/events/` SHALL contain: `types.ts` (the `Event` typ
 - **WHEN** a reviewer greps `src/lib/features/events/components/` for `from "$lib/features/`
 - **THEN** no matches appear except for the feature's own `$lib/features/events` import surface.
 
-### Requirement: Event type optionally carries `categoryLabel` and `categorySecondary`
+### Requirement: Event data lives in Supabase, not in a hardcoded array
 
-The `Event` type SHALL add two optional fields: `categoryLabel?: string` and `categorySecondary?: string`. Each SHALL be a string of max 16 characters, displayed as a pill label on the event card. When either field is `undefined`, the corresponding pill SHALL be hidden. The dummy data SHALL fill both fields on all 8 events.
+The events feature SHALL read its data from the Supabase Postgres database via the Drizzle client at `src/lib/server/db/client.ts`. The `src/lib/features/events/services/dummy-events.ts` file SHALL be deleted. The server-only service module at `src/lib/server/events/db-events.ts` (re-exported from `src/lib/server/events/index.ts`) SHALL export `getUpcomingEvents()`, `getPastEvents()`, and `getEventBySlug(slug)` with the same signatures and return shapes as the previous dummy service, but implemented as Drizzle queries against the `events` table with an eager-loaded join to `event_categories` and `categories`. Every function SHALL return events with a `categories: { id, name, slug }[]` field populated (the M2M relation). The events feature barrel at `src/lib/features/events/index.ts` SHALL NOT export the service functions (they live under `$lib/server/events/` and are imported by `+page.server.ts` / `+server.ts` files only).
 
-#### Scenario: A new event is added to the dummy data with categories
+#### Scenario: A page calls `getUpcomingEvents()`
 
-- **WHEN** a developer adds an entry to `features/events/services/dummy-events.ts` with `categoryLabel: "Workshop"` and `categorySecondary: "Hands-on"`
-- **THEN** the event card renders two pills reading "Workshop" and "Hands-on", and the type check passes.
+- **WHEN** a `+page.server.ts` `load()` calls `getUpcomingEvents()`
+- **THEN** the function issues a Drizzle query against the `events` table joined with `event_categories` and `categories`, filters rows where `events.startsAt >= now()`, sorts ascending by `events.startsAt`, and returns an array of `Event` objects each carrying a populated `categories: { id, name, slug }[]` field.
+
+#### Scenario: A page calls `getEventBySlug("traditional-talam-masterclass")`
+
+- **WHEN** a `+page.server.ts` `load()` calls `getEventBySlug("traditional-talam-masterclass")`
+- **THEN** the function returns the matching row (with categories eager-loaded) or `undefined` when no row matches; the route's `error(404, ...)` translates `undefined` to a 404 response.
+
+#### Scenario: A reviewer greps for the dummy service
+
+- **WHEN** a reviewer greps the codebase for `dummy-events`
+- **THEN** no matches appear — the file is deleted and the server barrel at `$lib/server/events/` re-exports the Drizzle-backed `db-events` module instead.
+
+### Requirement: `Event` type uses an M2M `categories` array, not free-form label strings
+
+The `Event` type at `src/lib/features/events/types.ts` SHALL define `categories: { id: string; name: string; slug: string }[]` as a non-optional field (an event has zero or more categories; the array is empty when the event has no categories assigned). The previous free-form `categoryLabel?: string` and `categorySecondary?: string` fields SHALL NOT exist on the type. The typed `category?: EventCategory` enum field SHALL be retained (it's the "primary category" used for the `EventCard` footer CTA label, distinct from the M2M display list).
+
+#### Scenario: A consumer imports the `Event` type
+
+- **WHEN** a route or component imports `type Event` from `$lib/features/events`
+- **THEN** the type includes `categories: { id: string; name: string; slug: string }[]` and does NOT include `categoryLabel` or `categorySecondary`.
+
+#### Scenario: A new event is added to the DB with two categories
+
+- **WHEN** a developer inserts a row into the `events` table with two corresponding rows in `event_categories`
+- **THEN** the next call to `getUpcomingEvents()` returns an `Event` with `categories.length === 2` and each entry has the correct `id`, `name`, and `slug`.
+
+#### Scenario: An event with no categories is queried
+
+- **WHEN** an event row has no corresponding `event_categories` rows
+- **THEN** `getEventBySlug` returns an `Event` with `categories: []` and the `EventCard` renders no pills (graceful degradation per the existing partial-response rule).
+
+### Requirement: `EventCard` category pills are clickable links to the filtered listing
+
+The `EventCard` component SHALL render each `event.categories[i]` as an `<a href="/events?category={category.slug}">` element (where `{category.slug}` is URL-encoded). The pill's visual style SHALL match the existing pill treatment (the first category uses `bg-primary/10 text-primary rounded-full text-label-md`; the second uses `bg-secondary/10 text-secondary rounded-full text-label-md`; the pattern repeats for additional categories). The card's outer wrapper SHALL be a `<div>` (not an `<a>`) with one inner `<a>` covering the banner, title, and excerpt; this inner `<a>` SHALL have `href="/events/{event.slug}"`. The footer date row and CTA text SHALL be plain `<div>` / `<span>` elements (not links). No `<a>` SHALL be nested inside another `<a>`.
+
+#### Scenario: A visitor clicks a category pill on a card
+
+- **WHEN** a visitor clicks the first pill on an `EventCard` whose event has `categories: [{ slug: "workshop" }]`
+- **THEN** the browser navigates to `/events?category=workshop` and the listing page filters to events tagged with the "workshop" category.
+
+#### Scenario: A visitor middle-clicks a pill to open in a new tab
+
+- **WHEN** a visitor middle-clicks (or right-clicks → "Open in new tab") a category pill
+- **THEN** the browser opens `/events?category={slug}` in a new tab — the click is NOT swallowed by the card's outer body link (the pill is a sibling, not a child, of the body link).
+
+#### Scenario: An event with no categories renders without pills
+
+- **WHEN** an `EventCard` is rendered for an event with `categories: []`
+- **THEN** the card renders the banner, title, excerpt, date row, and CTA, but no category pills are visible.
+
+### Requirement: Event listing page filters by `?category=…`
+
+The event listing page at `src/routes/events/+page.svelte` (loaded by the co-located `+page.server.ts`) SHALL read the `category` query param from the request URL. When the param is set to a known category slug, the page SHALL return only events whose joined categories include that slug (an event is included if any of its `categories[i].slug` matches the param). When the param is unset or empty, the page SHALL return all events as it does today. The data load SHALL also return `filter: { name, slug } | null` (the resolved category object when filtered, `null` when unfiltered) so the page can render the filter chip and adapt the `<svelte:head>` and `EmptyState` copy.
+
+#### Scenario: A visitor opens `/events` with no filter
+
+- **WHEN** the page is requested at `/events` with no query param
+- **THEN** the page returns the full upcoming and past lists (all events) and `data.filter === null`; the page renders without the filter chip.
+
+#### Scenario: A visitor opens `/events?category=workshop`
+
+- **WHEN** the page is requested at `/events?category=workshop`
+- **THEN** the data load filters `getUpcomingEvents()` and `getPastEvents()` to events whose `categories` array includes a category with `slug === "workshop"`; the data load returns `filter: { name: "Workshop", slug: "workshop" }`; the page renders only those events and surfaces the filter chip.
+
+#### Scenario: A visitor opens `/events?category=does-not-exist`
+
+- **WHEN** the page is requested at `/events?category=does-not-exist` and no category with that slug exists
+- **THEN** the data load returns empty `upcoming` and `past` arrays and `filter: { name: "does-not-exist", slug: "does-not-exist" }`; the page renders the upcoming `EmptyState` with the unknown-slug name and omits the past section.
+
+#### Scenario: The filter happens at the DB layer, not in the Svelte component
+
+- **WHEN** the data load runs
+- **THEN** the SQL query includes a WHERE clause on the joined `categories.slug`; the unfiltered list is never sent to the client when the param is set (verifiable by inspecting the SQL log or by the network response size being smaller when filtered).
+
+### Requirement: Event listing page shows a removable filter chip when filtered
+
+When the listing page data load returns `filter: { name, slug }` (i.e. the URL has `?category=…`), the page SHALL render a single filter chip at the top of the listing body. The chip SHALL read "Filter: {name} × Hapus filter" where "× Hapus filter" is an inline `<a href="/events">` styled as a quiet link (using the existing `.link-quiet` class from `src/routes/layout.css`). The chip SHALL be omitted when `data.filter === null`.
+
+#### Scenario: A filtered listing page renders the chip
+
+- **WHEN** the page is requested at `/events?category=workshop` and at least one event matches
+- **THEN** the page renders a chip reading "Filter: Workshop × Hapus filter" with the "Hapus filter" link pointing at `/events` (clearing the filter).
+
+#### Scenario: A visitor clicks "Hapus filter"
+
+- **WHEN** a visitor clicks the "Hapus filter" link on the filter chip
+- **THEN** the browser navigates to `/events` (no query param) and the page renders the unfiltered listing (all events, no chip).
+
+#### Scenario: An unfiltered listing page omits the chip
+
+- **WHEN** the page is requested at `/events` with no query param
+- **THEN** the filter chip is not rendered — the page goes straight to the two section headings.
+
+### Requirement: Filtered listing `<svelte:head>` and `EmptyState` copy adapt to the filter
+
+When the listing page is filtered, the page SHALL adapt its `<svelte:head>` and the upcoming `EmptyState` copy: `<title>` becomes "Event {filter.name} — PKUBersua", `og:title` mirrors it, and the upcoming `EmptyState` description reads "Belum ada event '{filter.name}' — coba hapus filter atau pilih kategori lain." instead of the unfiltered message. The canonical URL SHALL stay at `${PUBLIC_SITE_URL}/events` (not the filtered URL) — the filter is a transient state, not a canonical landing page.
+
+#### Scenario: A filtered listing's `<title>` reflects the filter
+
+- **WHEN** the page is requested at `/events?category=workshop`
+- **THEN** the `<title>` in the initial HTML response is "Event Workshop — PKUBersua" and the canonical link points at `${PUBLIC_SITE_URL}/events` (not the filtered URL).
+
+#### Scenario: A filtered listing with no events shows the filter-aware `EmptyState`
+
+- **WHEN** the page is requested at `/events?category=workshop` and no events match
+- **THEN** the upcoming `EmptyState` description reads "Belum ada event 'Workshop' — coba hapus filter atau pilih kategori lain." and the past section is omitted.
+
+### Requirement: `db-events` service also exports `getEventsByCategorySlug`, `getAllCategories`, and `getCategoryBySlug`
+
+The `db-events.ts` module at `src/lib/server/events/` SHALL additionally export three query functions: `getEventsByCategorySlug(slug: string): Event[]` (returns all events — upcoming and past — whose categories include the given slug, sorted by `startsAt` ascending), `getAllCategories(): { id: string; name: string; slug: string }[]` (returns every category, sorted by `name` ascending), and `getCategoryBySlug(slug: string): { id: string; name: string; slug: string } | undefined` (returns a single category by slug, or `undefined`). The server barrel at `src/lib/server/events/index.ts` SHALL re-export all three.
+
+#### Scenario: A reviewer imports the new service functions
+
+- **WHEN** a route imports `getAllCategories` from `$lib/server/events`
+- **THEN** TypeScript resolves the export from `db-events.ts` and the function is callable.
+
+#### Scenario: A category with no events is returned by `getAllCategories`
+
+- **WHEN** the database has a category with no events assigned
+- **THEN** `getAllCategories()` still returns that category (it returns categories, not events; the caller decides how to use the result).
+
+### Requirement: Dedicated event listing page at `/events`
+
+The site SHALL expose a server-rendered event listing page at `src/routes/events/+page.svelte` (with a co-located `+page.server.ts` `load()` that calls `getUpcomingEvents()` and `getPastEvents()` from the server-only events service at `$lib/server/events/`). The page SHALL render two distinct sections in this order: an "Event Akan Datang" section (with `<h2 id="upcoming">`) listing upcoming events sorted ascending by `startsAt`, and an "Event Sebelumnya" section (with `<h2 id="past">`) listing past events sorted descending by `startsAt`. Each section SHALL render its events as a vertical list of `EventCard` components (the same component the homepage uses). The upcoming section SHALL render an `EmptyState` (from `$lib/components/ui/empty-state`) with the message "Belum ada event yang akan datang — pantau terus untuk kabar terbaru." when empty. The past section SHALL be omitted entirely from the page when empty. The page SHALL include in `<svelte:head>`: a unique `<title>` ("Event — PKUBersua"), a unique `meta description` ("Daftar event PKUBersua — kumpul, belajar, dan bersua di Pekanbaru."), a `link rel="canonical"` pointing at `${PUBLIC_SITE_URL}/events`, `og:title`, `og:description`, `og:type=website`, `og:url`, `og:site_name=PKUBersua`, and `og:locale=id_ID`. The page SHALL NOT embed JSON-LD (the structured `Event` schema lives on the per-event detail page only). The page SHALL be reachable without login and SHALL link each event card to `/events/{event.slug}` via the existing `EventCard` anchor.
+
+#### Scenario: A visitor opens `/events` with at least one upcoming event and no past events
+
+- **WHEN** the page is requested at `/events` and the upcoming events list is non-empty and the past events list is empty
+- **THEN** the page renders the "Event Akan Datang" section with one `EventCard` per upcoming event in chronological order, the "Event Sebelumnya" section is omitted entirely from the page, the meta title is "Event — PKUBersua", and the meta description matches the spec.
+
+#### Scenario: A visitor opens `/events` with both upcoming and past events
+
+- **WHEN** the page is requested at `/events` and both lists are non-empty
+- **THEN** the page renders both sections in order — upcoming first, past second — each as a vertical list of `EventCard`s, with `<h2 id="upcoming">` and `<h2 id="past">` headings, and the meta tags are present in the initial HTML response.
+
+#### Scenario: A visitor opens `/events` with no upcoming events and at least one past event
+
+- **WHEN** the page is requested at `/events` and the upcoming events list is empty and the past events list is non-empty
+- **THEN** the "Event Akan Datang" section renders an `EmptyState` with the message "Belum ada event yang akan datang — pantau terus untuk kabar terbaru." and the "Event Sebelumnya" section renders the past events in reverse chronological order.
+
+#### Scenario: A visitor opens `/events` with zero events in either section
+
+- **WHEN** the page is requested at `/events` and both lists are empty
+- **THEN** the page renders the "Event Akan Datang" section with the `EmptyState`, the "Event Sebelumnya" section is omitted entirely, and the page returns a 200 status with a valid (non-empty) HTML body.
+
+#### Scenario: A visitor deep-links to `/events#upcoming`
+
+- **WHEN** the page is requested at `/events#upcoming`
+- **THEN** the browser scrolls to the `<h2 id="upcoming">` element after the page renders.
+
+#### Scenario: A search engine crawls `/events`
+
+- **WHEN** Google's structured-data validator parses `/events`
+- **THEN** it finds a regular HTML page with the meta title, meta description, canonical URL, Open Graph tags, and Twitter Card tags; the page contains no JSON-LD `<script type="application/ld+json">` block.
+
+### Requirement: Homepage preview reveals a "Lihat semua" link when past events are truncated
+
+The homepage at `src/routes/+page.svelte` SHALL render a "Lihat semua" link inside the "Event Sebelumnya" section whenever the total count of past events exceeds 6 (i.e. the section is truncated). The link SHALL be a `<a href="/events">` styled as a quiet hairline-underline text link (the same `.link-quiet` class used for the footer "Events Calendar" link in `src/routes/layout.css`). The link SHALL be omitted from the homepage entirely when the total past-events count is 6 or fewer. The homepage preview SHALL continue to render at most 6 past `EventCard`s in the "Event Sebelumnya" section regardless of the total count.
+
+#### Scenario: The homepage has 3 past events
+
+- **WHEN** the homepage is requested and the total past-events count is 3
+- **THEN** the "Event Sebelumnya" section renders 3 `EventCard`s and the "Lihat semua" link is not rendered.
+
+#### Scenario: The homepage has 7 past events
+
+- **WHEN** the homepage is requested and the total past-events count is 7
+- **THEN** the "Event Sebelumnya" section renders the 6 most recent `EventCard`s and a "Lihat semua" link below them pointing to `/events`.
+
+### Requirement: Event detail page links back to the listing
+
+The event detail page at `src/routes/events/[slug]/+page.svelte` SHALL render a "Kembali ke semua event" link above the `EventDetailHero`. The link SHALL be a `<a href="/events">` styled as a quiet hairline-underline text link (the same `.link-quiet` class). The link SHALL be visible on all viewport sizes. The link SHALL always be rendered for every event detail page (no conditional omitted states are defined).
+
+#### Scenario: A visitor opens an event detail page
+
+- **WHEN** a visitor navigates to `/events/{slug}` for a known slug
+- **THEN** the page renders a "Kembali ke semua event" link above the event hero, and clicking the link navigates to `/events` (the listing page).
+
+#### Scenario: A visitor uses the back-link round-trip
+
+- **WHEN** a visitor navigates `/` → `/events` → `/events/{slug}` and clicks the "Kembali ke semua event" link
+- **THEN** the browser navigates to `/events` and the page renders the "Event Akan Datang" and "Event Sebelumnya" sections as defined in the "Dedicated event listing page at `/events`" requirement.
+
+### Requirement: `Event` type optionally carries `registrationClosesAt`
+
+The `Event` type at `src/lib/features/events/types.ts` SHALL add an optional `registrationClosesAt?: string` field (ISO-8601 string). When set and the current time is past this value, the event is no longer bookable. When unset, no registration deadline applies. The Drizzle row in the `events` table SHALL have a corresponding nullable `registrationClosesAt` column.
+
+#### Scenario: A consumer imports the `Event` type
+
+- **WHEN** a route or component imports `type Event` from `$lib/features/events`
+- **THEN** the type includes `registrationClosesAt?: string` alongside the other optional fields.
+
+#### Scenario: An event has no registration deadline
+
+- **WHEN** an event's `registrationClosesAt` is `null` in the database
+- **THEN** the `Event` returned by `getEventBySlug` has `registrationClosesAt === undefined` and the event is bookable up to its `startsAt`.
+
+### Requirement: Event detail page's "Booking Sekarang" CTA is a real form action that collects per-event attendee name and phone, not a `mailto:` link
+
+The event detail page SHALL render the "Booking Sekarang" CTA via the `EventBookingCta` component, which posts to the route's `actions.book` handler. The CTA SHALL NOT use `mailto:` for the booking flow (the mailto: pattern is removed). The booking form SHALL collect two text inputs from the user: `attendeeName` (required, the per-event attendee name) and `attendeePhone` (required, the per-event attendee phone). The attendee name SHALL default to the user's profile `displayName` and SHALL be editable per event (the same user can register for different events under different names). The CTA's disabled state SHALL reflect the event's bookability (upcoming status, `remainingSlots > 0`, no past `registrationClosesAt`). The previous mailto: behavior is **REMOVED** — the CTA no longer opens an email client.
+
+#### Scenario: A visitor clicks "Booking Sekarang" on a bookable event
+
+- **WHEN** a visitor clicks the "Booking Sekarang" button on a bookable event
+- **THEN** the browser submits the form to `?/book`; the action creates a registration and redirects to the ticket page; no email client opens.
+
+#### Scenario: The form pre-fills with the user's profile name and is editable
+
+- **WHEN** an authenticated visitor views `/events/{slug}` for the first time
+- **THEN** the "Nama Peserta" input is pre-filled with the user's profile `displayName`; the "No. HP" input is empty; the visitor can edit either field before submitting; the booking stores the entered (edited) name and phone in the registration row, not the profile values.
+
+#### Scenario: The form rejects empty fields with per-field validation errors
+
+- **WHEN** an authenticated visitor submits the booking form with an empty `attendeeName` or `attendeePhone`
+- **THEN** the action returns `fail(400, { code: 'VALIDATION', message, attendeeName, attendeePhone })`; the page re-renders with the error message ("Nama wajib diisi." or "No. HP wajib diisi.") above the form; the previously-entered values are pre-filled in the form so the user can fix and re-submit.
+
+### Requirement: Event detail page surfaces the registration deadline in the metadata
+
+When the `events.registrationClosesAt` column is set, the event detail page SHALL show the registration deadline in the booking panel as a small meta line above the CTA (e.g. "Pendaftaran ditutup pada 20 Oktober 2026 pukul 23.59"). When the column is null, the meta line is omitted.
+
+#### Scenario: An event with a registration deadline
+
+- **WHEN** a visitor views `/events/{slug}` for an event with `registrationClosesAt = "2026-10-20T23:59:00+07:00"`
+- **THEN** the booking panel renders a meta line "Pendaftaran ditutup pada 20 Oktober 2026 pukul 23.59" above the CTA.
+
+#### Scenario: An event with no registration deadline
+
+- **WHEN** a visitor views `/events/{slug}` for an event with `registrationClosesAt = null`
+- **THEN** the booking panel does not render the deadline meta line; the CTA is bookable up to the event's `startsAt`.

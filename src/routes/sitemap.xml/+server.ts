@@ -1,9 +1,9 @@
 import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
-import { getUpcomingEvents, getPastEvents } from "$lib/features/events";
+import { getUpcomingEvents, getPastEvents } from "$lib/server/events";
 
-export const GET = (): Response => {
+export const GET = async (): Promise<Response> => {
 	const today = new Date().toISOString().split("T")[0];
-	const allEvents = [...getUpcomingEvents(), ...getPastEvents()];
+	const allEvents = [...(await getUpcomingEvents()), ...(await getPastEvents())];
 
 	const urls = [
 		{ loc: `${PUBLIC_SITE_URL}/`, lastmod: today },

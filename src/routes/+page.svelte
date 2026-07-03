@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from "$app/state";
+	import type { PageData } from "./$types.js";
 	import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
-	import { getUpcomingEvents, EventCard, buildLandingJsonLd } from "$lib/features/events";
+	import { EventCard, buildLandingJsonLd } from "$lib/features/events";
 	import { Button, Badge, Input } from "$lib/components/primitives";
 	import { Card } from "$lib/components/ui/card";
 	import {
@@ -13,7 +14,10 @@
 	} from "$lib/components/ui/sheet";
 	import { cn } from "$lib/utils";
 
-	const events = getUpcomingEvents();
+	let { data }: { data: PageData } = $props();
+	const events = $derived(data.events);
+	const pastEvents = $derived(data.pastEvents);
+	const pastEventsTotal = $derived(data.pastEventsTotal);
 	const tagline = "Kabar terbaru komunitas Pekanbaru dalam satu tempat";
 	const description =
 		"Kabar terbaru komunitas Pekanbaru dalam satu tempat. Workshop, talks, dan meetup dari berbagai profesi — semua di satu bulletin.";
@@ -274,6 +278,37 @@
 			View All Events
 		</Button>
 	</section>
+
+	<!-- Past Events Section -->
+	{#if pastEventsTotal > 0}
+		<section
+			class="scroll-mt-20 py-md tablet:py-xl px-margin-mobile tablet:px-margin-desktop max-w-[1280px] mx-auto"
+			id="past-events"
+		>
+			<div class="flex justify-between items-start mb-md tablet:mb-xl">
+				<div>
+					<h2
+						class="font-headline-md tablet:font-headline-lg text-headline-md tablet:text-headline-lg text-primary"
+					>
+						Event Sebelumnya
+					</h2>
+					<p class="text-on-surface-variant mt-2">
+						Lihat apa yang sudah kita selenggarakan — dan bergabung di event berikutnya.
+					</p>
+				</div>
+			</div>
+			<div class="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 gap-gutter">
+				{#each pastEvents as event (event.id)}
+					<EventCard {event} />
+				{/each}
+			</div>
+			{#if pastEventsTotal > 6}
+				<div class="mt-md flex justify-center">
+					<a class="link-quiet text-label-lg text-primary" href="/events">Lihat semua</a>
+				</div>
+			{/if}
+		</section>
+	{/if}
 
 	<!-- Bento Grid: News & Blog -->
 	<section class="scroll-mt-20 py-md tablet:py-xl bg-surface-container-low" id="blog">

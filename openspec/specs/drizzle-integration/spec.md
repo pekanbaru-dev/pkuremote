@@ -121,3 +121,98 @@ No Drizzle schema or client file SHALL be reachable from a client-side bundle. T
 
 - **WHEN** `pnpm build` runs
 - **THEN** no Drizzle module appears in the client-side output of the SvelteKit build
+
+### Requirement: `events` table carries the full shape the UI renders
+
+The `events` table SHALL have the following columns in addition to the existing `id`, `title`, `startsAt`, `location`, `excerpt`, `body`, `createdAt`: `slug` (text, NOT NULL, UNIQUE), `endsAt` (timestamp with timezone, NULL), `bannerUrl` (text, NULL), `status` (text, NOT NULL, default `'upcoming'`, CHECK constraint in `'upcoming' | 'live' | 'past'`), `quota` (integer, NULL, positive), `remainingSlots` (integer, NULL, non-negative, SHALL be ≤ `quota` when both are set), `priceNormal` (integer, NULL, in IDR), `pricePromo` (integer, NULL, in IDR, SHALL be < `priceNormal` when both are set), `category` (text, NULL, CHECK constraint in `'workshop' | 'talk' | 'meetup' | 'social' | 'other'`). The `events` schema file at `db/schema/events.ts` SHALL declare all of these columns and export the Drizzle table object.
+
+#### Scenario: A new event is inserted with the full shape
+
+- **WHEN** a developer inserts a row into `events` with all fields populated
+- **THEN** the insert succeeds, the `slug` is unique across the table, `pricePromo < priceNormal` when both are set, `remainingSlots <= quota` when both are set, and the row is queryable via Drizzle with the correct inferred TypeScript shape.
+
+#### Scenario: A CHECK constraint rejects an invalid status
+
+- **WHEN** a developer attempts to insert a row with `status = 'invalid'`
+- **THEN** Postgres rejects the insert with a CHECK constraint violation error.
+
+#### Scenario: A new migration captures the column additions
+
+- **WHEN** a developer edits `db/schema/events.ts` to add a new column and runs `pnpm db:generate`
+- **THEN** a new SQL file is created under `db/migrations/` adding the column with the right type and constraints, and `pnpm db:migrate` applies it without error.
+
+### Requirement: `categories` table exists with `id`, `name`, `slug`
+
+The Drizzle schema SHALL define a `categories` table at `db/schema/categories.ts` with three columns: `id` (uuid, primary key, default `gen_random_uuid()`), `name` (text, NOT NULL, UNIQUE), `slug` (text, NOT NULL, UNIQUE). The schema index SHALL re-export the `categories` table from `db/schema/index.ts`. A new Drizzle migration SHALL create the table on `pnpm db:migrate`.
+
+#### Scenario: A category is inserted and queried
+
+- **WHEN** a developer inserts a row into `categories` with `name = "Workshop"` and `slug = "workshop"`
+- **THEN** the row is queryable via Drizzle, the `name` and `slug` are both unique, and the inferred TypeScript type matches the columns.
+
+#### Scenario: A duplicate slug is rejected
+
+- **WHEN** a developer attempts to insert two rows into `categories` with the same `slug`
+- **THEN** Postgres rejects the second insert with a unique-constraint violation error.
+
+### Requirement: `event_categories` join table enables M2M between events and categories
+
+The Drizzle schema SHALL define an `event_categories` join table at `db/schema/event-categories.ts` with three columns: `eventId` (uuid, NOT NULL, foreign key to `events.id` with `ON DELETE CASCADE`), `categoryId` (uuid, NOT NULL, foreign key to `categories.id` with `ON DELETE CASCADE`), and a composite primary key on `(eventId, categoryId)`. The schema index SHALL re-export the `eventCategories` table from `db/schema/index.ts`. A new Drizzle migration SHALL create the table on `pnpm db:migrate`.
+
+#### Scenario: An event is tagged with two categories
+
+- **WHEN** a developer inserts two rows into `event_categories` for the same `eventId` with different `categoryId`s
+- **THEN** both rows persist, the event's M2M categories list (joined via the `event_categories` and `categories` tables) contains both categories, and a query that filters by one of the `slug`s returns the event.
+
+#### Scenario: Deleting an event cascades to its `event_categories` rows
+
+- **WHEN** a developer deletes an event row
+- **THEN** Postgres also deletes every `event_categories` row that referenced that event (via the `ON DELETE CASCADE` foreign key), and no orphan `event_categories` rows remain.
+
+#### Scenario: Deleting a category cascades to its `event_categories` rows
+
+- **WHEN** a developer deletes a category row
+- **THEN** Postgres also deletes every `event_categories` row that referenced that category, and no orphan `event_categories` rows remain.
+
+#### Scenario: A query joins events to categories through the join table
+
+- **WHEN** the events service issues a Drizzle query that joins `events` → `eventCategories` → `categories`
+- **THEN** the result set includes every (event, category) pair where the event is tagged with that category, and an event with N categories produces N rows in the join result.
+
+### Requirement: `registrations` table exists with booking, ownership, status, and per-event attendee columns
+
+The Drizzle schema SHALL define a `registrations` table at `db/schema/registrations.ts` with the following columns: `id` (uuid, primary key, default `gen_random_uuid()`), `userId` (uuid, NOT NULL, foreign key to `profiles.id` with `ON DELETE CASCADE`), `eventId` (uuid, NOT NULL, foreign key to `events.id` with `ON DELETE CASCADE`), `registrationNumber` (text, NOT NULL, UNIQUE — short human-readable id of the form `PKU-{year}-{nanoid(6)}`), `attendeeName` (text, NOT NULL — the per-event attendee name, separate from the user's profile name so the same user can register for different events under different names), `attendeePhone` (text, NOT NULL — the per-event attendee phone), `status` (text, NOT NULL, default `'confirmed'`, CHECK constraint in `'confirmed' | 'cancelled' | 'attended' | 'no_show'`), `createdAt` (timestamptz, NOT NULL, default now()), `updatedAt` (timestamptz, NOT NULL, default now()). A unique constraint SHALL be enforced on `(userId, eventId)`. The schema index SHALL re-export the `registrations` table from `db/schema/index.ts`. A new Drizzle migration SHALL create the table on `pnpm db:migrate`.
+
+#### Scenario: A registration is inserted with the full shape
+
+- **WHEN** a developer inserts a row into `registrations` with `userId`, `eventId`, `registrationNumber`, `attendeeName`, and `attendeePhone`
+- **THEN** the insert succeeds; the unique constraint on `(userId, eventId)` is enforced; the `status` defaults to `'confirmed'`; the `createdAt` and `updatedAt` default to now.
+
+#### Scenario: A duplicate `(userId, eventId)` is rejected
+
+- **WHEN** a developer attempts to insert two `registrations` rows with the same `(userId, eventId)`
+- **THEN** the second insert fails with a unique-constraint violation; only the first row persists.
+
+#### Scenario: Deleting a user cascades to their registrations
+
+- **WHEN** a developer deletes a `profiles` row
+- **THEN** Postgres also deletes every `registrations` row that referenced that user (via the `ON DELETE CASCADE` foreign key), and no orphan `registrations` rows remain.
+
+#### Scenario: Deleting an event cascades to its registrations
+
+- **WHEN** a developer deletes an `events` row
+- **THEN** Postgres also deletes every `registrations` row that referenced that event (via the `ON DELETE CASCADE` foreign key), and no orphan `registrations` rows remain.
+
+### Requirement: `events` table gains `registrationClosesAt` column
+
+The Drizzle schema SHALL add a `registrationClosesAt` column to the `events` table: type `timestamp with timezone`, NULL allowed, no default. The new column is added to the existing `events` table via a Drizzle migration (the migration is auto-generated and applied on `pnpm db:migrate`).
+
+#### Scenario: An event is created without a registration deadline
+
+- **WHEN** a developer inserts a row into `events` without specifying `registrationClosesAt`
+- **THEN** the column is `NULL` in the database and the event is bookable up to its `startsAt`.
+
+#### Scenario: An event is created with a registration deadline
+
+- **WHEN** a developer inserts a row into `events` with `registrationClosesAt = "2026-10-20T23:59:00+07:00"`
+- **THEN** the column is set to that value; the booking action rejects bookings with `registrationClosesAt` in the past.

@@ -1,12 +1,12 @@
 /**
- * Public surface for the `events` feature.
+ * Public surface for the `events` feature (client-safe).
  *
- * Consumers SHALL import only from `$lib/features/events`, never from the
- * nested `components/`, `services/`, or `types.ts` files. This is enforced
- * by the architecture convention documented in AGENTS.md.
+ * Consumers SHALL import only from `$lib/features/events` for the
+ * component / type public API. The data-access service is server-only
+ * (it imports from `$lib/server/db`) and is re-exported from
+ * `$lib/server/events` for `+page.server.ts` / `+server.ts` callers.
  */
-export type { Event, EventStatus, EventCategory } from "./types.ts";
-export { getUpcomingEvents, getPastEvents, getEventBySlug } from "./services/dummy-events.ts";
+export type { Event, EventStatus, EventCategory, EventCategoryRef } from "./types.ts";
 export { buildEventJsonLd, buildLandingJsonLd } from "./services/json-ld.ts";
 export { default as EventCard } from "./components/event-card.svelte";
 export { default as EventList } from "./components/event-list.svelte";
