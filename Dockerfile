@@ -21,8 +21,14 @@ COPY . .
 # docker-compose.prod.yml.
 ARG PUBLIC_SITE_URL
 ARG PUBLIC_CONTACT_EMAIL
+# DATABASE_URL is consumed at module-load by $lib/server/db/client.ts, which
+# SvelteKit's postbuild `analyse` step imports to discover server endpoints.
+# A placeholder would also work — the build never opens a connection — but
+# passing the real value keeps dev and prod build envs identical.
+ARG DATABASE_URL
 ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL} \
-	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL}
+	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL} \
+	DATABASE_URL=${DATABASE_URL}
 RUN pnpm build
 RUN pnpm prune --prod
 
