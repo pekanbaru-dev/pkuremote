@@ -7,7 +7,7 @@
  */
 export type { Event, EventStatus, EventCategory } from "./types.ts";
 export { getUpcomingEvents, getPastEvents, getEventBySlug } from "./services/dummy-events.ts";
-export { buildEventJsonLd } from "./services/json-ld.ts";
+export { buildEventJsonLd, buildLandingJsonLd } from "./services/json-ld.ts";
 export { default as EventCard } from "./components/event-card.svelte";
 export { default as EventList } from "./components/event-list.svelte";
 export { default as EventDetailHero } from "./components/event-detail-hero.svelte";

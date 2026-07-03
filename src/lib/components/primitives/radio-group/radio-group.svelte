@@ -1,7 +1,5 @@
 <script lang="ts" module>
 	import { positionVariants, legendVariants, type RadioGroupProps } from "./radio-group.style.js";
-
-	const nextRgId = () => `rg-${crypto.randomUUID()}`;
 </script>
 
 <script lang="ts">
@@ -25,7 +23,9 @@
 		...rest
 	}: RadioGroupProps = $props();
 
-	const groupId = nextRgId();
+	// `$props.id()` (Svelte >= 5.20) is a per-instance, SSR-stable id, so the
+	// same group id is rendered on the server and the client during hydration.
+	const groupId = $props.id();
 	const msgId = `${groupId}-msg`;
 	const describedBy = $derived((error ?? hint) ? msgId : undefined);
 </script>
@@ -56,6 +56,7 @@
 						checked={value === item.value}
 						disabled={disabled || item.disabled}
 						label={item.label}
+						required={required && !item.disabled}
 						onchange={() => onchange?.(item.value)}
 					/>
 				</li>

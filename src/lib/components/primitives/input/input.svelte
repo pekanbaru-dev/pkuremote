@@ -1,7 +1,5 @@
 <script lang="ts" module>
 	import { inputVariants, type InputProps } from "./input.style.js";
-
-	const nextInputId = () => `input-${crypto.randomUUID()}`;
 </script>
 
 <script lang="ts">
@@ -23,7 +21,12 @@
 		...rest
 	}: InputProps = $props();
 
-	const inputId = $derived(id ?? nextInputId());
+	// `$props.id()` (Svelte >= 5.20) returns a per-instance, SSR-stable id
+	// that matches between the server-rendered HTML and the client-hydrated
+	// component. Prefer it over a module-scoped counter or `crypto.randomUUID()`,
+	// both of which drift between server and client and cause hydration churn.
+	const autoId = $props.id();
+	const inputId = $derived(id ?? `${autoId}-input`);
 	const msgId = $derived(`${inputId}-msg`);
 	const describedBy = $derived((error ?? hint) ? msgId : undefined);
 </script>

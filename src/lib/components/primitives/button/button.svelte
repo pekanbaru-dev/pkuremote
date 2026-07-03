@@ -25,15 +25,36 @@
 	}: ButtonProps = $props();
 
 	const isDisabled = $derived(disabled || loading);
+	// For link-buttons, drop the `href` while disabled or loading so that
+	// pointer/touch activation cannot follow the URL. ARIA + tabindex alone
+	// don't prevent activation on anchor elements.
+	const linkHref = $derived(isDisabled ? undefined : href);
 </script>
 
-{#if href}
+{#if linkHref}
 	<a
 		class={cn(buttonVariants({ intent, variant, size, uppercase, rounded, fullWidth }), className)}
-		{href}
+		href={linkHref}
 		aria-disabled={isDisabled || undefined}
 		role={isDisabled ? "link" : undefined}
 		tabindex={isDisabled ? -1 : undefined}
+		aria-busy={loading || undefined}
+		{...rest}
+	>
+		{#if loading}
+			<LoaderCircle class="animate-spin" />
+		{:else}
+			{@render leftIcon?.()}
+			{@render children?.()}
+			{@render rightIcon?.()}
+		{/if}
+	</a>
+{:else if href && isDisabled}
+	<a
+		class={cn(buttonVariants({ intent, variant, size, uppercase, rounded, fullWidth }), className)}
+		aria-disabled="true"
+		role="link"
+		tabindex={-1}
 		aria-busy={loading || undefined}
 		{...rest}
 	>

@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { page } from "$app/state";
 	import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
-	import { getUpcomingEvents, EventCard } from "$lib/features/events";
+	import { getUpcomingEvents, EventCard, buildLandingJsonLd } from "$lib/features/events";
 	import { Button, Badge, Input } from "$lib/components/primitives";
 	import { Card } from "$lib/components/ui/card";
 	import {
@@ -17,6 +18,14 @@
 	const description =
 		"Kabar terbaru komunitas Pekanbaru dalam satu tempat. Workshop, talks, dan meetup dari berbagai profesi — semua di satu bulletin.";
 	const ogImage = `${PUBLIC_SITE_URL}/og-default.png`;
+	// `page.data.user` is populated by the root `+layout.server.ts` from
+	// `locals.user`. Keep the signed-in CTA in sync with the auth state so
+	// returning users land on their profile instead of being sent back
+	// through the login flow.
+	const user = $derived(page.data.user);
+	const accountHref = $derived(user ? "/myprofile" : "/login");
+	const accountLabel = $derived(user ? "Profil saya" : "Login/Register");
+	const landingJsonLd = buildLandingJsonLd();
 
 	let scrolled = $state(false);
 	let mobileMenuOpen = $state(false);
@@ -47,38 +56,8 @@
 	<meta name="twitter:title" content="PKUBersua — {tagline}" />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={ogImage} />
-	<script type="application/ld+json">
-		{JSON.stringify({
-			"@context": "https://schema.org",
-			"@type": "ItemList",
-			"itemListElement": [
-				{
-					"@type": "ListItem",
-					position: 1,
-					item: {
-						"@type": "ImageObject",
-						contentUrl: `${PUBLIC_SITE_URL}/images/bento/songket.png`,
-						name: "Songket Pattern Pekanbaru",
-						description:
-							"Songket pattern, traditional handwoven textile of Pekanbaru, Riau",
-						creditText: "PKUBersua"
-					}
-				},
-				{
-					"@type": "ListItem",
-					position: 2,
-					item: {
-						"@type": "ImageObject",
-						contentUrl: `${PUBLIC_SITE_URL}/images/bento/senapelan-culinary-market.jpg`,
-						name: "Senapelan Culinary Market",
-						description:
-							"Local market stall with tropical fruits in Senapelan, Pekanbaru",
-						creditText: "PKUBersua"
-					}
-				}
-			]
-		})}
-	</script>
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html landingJsonLd}
 </svelte:head>
 
 <!-- Body classes applied via app.html. Cannot use <svelte:body> with children. -->
@@ -126,12 +105,12 @@
 					/>
 				</div>
 				<div class="hidden tablet:block">
-					<a href="/login">
-						<Button
-							class="h-auto text-base font-normal bg-primary text-white/75 px-lg py-sm rounded-full font-label-lg hover:opacity-90 transition-all active:scale-95"
-							>Login/Register</Button
-						>
-					</a>
+					<Button
+						href={accountHref}
+						class="h-auto text-base font-normal bg-primary text-white/75 px-lg py-sm rounded-full font-label-lg hover:opacity-90 transition-all active:scale-95"
+					>
+						{accountLabel}
+					</Button>
 				</div>
 				<Button
 					variant="text"
@@ -185,14 +164,15 @@
 				Partnership
 			</a>
 			<hr class="border-outline-variant/30 my-2" />
-			<a href="/login" class="mt-2 tablet:hidden">
+			<div class="mt-2 tablet:hidden">
 				<Button
+					href={accountHref}
 					class="w-full h-auto text-base font-normal bg-primary text-white px-md py-sm rounded-full font-label-lg hover:opacity-90 transition-all"
 					onclick={() => (mobileMenuOpen = false)}
 				>
-					Login / Register
+					{accountLabel}
 				</Button>
-			</a>
+			</div>
 		</nav>
 	</SheetContent>
 </Sheet>
@@ -240,6 +220,7 @@
 				</p>
 				<div class="flex flex-col tablet:flex-row gap-md">
 					<Button
+						href="#events"
 						class="h-auto text-base font-normal bg-primary-container hover:bg-primary-container/70 text-on-primary-container px-xl py-md rounded-lg font-headline-md shadow-sm hover:shadow-md transition-all active:scale-95 w-full tablet:w-auto"
 						>Explore Events</Button
 					>

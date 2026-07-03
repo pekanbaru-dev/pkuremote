@@ -133,6 +133,35 @@
 	--text-label-md--line-height: 16px;
 	--text-label-md--font-weight: 500;
 
+	/* Unqualified text-size aliases used by auth/profile pages (login,
+	   myprofile) and the .label-meta helper. These keep the older
+	   `text-body` / `text-headline` / `text-title` / `text-display` /
+	   `text-label` utilities generating CSS after the @theme block was
+	   re-shaped around compound tokens. Sizes are matched to the closest
+	   role: body → body-md, label → label-md, headline → headline-lg,
+	   title → headline-md, display → headline-xl. Tailwind v4 @theme
+	   blocks accept literal values only (no var() references), so the
+	   numbers are duplicated here on purpose. */
+	--text-body: 16px;
+	--text-body--line-height: 24px;
+	--text-body--font-weight: 400;
+
+	--text-headline: 32px;
+	--text-headline--line-height: 40px;
+	--text-headline--font-weight: 600;
+
+	--text-title: 24px;
+	--text-title--line-height: 32px;
+	--text-title--font-weight: 600;
+
+	--text-display: 48px;
+	--text-display--line-height: 56px;
+	--text-display--font-weight: 800;
+
+	--text-label: 12px;
+	--text-label--line-height: 16px;
+	--text-label--font-weight: 500;
+
 	--spacing-margin-mobile: 16px;
 	--spacing-margin-desktop: 80px;
 	--spacing-gutter: 24px;

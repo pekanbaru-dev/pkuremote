@@ -40,7 +40,7 @@ const EVENTS: Event[] = [
 		slug: "riau-heritage-night",
 		title: "Riau Heritage Night",
 		startsAt: "2026-11-02T19:00:00+07:00",
-		endsAt: "2024-11-02T22:00:00+07:00",
+		endsAt: "2026-11-02T22:00:00+07:00",
 		location: "Taman Budaya Riau, Pekanbaru",
 		excerpt:
 			"A celebration of Zapin dance, traditional music, and storytelling under the moonlight.",

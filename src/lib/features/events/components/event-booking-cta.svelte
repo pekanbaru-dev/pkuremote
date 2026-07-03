@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import type { Event } from "../types.ts";
+	import { PUBLIC_CONTACT_EMAIL } from "$env/static/public";
 	import { cn } from "$lib/utils.js";
 
 	export type EventBookingCtaMode = "desktop" | "mobile" | "both";
@@ -15,7 +16,7 @@
 		const body = encodeURIComponent(
 			`Halo, saya ingin mendaftar untuk event ${event.title} (${event.startsAt} di ${event.location}).\n\nNama:\nNo. HP:\n`
 		);
-		return `mailto:hello@pkubersua.com?subject=${subject}&body=${body}`;
+		return `mailto:${PUBLIC_CONTACT_EMAIL}?subject=${subject}&body=${body}`;
 	}
 </script>
 
@@ -29,7 +30,7 @@
 </script>
 
 {#if showDesktop}
-	<div class={cn("hidden table:block flex flex-col gap-2", className)}>
+	<div class={cn("hidden tablet:flex tablet:flex-col tablet:gap-2", className)}>
 		<a
 			href={isSoldOut ? undefined : mailtoHref}
 			aria-disabled={isSoldOut}
@@ -56,7 +57,7 @@
 		aria-disabled={isSoldOut}
 		aria-label={isSoldOut ? "Kuota penuh" : "Booking Sekarang"}
 		class={cn(
-			"fixed right-4 bottom-4 z-50 desktop:hidden inline-flex h-14 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-transform duration-200",
+			"fixed right-4 bottom-4 z-50 inline-flex desktop:hidden h-14 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-lg transition-transform duration-200",
 			isSoldOut
 				? "pointer-events-none cursor-not-allowed opacity-50"
 				: "hover:scale-105 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
