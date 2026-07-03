@@ -58,10 +58,7 @@ describe("EventBookingCta", () => {
 	});
 
 	it("renders a disabled button labeled 'Kuota penuh' when remainingSlots is 0", async () => {
-		render(
-			EventBookingCta,
-			{ event: makeEvent({ remainingSlots: 0 }), authenticated: true }
-		);
+		render(EventBookingCta, { event: makeEvent({ remainingSlots: 0 }), authenticated: true });
 
 		const button = page.getByRole("button", { name: /Kuota penuh/i }).first();
 		await expect.element(button).toBeVisible();
@@ -69,10 +66,7 @@ describe("EventBookingCta", () => {
 	});
 
 	it("renders a disabled button labeled 'Event telah berlalu' when status is past", async () => {
-		render(
-			EventBookingCta,
-			{ event: makeEvent({ status: "past" }), authenticated: true }
-		);
+		render(EventBookingCta, { event: makeEvent({ status: "past" }), authenticated: true });
 
 		const button = page.getByRole("button", { name: /Event telah berlalu/i }).first();
 		await expect.element(button).toBeVisible();
@@ -80,13 +74,10 @@ describe("EventBookingCta", () => {
 	});
 
 	it("renders a disabled button labeled 'Pendaftaran ditutup' when registrationClosesAt is in the past", async () => {
-		render(
-			EventBookingCta,
-			{
-				event: makeEvent({ registrationClosesAt: "2020-01-01T00:00:00+00:00" }),
-				authenticated: true
-			}
-		);
+		render(EventBookingCta, {
+			event: makeEvent({ registrationClosesAt: "2020-01-01T00:00:00+00:00" }),
+			authenticated: true
+		});
 
 		const button = page.getByRole("button", { name: /Pendaftaran ditutup/i }).first();
 		await expect.element(button).toBeVisible();

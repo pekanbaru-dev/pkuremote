@@ -11,7 +11,13 @@
 import { customAlphabet, nanoid } from "nanoid";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
-import { events, profiles, registrations, eventCategories, categories } from "../../../../db/schema";
+import {
+	events,
+	profiles,
+	registrations,
+	eventCategories,
+	categories
+} from "../../../../db/schema";
 import type { Event } from "../../features/events/types.ts";
 import type { EventCategoryRef } from "../../features/events/types.ts";
 

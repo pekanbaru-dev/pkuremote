@@ -9,7 +9,7 @@
 
 - [x] 2.1 Create `src/lib/server/registrations/db-registrations.ts` with the 4 query functions: `bookEvent` (transactional, `SELECT … FOR UPDATE`), `getMyRegistrations`, `getRegistrationByNumber`, `cancelRegistration`. Add typed error codes. → Also added `VALIDATION` for empty name/phone.
 - [x] 2.2 Create `src/lib/server/registrations/qr.ts` with the `buildRegistrationQrPayload(registration)` helper and `buildRegistrationQrSvg(registration)` (server-side SVG rendering).
-- [x] 2.3 Create `src/lib/server/registrations/index.ts` re-exporting the 4 query functions and the QR helpers. → Replaced `db.execute(sql\`... ANY(${eventIds}) ...\`)` with drizzle's `inArray(...)` typed builder (the array-expansion path was throwing 500 in production).
+- [x] 2.3 Create `src/lib/server/registrations/index.ts` re-exporting the 4 query functions and the QR helpers. → Replaced `db.execute(sql\`... ANY(${eventIds}) ...\`)`with drizzle's`inArray(...)` typed builder (the array-expansion path was throwing 500 in production).
 - [x] 2.4 Add `nanoid` and `qrcode` to `package.json` dependencies and run `pnpm install`. → Also added `@types/qrcode` as dev dep.
 
 ## 3. Detail page CTA + form action
