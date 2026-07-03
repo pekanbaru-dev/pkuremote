@@ -27,7 +27,6 @@ ARG PUBLIC_CONTACT_EMAIL
 ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL} \
 	PUBLIC_CONTACT_EMAIL=${PUBLIC_CONTACT_EMAIL}
 RUN pnpm build
-COPY .env ./
 RUN pnpm prune --prod
 
 # ----- Dev stage (extends base; runs Vite dev server) ------------------------
