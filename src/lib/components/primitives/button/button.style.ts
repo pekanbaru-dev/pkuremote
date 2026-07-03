@@ -9,6 +9,10 @@ export const buttonVariants = tv({
 		"whitespace-nowrap font-medium select-none transition",
 		"hover:cursor-pointer active:scale-95",
 		"disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none disabled:hover:opacity-100 disabled:active:scale-100",
+		// Mirror the same disabled treatment when the host element cannot
+		// use the native `disabled` attribute (e.g. an `<a>` link-button).
+		// `aria-disabled="true"` is the only signal anchor elements can carry.
+		"aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:hover:opacity-100 aria-disabled:active:scale-100",
 		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0",
 		"[&_svg:not([class*=size-])]:size-4 [&_svg]:shrink-0 [&_svg]:pointer-events-none"
 	),
