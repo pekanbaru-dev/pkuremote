@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { NAV_ITEMS, isNavItemActive } from "./nav";
 
 describe("NAV_ITEMS", () => {
-	it("lists Dashboard and Events with hrefs and icons", () => {
-		expect(NAV_ITEMS.map((i) => i.href)).toEqual(["/admin", "/admin/events"]);
+	it("lists Dashboard, Events, and Categories with hrefs and icons", () => {
+		expect(NAV_ITEMS.map((i) => i.href)).toEqual(["/admin", "/admin/events", "/admin/categories"]);
 		expect(NAV_ITEMS.every((i) => i.label && i.icon)).toBe(true);
 	});
 });
