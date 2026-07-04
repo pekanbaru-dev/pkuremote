@@ -42,13 +42,19 @@ WORKDIR /app
 
 ENV HOST=0.0.0.0 \
 	PORT=3000 \
-	NODE_ENV=production
+	NODE_ENV=production \
+	UPLOAD_DIR=/data/uploads
 
 # Copy just what the Node server needs at runtime: the build output, the
 # production node_modules, and the package manifest.
 COPY --from=build /app/build ./build
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
+
+# Create the uploads dir owned by `node` BEFORE dropping privileges, so the
+# named volume mounted here (see docker-compose.prod.yml) initializes with
+# write permission for the unprivileged runtime user.
+RUN mkdir -p /data/uploads && chown -R node:node /data/uploads
 
 # Run as the unprivileged `node` user that ships in the base image.
 USER node

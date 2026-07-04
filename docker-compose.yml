@@ -21,6 +21,9 @@ services:
       # SvelteKit reads $PUBLIC_* at build time and at runtime.
       PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
       PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+      # Uploads land under the bind-mounted repo (→ host ./uploads, gitignored),
+      # so they persist across container restarts without a separate volume.
+      UPLOAD_DIR: /app/uploads
     volumes:
       # Bind-mount the source so HMR sees live edits.
       - .:/app
