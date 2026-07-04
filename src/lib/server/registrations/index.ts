@@ -9,6 +9,11 @@ export {
 	getMyRegistrations,
 	getRegistrationByNumber,
 	cancelRegistration,
+	getEventRegistrations,
+	setRegistrationStatus,
+	tallyRegistrationCounts,
+	isCheckinStatus,
+	CHECKIN_STATUSES,
 	RegistrationError,
 	getRegistrationErrorMessage
 } from "./db-registrations.ts";
@@ -16,6 +21,8 @@ export type {
 	Registration,
 	MyRegistration,
 	RegistrationStatus,
-	RegistrationErrorCode
+	RegistrationErrorCode,
+	EventRegistrationCounts,
+	CheckinStatus
 } from "./db-registrations.ts";
 export { buildRegistrationQrPayload, buildRegistrationQrSvg } from "./qr.ts";

@@ -39,6 +39,7 @@ export type RegistrationErrorCode =
 	| "REGISTRATION_NOT_CANCELLABLE"
 	| "REGISTRATION_NUMBER_COLLISION"
 	| "PROFILE_MISSING"
+	| "INVALID_TRANSITION"
 	| "VALIDATION";
 
 export class RegistrationError extends Error {
@@ -59,6 +60,7 @@ export function getRegistrationErrorMessage(code: string): string {
 		ALREADY_REGISTERED: "Anda sudah terdaftar untuk event ini — cek halaman Registrasi Saya.",
 		NOT_AUTHENTICATED: "Anda harus login untuk melakukan booking.",
 		PROFILE_MISSING: "Akun Anda belum siap untuk booking. Coba keluar lalu login ulang.",
+		INVALID_TRANSITION: "Status registrasi ini tidak bisa diubah di sini.",
 		VALIDATION: "Data yang Anda masukkan tidak valid."
 	};
 	return messages[code] ?? "Gagal melakukan booking — coba lagi.";
@@ -360,6 +362,106 @@ export async function cancelRegistration(params: {
 				.where(eq(events.id, row.event.id));
 		}
 
+		return rowToRegistration(updated);
+	});
+}
+
+// --- Admin attendee views (admin-event-attendees) --------------------------
+
+/** Per-event registration tally by status. */
+export type EventRegistrationCounts = {
+	confirmed: number;
+	attended: number;
+	no_show: number;
+	cancelled: number;
+	total: number;
+};
+
+/** Statuses an admin may set via door check-in (never `cancelled`). */
+export const CHECKIN_STATUSES = ["confirmed", "attended", "no_show"] as const;
+export type CheckinStatus = (typeof CHECKIN_STATUSES)[number];
+
+/** Type guard: is `status` a valid check-in target/current status? Pure. */
+export function isCheckinStatus(status: string): status is CheckinStatus {
+	return (CHECKIN_STATUSES as readonly string[]).includes(status);
+}
+
+/** Sort order for the attendee list — active states before cancelled. */
+const STATUS_ORDER: Record<RegistrationStatus, number> = {
+	confirmed: 0,
+	attended: 1,
+	no_show: 2,
+	cancelled: 3
+};
+
+/** Tally registrations by status. Pure (no I/O). */
+export function tallyRegistrationCounts(
+	rows: { status: RegistrationStatus }[]
+): EventRegistrationCounts {
+	const counts: EventRegistrationCounts = {
+		confirmed: 0,
+		attended: 0,
+		no_show: 0,
+		cancelled: 0,
+		total: 0
+	};
+	for (const row of rows) {
+		counts[row.status] += 1;
+		counts.total += 1;
+	}
+	return counts;
+}
+
+/**
+ * List an event's registrations for the admin attendee view, ordered active
+ * (confirmed/attended/no_show) before cancelled, then by registration date,
+ * with a status tally. Server-only; the caller MUST have run `requireAdmin`.
+ */
+export async function getEventRegistrations(
+	eventId: string
+): Promise<{ registrations: Registration[]; counts: EventRegistrationCounts }> {
+	const rows = await db.select().from(registrations).where(eq(registrations.eventId, eventId));
+	const list = rows.map(rowToRegistration).sort((a, b) => {
+		const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+		return byStatus !== 0 ? byStatus : a.createdAt.localeCompare(b.createdAt);
+	});
+	return { registrations: list, counts: tallyRegistrationCounts(list) };
+}
+
+/**
+ * Door check-in: set a registration's status to `confirmed`/`attended`/
+ * `no_show`. Never touches `remaining_slots` (the seat was consumed at booking
+ * time). Rejects a non-check-in target, a missing registration, or a
+ * registration currently `cancelled`. Server-only; caller MUST run
+ * `requireAdmin`.
+ */
+export async function setRegistrationStatus(id: string, status: string): Promise<Registration> {
+	if (!isCheckinStatus(status)) {
+		throw new RegistrationError("INVALID_TRANSITION", "Status check-in tidak valid.");
+	}
+	return await db.transaction(async (tx) => {
+		const [row] = await tx
+			.select()
+			.from(registrations)
+			.where(eq(registrations.id, id))
+			.for("update")
+			.limit(1);
+		if (!row) {
+			throw new RegistrationError("NOT_FOUND");
+		}
+		if (!isCheckinStatus(row.status)) {
+			// e.g. a cancelled registration — re-activating it here would desync
+			// remaining_slots, which is owned by the booking/cancel flow.
+			throw new RegistrationError(
+				"INVALID_TRANSITION",
+				"Registrasi yang dibatalkan tidak bisa di-check-in."
+			);
+		}
+		const [updated] = await tx
+			.update(registrations)
+			.set({ status, updatedAt: new Date() })
+			.where(eq(registrations.id, id))
+			.returning();
 		return rowToRegistration(updated);
 	});
 }
