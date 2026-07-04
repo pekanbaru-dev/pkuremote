@@ -65,6 +65,8 @@ The Supabase side is one toggle. The reason it's not "just a switch" is that Goo
 
 That's it. A `profiles` row is created automatically the first time a Google identity signs in, by the `handle_new_user` trigger in `db/migrations/0001_*.sql`.
 
+> **Can't do Google OAuth on localhost?** For working on the `/admin` panel you can use the dev-login bypass instead — see [`LOCAL_DEV_ADMIN.md`](LOCAL_DEV_ADMIN.md).
+
 ### 2. Configure environment
 
 ```sh
@@ -98,15 +100,16 @@ Open `http://localhost:5173` once any of the dev-server options is up. Run `pnpm
 
 ### Useful commands
 
-| Command             | What it does                                                                  |
-| ------------------- | ----------------------------------------------------------------------------- |
-| `pnpm dev`          | Dev server on `http://localhost:5173` (host Node)                             |
-| `docker compose up` | Dev server on `http://localhost:5173` (everything in Docker)                  |
-| `pnpm db:generate`  | Generate a new migration after editing `db/schema/`                           |
-| `pnpm db:migrate`   | Apply pending migrations to the configured Supabase project                   |
-| `pnpm db:push`      | Push schema changes directly (prototyping only — does not create a migration) |
-| `pnpm db:studio`    | Open Drizzle Studio against the configured Supabase project                   |
-| `pnpm db:seed`      | Idempotently insert dev data                                                  |
+| Command                  | What it does                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `pnpm dev`               | Dev server on `http://localhost:5173` (host Node)                               |
+| `docker compose up`      | Dev server on `http://localhost:5173` (everything in Docker)                    |
+| `pnpm db:generate`       | Generate a new migration after editing `db/schema/`                             |
+| `pnpm db:migrate`        | Apply pending migrations to the configured Supabase project                     |
+| `pnpm db:push`           | Push schema changes directly (prototyping only — does not create a migration)   |
+| `pnpm db:studio`         | Open Drizzle Studio against the configured Supabase project                     |
+| `pnpm db:seed`           | Idempotently insert dev data                                                    |
+| `pnpm db:seed-dev-admin` | Provision the dev-login admin user ([`LOCAL_DEV_ADMIN.md`](LOCAL_DEV_ADMIN.md)) |
 
 ## Commands
 
