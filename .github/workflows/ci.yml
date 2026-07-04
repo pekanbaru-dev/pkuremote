@@ -1,0 +1,60 @@
+name: CI
+
+# Quality gate: typecheck, lint, unit/component tests, and a production build
+# on every push to main and every pull request. Deploy stays manual for now.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref (e.g. rapid pushes to a PR branch).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    # PUBLIC_* vars are baked into the bundle by $env/static/public, so `check`
+    # and `build` need them defined. They're non-secret; CI uses repo Variables
+    # if set, else harmless placeholders (the CI build artifact isn't deployed).
+    env:
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://ci.invalid' }}
+      PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL || 'ci@example.com' }}
+      PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL || 'https://ci.supabase.co' }}
+      PUBLIC_SUPABASE_ANON_KEY: ${{ vars.PUBLIC_SUPABASE_ANON_KEY || 'ci-anon-placeholder' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (svelte-check)
+        run: pnpm check
+
+      - name: Lint (prettier + eslint)
+        run: pnpm lint
+
+      # The Vitest "client" project runs component tests in headless Chromium.
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Unit & component tests
+        run: pnpm test:unit -- --run
+
+      - name: Production build
+        run: pnpm build
