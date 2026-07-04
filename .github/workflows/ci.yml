@@ -1,7 +1,9 @@
 name: CI
 
 # Quality gate: typecheck, lint, unit/component tests, and a production build
-# on every push to main and every pull request. Deploy stays manual for now.
+# on every push to main and every pull request. No image is built here — the
+# release image is built only when a version tag is pushed (see deploy.yml),
+# which keeps Actions minutes low.
 on:
   push:
     branches: [main]
