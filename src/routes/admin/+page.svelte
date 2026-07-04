@@ -37,7 +37,7 @@
 	<div class="grid grid-cols-2 gap-4 desktop:grid-cols-4">
 		{#each tiles as tile (tile.label)}
 			{@const Icon = tile.icon}
-			<Card>
+			<Card class="border-hairline border">
 				<CardContent class="flex flex-col gap-2">
 					<div class="text-on-surface-variant flex items-center gap-2">
 						<Icon class="size-4" />
@@ -50,7 +50,7 @@
 	</div>
 
 	<div class="grid gap-4 tablet:grid-cols-2">
-		<Card>
+		<Card class="border-hairline border">
 			<CardContent class="flex flex-col gap-3">
 				<div class="flex items-center justify-between">
 					<h2 class="text-label-lg font-medium text-ink">Pendaftaran Terbaru</h2>
@@ -81,7 +81,7 @@
 			</CardContent>
 		</Card>
 
-		<Card>
+		<Card class="border-hairline border">
 			<CardContent class="flex flex-col gap-3">
 				<div class="flex items-center justify-between">
 					<h2 class="text-label-lg font-medium text-ink">Event Akan Datang</h2>
