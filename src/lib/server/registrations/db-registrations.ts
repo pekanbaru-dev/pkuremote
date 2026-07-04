@@ -11,6 +11,7 @@
 import { customAlphabet, nanoid } from "nanoid";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
+import { isUniqueViolation } from "$lib/server/db/pg-error";
 import {
 	events,
 	profiles,
@@ -183,8 +184,7 @@ export async function bookEvent(params: {
 		try {
 			registration = await insertOnce();
 		} catch (err) {
-			const code = (err as { code?: string }).code;
-			if (code === "23505") {
+			if (isUniqueViolation(err)) {
 				// unique_violation — either (userId, eventId) duplicate
 				// or registrationNumber collision. Distinguish: a second
 				// try with a fresh number that fails on the same column

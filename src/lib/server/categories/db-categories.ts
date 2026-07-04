@@ -6,6 +6,7 @@
  */
 import { eq } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
+import { isUniqueViolation } from "$lib/server/db/pg-error";
 import { categories } from "../../../../db/schema";
 
 export type CategoryWriteErrorCode = "SLUG_TAKEN" | "VALIDATION" | "NOT_FOUND";
@@ -36,11 +37,6 @@ export function validateCategoryInput(input: CategoryWriteInput): void {
 			"slug"
 		);
 	}
-}
-
-/** True when a caught DB error is a Postgres unique-constraint violation. */
-function isUniqueViolation(err: unknown): boolean {
-	return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
 
 export async function createCategory(input: CategoryWriteInput): Promise<string> {
