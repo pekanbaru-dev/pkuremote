@@ -1,8 +1,11 @@
 # admin-event-attendees Specification
 
 ## Purpose
+
 TBD - created by archiving change admin-event-attendees. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: An admin can view an event's attendees
 
 The system SHALL provide `/admin/events/[id]/attendees` rendering all registrations for the event — per row: attendee name, phone, status, registration number, and registration date — together with summary counts (confirmed, attended, no_show, cancelled, total). Active registrations (`confirmed`, `attended`, `no_show`) SHALL be ordered before `cancelled`, then by registration date. The list SHALL be reachable from a per-row "Attendees" link on `/admin/events`. The route SHALL be admin-gated (inherits the `/admin` gate) and render inside the admin shell.
@@ -58,4 +61,3 @@ The system SHALL provide an admin-gated endpoint that returns the event's attend
 
 - **WHEN** a reviewer greps `src/lib/features/`, `src/lib/components/`, and `**/+page.svelte` for imports of `getEventRegistrations` / `setRegistrationStatus`
 - **THEN** no matches appear — they are imported only by server files
-

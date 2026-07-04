@@ -18,7 +18,7 @@
 				"text-label-lg flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
 				active
 					? "bg-primary-container text-on-primary-container font-semibold"
-					: "text-on-surface-variant hover:bg-muted"
+					: "text-on-surface-variant hover:bg-surface-container-high hover:text-ink"
 			]}
 		>
 			<Icon class="size-5" aria-hidden="true" />

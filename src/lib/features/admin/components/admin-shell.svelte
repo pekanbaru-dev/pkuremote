@@ -24,7 +24,7 @@
 		<div class="flex items-center gap-2">
 			<Sheet bind:open={sheetOpen}>
 				<SheetTrigger
-					class="hover:bg-muted inline-flex size-9 items-center justify-center rounded-lg desktop:hidden"
+					class="hover:bg-surface-container-high inline-flex size-9 items-center justify-center rounded-lg transition-colors desktop:hidden"
 				>
 					<Menu class="size-5" aria-hidden="true" />
 					<span class="sr-only">Buka menu navigasi</span>
@@ -55,8 +55,10 @@
 		<aside class="border-hairline hidden w-64 shrink-0 border-r p-4 desktop:block">
 			<AdminSidebar />
 		</aside>
-		<main class="min-w-0 flex-1">
-			{@render children()}
+		<main class="min-w-0 flex-1 p-4 tablet:p-6 desktop:p-8">
+			<div class="mx-auto w-full max-w-[80rem]">
+				{@render children()}
+			</div>
 		</main>
 	</div>
 </div>
