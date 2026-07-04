@@ -23,6 +23,11 @@
 			"headers": {
 				"X-Goog-Api-Key": "{env:STITCH_API_KEY}"
 			}
+		},
+		"playwright": {
+			"type": "local",
+			"command": ["npx", "-y", "@playwright/mcp@latest"],
+			"enabled": true
 		}
 	},
 	"instructions": ["AGENTS.md"]
