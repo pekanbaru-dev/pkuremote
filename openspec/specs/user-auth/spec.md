@@ -3,9 +3,7 @@
 ## Purpose
 
 TBD - created by archiving change add-supabase-google-auth. Update Purpose after archive.
-
 ## Requirements
-
 ### Requirement: Sign-in is a single Google OAuth action
 
 The system SHALL expose sign-in as a single "Continue with Google" action on `/login`. The action SHALL be implemented as a SvelteKit form `action` that calls Supabase Auth's `signInWithOAuth({ provider: 'google', options: { redirectTo } })` server-side. The `redirectTo` SHALL be the absolute URL of `/auth/callback?next=<safe-target>`, where `<safe-target>` is the post-sign-in destination (defaults to `/myprofile`, or a user-supplied `?redirect=` query parameter validated to be a same-origin path starting with `/`).
@@ -105,17 +103,27 @@ The trigger SHALL be `security definer`, SHALL use `on conflict (id) do nothing`
 
 ### Requirement: Guarded routes redirect to `/login` with a `redirect` parameter
 
-`hooks.server.ts` SHALL maintain a list of guarded path prefixes (initially `["/myprofile"]`). When an unauthenticated request matches a guarded prefix, `hooks.server.ts` SHALL respond with a 302 to `/login?redirect=<original-path-and-search>` instead of letting the request reach the SvelteKit router.
+`hooks.server.ts` SHALL maintain a list of guarded path prefixes (`["/myprofile", "/admin"]`). When an unauthenticated request matches a guarded prefix, `hooks.server.ts` SHALL respond with a 302 to `/login?redirect=<original-path-and-search>` instead of letting the request reach the SvelteKit router. This guard enforces **authentication only** — it does not evaluate whether the user is an administrator; authorization for `/admin/*` is handled downstream in the admin route group's `+layout.server.ts` (see the `admin-access` capability).
 
 #### Scenario: An unauthenticated user visits `/myprofile`
 
 - **WHEN** a request for `/myprofile` arrives with `event.locals.user === null`
 - **THEN** the response status is 302 and the `Location` header is `/login?redirect=%2Fmyprofile`
 
+#### Scenario: An unauthenticated user visits `/admin`
+
+- **WHEN** a request for `/admin` (or any `/admin/*` path) arrives with `event.locals.user === null`
+- **THEN** the response status is 302 and the `Location` header is `/login?redirect=%2Fadmin` (preserving the original path and search)
+
 #### Scenario: An authenticated user visits `/myprofile`
 
 - **WHEN** a request for `/myprofile` arrives with a valid session
 - **THEN** the request continues to the route handler with no redirect
+
+#### Scenario: An authenticated user visits `/admin`
+
+- **WHEN** a request for `/admin` arrives with a valid session
+- **THEN** the authentication guard does not redirect; the request proceeds to the admin route group, where the `+layout.server.ts` authorization check runs (admins continue, non-admins are redirected to `/`)
 
 #### Scenario: An unauthenticated user visits a public page
 
@@ -165,3 +173,4 @@ If `signInWithOAuth` returns an error (network failure, Supabase misconfiguratio
 
 - **WHEN** the user submits `/login` and the server-side `signInWithOAuth` call returns an error
 - **THEN** the page renders the message "Login dengan Google belum tersedia. Hubungi admin." and the raw error is logged server-side only
+
