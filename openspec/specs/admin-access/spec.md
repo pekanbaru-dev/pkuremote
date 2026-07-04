@@ -1,8 +1,11 @@
 # admin-access Specification
 
 ## Purpose
+
 TBD - created by archiving change add-admin-access-gate. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Administrators are identified by the `ADMIN_EMAILS` environment allow-list
 
 The system SHALL identify administrators from an `ADMIN_EMAILS` environment variable containing a comma-separated list of email addresses. The value SHALL be parsed into a set of normalized entries — each entry trimmed of surrounding whitespace and lowercased — and empty entries SHALL be discarded. A user SHALL be considered an administrator if and only if the lowercased value of their validated `locals.user.email` is a member of that set. There SHALL be no `role` column, database migration, or admin-management UI in this capability; administrator status is derived solely from configuration.
@@ -96,4 +99,3 @@ The `.env.example` file SHALL document the `ADMIN_EMAILS` variable, describing i
 
 - **WHEN** a developer copies `.env.example` to `.env`
 - **THEN** they find an `ADMIN_EMAILS` entry with a comment describing its comma-separated format
-

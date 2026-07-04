@@ -1,8 +1,11 @@
 # admin-media-upload Specification
 
 ## Purpose
+
 TBD - created by archiving change admin-media-upload. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Banner images are stored on local disk under `UPLOAD_DIR`
 
 The system SHALL store event banner images on the local filesystem under a directory resolved from the `UPLOAD_DIR` environment variable, located outside the SvelteKit build output (never in `static/`). When `UPLOAD_DIR` is unset in development, the system MAY fall back to a documented default (e.g. `./uploads`); in production it SHALL be set explicitly. Stored files SHALL be named with a uuid-based key (`{uuid}.{ext}`), never a user-supplied path.
@@ -91,4 +94,3 @@ The storage service SHALL be invoked only from server contexts that have already
 
 - **WHEN** an event create/edit form action calls `uploadEventBanner`
 - **THEN** that action has already called `requireAdmin(locals)` earlier in its execution, so only administrators can trigger an upload
-

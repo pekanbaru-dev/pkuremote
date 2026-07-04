@@ -3,7 +3,9 @@
 ## Purpose
 
 Defines how shadcn-svelte is initialized and configured in the project, how its CSS variables map to the OKLCH theme tokens, and which shadcn components (Button, Separator, NavigationMenu) are installed and used on the landing page.
+
 ## Requirements
+
 ### Requirement: shadcn-svelte is initialized with a components.json
 
 The project SHALL contain a `components.json` at the repo root, produced by `shadcn-svelte init`, configured with the CSS path `src/routes/layout.css`, the lib alias `$lib`, the components alias `$lib/components`, the utils alias `$lib/utils`, the hooks alias `$lib/hooks`, and the ui alias `$lib/components/ui`. The base color SHALL be `neutral`.
@@ -177,4 +179,3 @@ The shadcn-svelte **Select** component SHALL be installed under `src/lib/compone
 
 - **WHEN** a reviewer greps `src/lib/components/ui/select/` for default Tailwind breakpoints
 - **THEN** no matches appear
-
