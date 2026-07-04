@@ -93,6 +93,9 @@
 							</Table.Cell>
 							<Table.Cell>
 								<div class="flex justify-end gap-2">
+									<Button href="/admin/events/{event.id}/attendees" variant="ghost" size="sm"
+										>Peserta</Button
+									>
 									<Button href="/admin/events/{event.id}/edit" variant="ghost" size="sm"
 										>Ubah</Button
 									>
