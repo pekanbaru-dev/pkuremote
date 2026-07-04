@@ -44,3 +44,6 @@ caddy_data/
 
 # Local event-banner uploads (dev)
 /uploads/
+
+# Playwright MCP scratch output
+.playwright-mcp/

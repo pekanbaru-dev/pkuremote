@@ -1,6 +1,7 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { getEventBySlug } from "$lib/server/events";
+import { renderMarkdown } from "$lib/server/markdown";
 import { db } from "$lib/server/db/client";
 import { profiles } from "../../../../db/schema";
 import {
@@ -28,6 +29,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 	return {
 		event,
+		bodyHtml: renderMarkdown(event.body),
 		authenticated: locals.user !== null && locals.user !== undefined,
 		defaultAttendeeName,
 		bookingError: url.searchParams.get("error")
