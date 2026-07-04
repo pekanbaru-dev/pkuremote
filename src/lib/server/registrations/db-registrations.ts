@@ -11,7 +11,7 @@
 import { customAlphabet, nanoid } from "nanoid";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
-import { isUniqueViolation } from "$lib/server/db/pg-error";
+import { isForeignKeyViolation, isUniqueViolation } from "$lib/server/db/pg-error";
 import {
 	events,
 	profiles,
@@ -38,6 +38,7 @@ export type RegistrationErrorCode =
 	| "NOT_FOUND"
 	| "REGISTRATION_NOT_CANCELLABLE"
 	| "REGISTRATION_NUMBER_COLLISION"
+	| "PROFILE_MISSING"
 	| "VALIDATION";
 
 export class RegistrationError extends Error {
@@ -57,6 +58,7 @@ export function getRegistrationErrorMessage(code: string): string {
 		REGISTRATION_CLOSED: "Pendaftaran untuk event ini sudah ditutup.",
 		ALREADY_REGISTERED: "Anda sudah terdaftar untuk event ini — cek halaman Registrasi Saya.",
 		NOT_AUTHENTICATED: "Anda harus login untuk melakukan booking.",
+		PROFILE_MISSING: "Akun Anda belum siap untuk booking. Coba keluar lalu login ulang.",
 		VALIDATION: "Data yang Anda masukkan tidak valid."
 	};
 	return messages[code] ?? "Gagal melakukan booking — coba lagi.";
@@ -195,6 +197,11 @@ export async function bookEvent(params: {
 				} catch {
 					throw new RegistrationError("ALREADY_REGISTERED");
 				}
+			} else if (isForeignKeyViolation(err)) {
+				// The user row (user_id → profiles → auth.users) doesn't exist.
+				// Shouldn't happen for a real signed-in user; it does under the
+				// dev-login bypass (synthetic user is not in auth.users).
+				throw new RegistrationError("PROFILE_MISSING");
 			} else {
 				throw err;
 			}
