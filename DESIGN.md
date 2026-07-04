@@ -95,6 +95,8 @@ Canonical primitives live in `src/lib/components/ui/` and follow the Flat-By-Def
 - **Do** keep depth tonal (Surface vs Canvas + 1px hairlines); reserve shadow for state changes only, with blur ≤8px.
 - **Do** ship a `prefers-reduced-motion: reduce` alternative for every animation (crossfade or instant).
 - **Do** pair color with text or icon — never signal state by color alone (color-blind safe).
+- **Do** render hover / active fills with a light tonal step (`surface-container-high`) and ink/`foreground` text — a subtle darken that stays readable. This is the single hover surface for buttons, nav items, table rows, and menu triggers.
+- **Do** mute placeholder text (`muted-foreground` at ~55% opacity). At full strength it reads as entered content, not a prompt.
 
 ### Don't:
 
@@ -107,3 +109,18 @@ Canonical primitives live in `src/lib/components/ui/` and follow the Flat-By-Def
 - **Don't** build a "generic community/club website": crowded sidebars, event-countdown widgets, stock illustrations, WordPress-theme chrome, identical feature-card grids, or the hero-metric template (big number + small label + gradient accent).
 - **Don't** animate CSS layout properties; don't use bounce/elastic easing; don't gate content visibility on a class-triggered reveal (it never fires on hidden tabs).
 - **Don't** let muted body text fall below 4.5:1 contrast against its background. Bump muted text toward Ink; "light gray for elegance" is the biggest reason AI designs feel hard to read.
+- **Don't** use `bg-muted` (or `muted` / `muted-foreground`) as a **surface / background**. In this system `--color-muted` is Muted Ink — a _text_ color — so filling a hover, badge, or panel with it produces dark-on-dark, unreadable text. Backgrounds come only from the `surface` / `surface-container-*` roles; `muted` is for text.
+
+## 7. Surfaces: public editorial vs. admin, and rendered prose
+
+The **public** site is flat-by-default and lets whitespace carry the layout (§1, §4). The **admin panel** is a functional tool with denser information, so it earns a little more structure without breaking the brand:
+
+- **Admin panels/cards** read as surfaces via a **1px `hairline` border** (the tonal-layering + hairline method from §4), not shadows. Give admin content real gutters — `p-4 → tablet:p-6 → desktop:p-8` — and cap width (`max-w-[80rem]`) so nothing runs edge-to-edge.
+- **Neutral chips/badges** (the `clean` intent) use `surface-container-high` + `on-surface-variant`, never `bg-muted` (see the Don't above).
+- Do **not** carry admin's bordered-panel density onto the public editorial pages — those stay flat.
+
+**Rendered event prose** (admin-authored Markdown → sanitized HTML) is styled by `.event-prose`, shared with the editor's live preview so what an author previews is what ships:
+
+- Headings use the display font (600); body is the body font at `line-height: 1.7`, capped with `.measure-prose`.
+- Links are `primary` with a 1px `hairline` underline (matching `.link-quiet`); blockquotes use a **1px** `hairline` left border (respecting the ≤1px stripe rule); lists keep their markers in `muted`.
+- Markdown is always sanitized server-side (DOMPurify) before `{@html}` — the ochre One Voice budget still applies to the rendered result.
