@@ -20,7 +20,7 @@
 	data-slot="input"
 	{type}
 	class={cn(
-		"h-11 w-full rounded-md border border-outline bg-canvas px-3 text-ink placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50",
+		"h-11 w-full rounded-md border border-outline bg-canvas px-3 text-ink placeholder:text-muted-foreground/55 focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50",
 		className
 	)}
 	bind:value

@@ -6,6 +6,7 @@
 	import * as Select from "$lib/components/ui/select";
 	import { enhance } from "$app/forms";
 	import { untrack } from "svelte";
+	import MarkdownEditor from "./markdown-editor.svelte";
 
 	export type EventFormValues = Record<string, string | string[]>;
 
@@ -85,6 +86,8 @@
 	}
 
 	// Selects submit via their `name` (bits-ui renders hidden inputs).
+	let body = $state(untrack(() => str("body", event?.body ?? "")));
+
 	let status = $state(untrack(() => str("status", event?.status ?? "upcoming")));
 	let category = $state(untrack(() => str("category", event?.category ?? "")));
 	let categoryIds = $state<string[]>(
@@ -195,13 +198,17 @@
 		{/if}
 	</label>
 
-	<label class="flex flex-col gap-1">
-		<span class={labelSpan}>Isi (Markdown)</span>
-		<Textarea name="body" rows={8} value={str("body", event?.body)} required></Textarea>
+	<div class="flex flex-col gap-1">
+		<span class={labelSpan}>Isi <span class="opacity-60">(mendukung Markdown)</span></span>
+		<MarkdownEditor
+			name="body"
+			bind:value={body}
+			placeholder="Tulis isi acara — gunakan Markdown: ## Judul, **tebal**, - daftar, [tautan](https://…)"
+		/>
 		{#if fieldError("body")}
 			<p class="label-meta text-error" role="alert">{fieldError("body")}</p>
 		{/if}
-	</label>
+	</div>
 
 	<label class="flex flex-col gap-1">
 		<span class={labelSpan}>Banner <span class="opacity-60">(PNG/JPEG/WebP, maks 2 MB)</span></span>

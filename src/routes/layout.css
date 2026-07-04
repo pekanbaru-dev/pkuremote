@@ -262,6 +262,135 @@
 		max-width: 70ch;
 	}
 
+	/* Rendered event body (server-sanitized Markdown → HTML). Editorial, calm.
+	   Applied to BOTH the published page (.event-prose) and the Carta editor's
+	   live preview (.carta-renderer) so what admins preview matches what ships. */
+	.event-prose,
+	.carta-renderer {
+		color: var(--color-ink);
+		font-family: var(--font-body);
+		font-size: 1rem;
+		line-height: 1.7;
+	}
+	.event-prose > :first-child,
+	.carta-renderer > :first-child {
+		margin-top: 0;
+	}
+	.event-prose p,
+	.event-prose ul,
+	.event-prose ol,
+	.event-prose blockquote,
+	.event-prose pre,
+	.event-prose table,
+	.carta-renderer p,
+	.carta-renderer ul,
+	.carta-renderer ol,
+	.carta-renderer blockquote,
+	.carta-renderer pre,
+	.carta-renderer table {
+		margin-block: 0.85rem;
+	}
+	.event-prose h2,
+	.event-prose h3,
+	.event-prose h4,
+	.carta-renderer h2,
+	.carta-renderer h3,
+	.carta-renderer h4 {
+		font-family: var(--font-display);
+		font-weight: 600;
+		line-height: 1.2;
+		color: var(--color-ink);
+		margin-top: 1.75rem;
+		margin-bottom: 0.5rem;
+		text-wrap: balance;
+	}
+	.event-prose h2,
+	.carta-renderer h2 {
+		font-size: 1.5rem;
+	}
+	.event-prose h3,
+	.carta-renderer h3 {
+		font-size: 1.25rem;
+	}
+	.event-prose h4,
+	.carta-renderer h4 {
+		font-size: 1.0625rem;
+	}
+	.event-prose a,
+	.carta-renderer a {
+		color: var(--color-primary);
+		border-bottom: 1px solid var(--color-hairline);
+		transition:
+			border-color 0.18s ease,
+			color 0.18s ease;
+	}
+	.event-prose a:hover,
+	.carta-renderer a:hover {
+		border-color: var(--color-primary);
+	}
+	.event-prose strong,
+	.carta-renderer strong {
+		font-weight: 700;
+	}
+	.event-prose em,
+	.carta-renderer em {
+		font-style: italic;
+	}
+	.event-prose ul,
+	.event-prose ol,
+	.carta-renderer ul,
+	.carta-renderer ol {
+		padding-left: 1.4rem;
+	}
+	.event-prose ul,
+	.carta-renderer ul {
+		list-style: disc;
+	}
+	.event-prose ol,
+	.carta-renderer ol {
+		list-style: decimal;
+	}
+	.event-prose li,
+	.carta-renderer li {
+		margin-block: 0.2rem;
+	}
+	.event-prose li::marker,
+	.carta-renderer li::marker {
+		color: var(--color-muted);
+	}
+	.event-prose blockquote,
+	.carta-renderer blockquote {
+		border-left: 1px solid var(--color-hairline);
+		padding-left: 1rem;
+		color: var(--color-muted);
+		font-style: italic;
+	}
+	.event-prose code,
+	.carta-renderer code {
+		font-size: 0.9em;
+		background: var(--color-surface-container-high);
+		padding: 0.1em 0.35em;
+		border-radius: 0.25rem;
+	}
+	.event-prose pre,
+	.carta-renderer pre {
+		background: var(--color-surface-container-high);
+		padding: 0.85rem 1rem;
+		border-radius: 0.5rem;
+		overflow-x: auto;
+	}
+	.event-prose pre code,
+	.carta-renderer pre code {
+		background: none;
+		padding: 0;
+	}
+	.event-prose hr,
+	.carta-renderer hr {
+		border: 0;
+		border-top: 1px solid var(--color-hairline);
+		margin-block: 1.5rem;
+	}
+
 	.label-meta {
 		font-family: var(--font-label);
 		font-size: var(--text-label);

@@ -64,10 +64,10 @@
 
 		<div class="grid grid-cols-1 gap-12 desktop:grid-cols-3">
 			<div class="desktop:col-span-2">
-				<div class="measure-prose flex flex-col gap-4">
-					{#each event.body.split("\n\n") as paragraph, i (i)}
-						<p class="text-[1rem] leading-relaxed text-ink">{paragraph}</p>
-					{/each}
+				<div class="measure-prose event-prose">
+					<!-- Sanitized on the server in load() via renderMarkdown() (DOMPurify). -->
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html data.bodyHtml}
 				</div>
 			</div>
 
