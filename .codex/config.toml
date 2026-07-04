@@ -22,3 +22,7 @@ url = "https://stitch.googleapis.com/mcp"
 
 [mcp_servers.stitch.env_http_headers]
 X-Goog-Api-Key = "STITCH_API_KEY"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@latest"]

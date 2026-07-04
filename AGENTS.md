@@ -19,7 +19,7 @@ Three MCP servers are configured for this repo and MUST be used for the workflow
 - `.claude/.mcp.json` — Claude Code (`mcpServers` key, `type: "stdio"`)
 - `.codex/config.toml` — Codex (`[mcp_servers.*]` sections)
 
-Servers: `serena` (symbolic code nav + editing), `codebase-memory-mcp` (code graph queries), `context7` (library docs). All three are enabled and should auto-load on session start.
+Servers: `serena` (symbolic code nav + editing), `codebase-memory-mcp` (code graph queries), `context7` (library docs), `playwright` (browser automation for UI/UX validation). All four are enabled and should auto-load on session start.
 
 **Prerequisites:** `serena` and `codebase-memory-mcp` must be on `PATH`. Install with `pipx install serena` and `pipx install codebase-memory-mcp` (or any equivalent). `context7` runs via `npx` (no install needed) or as a remote server. If a server reports "not found" on session start, run the install command and restart the session.
 
@@ -53,6 +53,14 @@ Use for **external library/framework documentation** instead of guessing APIs or
 - `resolve-library-id` first (e.g. libraryName: "SvelteKit"), then `query-docs` with the returned `libraryId` and a specific question.
 - Use for SvelteKit, shadcn-svelte, Tailwind v4, Vitest, Playwright, bits-ui — anything where the exact API matters.
 - Do not call more than 3 times per question. If the API key is invalid, state that and proceed from local knowledge.
+
+### Playwright — browser automation for UI/UX validation
+
+Use for **driving a real browser** to validate rendered UI/UX: navigate, screenshot, inspect the accessibility tree, click, fill, and check responsive states. Prefer this over one-off Playwright scripts for visual checks.
+
+- Runs via `npx @playwright/mcp@latest` (no auth). Chromium is installed on first use; if a launch fails, run `pnpm exec playwright install chromium`.
+- Typical flow: navigate to a `pnpm dev` URL (e.g. `http://localhost:5173/admin`), snapshot the page, then assert on layout/contrast/hover states.
+- Local admin routes need the dev-login bypass — set `DEV_ADMIN_EMAIL` (see `LOCAL_DEV_ADMIN.md`) so `/admin/*` is reachable without Google login.
 
 ### MCP server configuration
 

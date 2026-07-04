@@ -24,6 +24,12 @@
 			"headers": {
 				"X-Goog-Api-Key": "${STITCH_API_KEY}"
 			}
+		},
+		"playwright": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@playwright/mcp@latest"],
+			"env": {}
 		}
 	}
 }
