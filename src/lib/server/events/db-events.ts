@@ -37,6 +37,7 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
 		priceNormal: row.priceNormal ?? undefined,
 		pricePromo: row.pricePromo ?? undefined,
 		category: (row.category as Event["category"]) ?? undefined,
+		registrationClosesAt: toIso(row.registrationClosesAt),
 		categories: cats
 	};
 }
@@ -99,6 +100,28 @@ export async function getPastEvents(): Promise<Event[]> {
 
 	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
+}
+
+/**
+ * Return every event (all statuses), sorted by `startsAt` descending (most
+ * recent first), each carrying its eager-loaded `categories`. Used by the
+ * admin event-management list, which spans upcoming, live, and past events.
+ */
+export async function getAllEvents(): Promise<Event[]> {
+	const rows: EventRow[] = await db.select().from(events).orderBy(desc(events.startsAt));
+	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
+	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
+}
+
+/**
+ * Look up a single event by its id. Returns `undefined` when not found; the
+ * admin edit route translates that to a 404.
+ */
+export async function getEventById(id: string): Promise<Event | undefined> {
+	const [row] = await db.select().from(events).where(eq(events.id, id)).limit(1);
+	if (!row) return undefined;
+	const catMap = await loadCategoriesForEvents([row.id]);
+	return rowToEvent(row, catMap.get(row.id) ?? []);
 }
 
 /**

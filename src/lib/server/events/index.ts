@@ -8,8 +8,25 @@
 export {
 	getUpcomingEvents,
 	getPastEvents,
+	getAllEvents,
+	getEventById,
 	getEventBySlug,
 	getEventsByCategorySlug,
 	getAllCategories,
 	getCategoryBySlug
 } from "./db-events.ts";
+
+export {
+	createEvent,
+	updateEvent,
+	deleteEvent,
+	validateEventInput,
+	computeRemainingSlots,
+	diffCategoryIds,
+	isUniqueViolation,
+	EventWriteError,
+	type EventWriteErrorCode,
+	type EventWriteInput
+} from "./db-event-writes.ts";
+
+export { parseEventFormData, type ParsedEventForm } from "./event-form.ts";
