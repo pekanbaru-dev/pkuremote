@@ -5,6 +5,12 @@ import adapter from "@sveltejs/adapter-node";
 import { sveltekit } from "@sveltejs/kit/vite";
 
 export default defineConfig({
+	// Carta bundles Shiki for Markdown highlighting; its server-side highlighter
+	// pulls in every language grammar (a ~780 kB chunk). Our editor is
+	// client-only and we don't use plugin-code, so drop the SSR highlighter.
+	define: {
+		__ENABLE_CARTA_SSR_HIGHLIGHTER__: false
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({
