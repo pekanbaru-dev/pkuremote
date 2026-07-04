@@ -14,9 +14,11 @@ The admin access gate (`add-admin-access-gate`) proves who may enter `/admin`, b
 ## Capabilities
 
 ### New Capabilities
+
 - `admin-shell`: The admin layout chrome — sidebar navigation with an active-menu indicator, responsive desktop/mobile behavior, the admin top bar (identity + sign out), and the `src/lib/features/admin/` slice that houses it.
 
 ### Modified Capabilities
+
 <!-- None. This change adds chrome around the /admin route group established by add-admin-access-gate; it does not alter that capability's requirements. -->
 
 ## Impact

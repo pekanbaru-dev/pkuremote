@@ -12,9 +12,11 @@ The admin panel's management screens need UI building blocks the project doesn't
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None. These are additions to the existing shadcn-components capability. -->
 
 ### Modified Capabilities
+
 - `shadcn-components`: Adds three new "component is installed and configured" requirements — Table, Dialog, and Select — to the managed shadcn component set.
 
 ## Impact

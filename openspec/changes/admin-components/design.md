@@ -5,22 +5,26 @@
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add `table`, `dialog`, `select` to `ui/`, configured to the project's conventions.
 - Ensure they work with the semantic breakpoints and OKLCH tokens.
 
 **Non-Goals:**
+
 - No admin screens or domain wiring (that's `admin-event-management`).
 - No hand-rolled variants; these are headless/complex and belong in `ui/` (shadcn), not `primitives/`.
 
 ## Decisions
 
 ### Install via `shadcn-svelte add`, then breakpoint-audit the output
+
 Run `pnpm dlx shadcn-svelte@latest add table dialog select --yes --overwrite`, then grep the generated files for `sm:`/`md:`/`lg:`/`xl:`/`2xl:` and rewrite to `mobile:`/`tablet:`/`desktop:`.
 
 - **Why:** `add` is the supported, non-interactive path with `components.json` already present. The breakpoint audit is required because the defaults are disabled in this project — an unconverted `md:` silently emits nothing.
 - **Alternatives considered:** Hand-rolling these in `primitives/` — rejected: dialog and select need headless behavior (focus trap, listbox semantics) that `bits-ui` already provides; CLAUDE.md places such components in `ui/`.
 
 ### Barrel-export consistent with existing `ui/` components
+
 Add exports for the three components to `src/lib/components/ui/index.ts` matching the existing style.
 
 - **Why:** Consumers import from the barrel; keeps the surface uniform.

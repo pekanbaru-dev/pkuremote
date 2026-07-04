@@ -5,10 +5,12 @@
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Turn `/admin` into a useful landing dashboard with a few high-signal metrics and two short lists.
 - Compute metrics with efficient aggregate SQL, server-side.
 
 **Non-Goals:**
+
 - No deep analytics, date-range filters, or time-series charts (future if wanted).
 - No new tables or columns.
 - No registration management actions here (separate change) — the recent list is read-only with links.
@@ -16,18 +18,21 @@
 ## Decisions
 
 ### Metrics computed by a server-only aggregate service, not in-memory
+
 A `getDashboardMetrics()` service issues COUNT/SUM aggregate queries (total events, upcoming count, total confirmed registrations, sum of `quota` and sum of booked = `quota − remainingSlots` for fill%) plus two small `LIMIT`ed list queries (recent registrations, next upcoming events).
 
 - **Why:** Aggregates in SQL are O(1) round-trips and avoid pulling every row to the app. Keeps the dashboard fast as data grows.
 - **Alternatives considered:** Loading all events/registrations and reducing in JS — rejected: doesn't scale and duplicates what SQL does well.
 
 ### Capacity fill = booked ÷ quota across quota-bearing events
+
 Fill% = `Σ(quota − remainingSlots) ÷ Σ(quota)` over events where `quota` is not null. Events without a quota are excluded from the denominator.
 
 - **Why:** A single honest utilization number; excluding unlimited events avoids a meaningless denominator.
 - **Alternatives considered:** Averaging per-event fill ratios — rejected: small events would distort the figure; a weighted total is truer.
 
 ### `/admin` is the dashboard (supersedes the placeholder)
+
 The dashboard replaces the placeholder `/admin/+page.svelte`. The `admin-access` spec's placeholder requirement is marked superseded in this change's delta.
 
 - **Why:** Issue #20 treats Dashboard as the admin landing; a second route would be redundant. The shell's Dashboard nav item already targets `/admin`.

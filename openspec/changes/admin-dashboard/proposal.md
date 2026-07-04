@@ -12,9 +12,11 @@ Issue #20 lists a Dashboard as the admin panel's landing view. After the gate, s
 ## Capabilities
 
 ### New Capabilities
+
 - `admin-dashboard`: The `/admin` dashboard view — the metric stat tiles, the recent-registrations and upcoming-events lists, and the server-only aggregate-metrics service behind them.
 
 ### Modified Capabilities
+
 <!-- None at spec level. This change supersedes the placeholder /admin page introduced by add-admin-access-gate at the implementation level; that capability's placeholder requirement is reconciled when this change is archived (its base spec does not exist until add-admin-access-gate is archived first). -->
 
 ## Impact

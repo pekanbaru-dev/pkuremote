@@ -14,9 +14,11 @@ Admin event management needs to set an event's banner image. We chose **upload**
 ## Capabilities
 
 ### New Capabilities
+
 - `admin-media-upload`: The local-disk banner upload/delete service, the `UPLOAD_DIR` location, file validation rules, the `/uploads/[file]` serving route (with path-traversal protection and cache headers), and the persistence wiring (Docker volume + directory ownership).
 
 ### Modified Capabilities
+
 <!-- None. events.bannerUrl already exists; no requirement of the events capability changes here. -->
 
 ## Impact

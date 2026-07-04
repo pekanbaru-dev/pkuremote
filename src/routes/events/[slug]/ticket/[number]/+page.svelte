@@ -120,9 +120,9 @@
 				class="rounded-xl border border-hairline bg-canvas p-lg flex flex-col items-center gap-3"
 			>
 				<p class="label-meta text-on-surface-variant uppercase tracking-wider">QR Code Check-in</p>
-				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				<div data-testid="ticket-qr" aria-label="QR code tiket">
 					{#if qrSvg}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html qrSvg}
 					{/if}
 				</div>
