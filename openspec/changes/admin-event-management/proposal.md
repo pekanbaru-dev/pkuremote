@@ -14,9 +14,11 @@ Issue #20's core feature is Event Management. Today events, categories, and thei
 ## Capabilities
 
 ### New Capabilities
+
 - `admin-event-management`: Admin CRUD for events (list/create/edit/delete, banner upload, category assignment) and categories (CRUD), the server-only write services behind them, and the validation rules enforced on write.
 
 ### Modified Capabilities
+
 <!-- None. The public `events` read capability is unchanged; this adds admin write paths that live in server services and admin routes. -->
 
 ## Impact

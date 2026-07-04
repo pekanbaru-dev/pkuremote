@@ -9,6 +9,7 @@ Issue #20 needs an administrator-only panel. This change delivers only the autho
 ## Goals / Non-Goals
 
 **Goals:**
+
 - A single server-only source of truth for "is this user an admin?" — `requireAdmin(locals)` / `isAdmin(locals)`.
 - Support one or more admins via configuration, with no code change to add/remove an admin.
 - Gate the `/admin` route group at two layers: authentication (hooks) and authorization (admin layout).
@@ -16,6 +17,7 @@ Issue #20 needs an administrator-only panel. This change delivers only the autho
 - Establish the seam that a future DB-backed RBAC change replaces without touching call sites.
 
 **Non-Goals:**
+
 - No `role` column, no migration, no RBAC (roles, permissions, promote/demote UI) — a separate future change.
 - No admin UI beyond a placeholder route proving the gate. Sidebar shell, dashboard, and CRUD are separate changes.
 - No RLS policies (server-only gating is the chosen posture; the Drizzle connection bypasses RLS regardless).
@@ -24,6 +26,7 @@ Issue #20 needs an administrator-only panel. This change delivers only the autho
 ## Decisions
 
 ### Admins are an env-based allow-list (`ADMIN_EMAILS`), not a DB role
+
 `ADMIN_EMAILS` is a comma-separated list of emails, parsed once into a `Set<string>` of trimmed, lowercased values. A user is an admin iff their validated `locals.user.email` (lowercased) is in the set.
 
 - **Why:** Issue #20 needs "admin vs not" for a tiny, known set of people. An env list delivers that with zero schema work and zero bootstrap chicken-and-egg (no "who promotes the first admin?"). Adding an admin is an env edit + redeploy.
@@ -31,19 +34,22 @@ Issue #20 needs an administrator-only panel. This change delivers only the autho
 - **Trade-off:** Every listed email has identical, full admin power (no granularity, no per-admin audit). Acceptable at this scale; the seam below contains the upgrade cost.
 
 ### One helper, `requireAdmin(locals)` / `isAdmin(locals)`, in `src/lib/server/auth/admin.ts`
+
 `isAdmin(locals)` returns a boolean; `requireAdmin(locals)` throws a SvelteKit `redirect(303, "/")` when the user is authenticated but not an admin (and is only ever called after the auth layer has ensured a user exists). Email parsing/normalization lives here.
 
 - **Why:** A single seam means the future RBAC change rewrites only this file's internals (env lookup → DB `role` lookup); `+layout.server.ts` and every future admin `load`/`action` call site stays unchanged.
 - **Alternatives considered:** Inlining the email check in the layout — rejected, because it scatters the auth decision and makes the RBAC upgrade a repo-wide edit.
 
 ### Two-layer gate: authentication in hooks, authorization in the admin layout
+
 `hooks.server.ts` adds `/admin` to `GUARDED_PREFIXES`: an unauthenticated request to `/admin/*` is redirected to `/login?redirect=<path>` — identical to `/myprofile` today, and hooks does **not** evaluate admin status. `src/routes/admin/+layout.server.ts` then calls `requireAdmin(locals)`; an authenticated non-admin is redirected to `/`.
 
 - **Why:** The two rejection cases are semantically different and want different destinations — "not logged in" → `/login` (so they can sign in and come back via `?redirect`), "logged in but not allowed" → `/` (signing in again wouldn't help). Reusing the existing `GUARDED_PREFIXES` mechanism for the auth half keeps hooks uniform; putting the role half in the layout keeps hooks free of route-specific role logic.
 - **Alternatives considered:** Doing both checks in hooks — rejected: hooks would need per-prefix role knowledge, and the redirect target logic gets tangled. Doing both in the layout — rejected: the layout can't run for an unauthenticated user without first duplicating the hooks redirect, and centralizing the auth guard in hooks is the established pattern.
 
 ### Server-only enforcement; `.svelte` never decides access
-The admin check exists only in `hooks.server.ts`, `+layout.server.ts`, and `$lib/server/`. Client components may *read* admin-derived data passed down from a server `load`, but never gate on `locals`/user themselves.
+
+The admin check exists only in `hooks.server.ts`, `+layout.server.ts`, and `$lib/server/`. Client components may _read_ admin-derived data passed down from a server `load`, but never gate on `locals`/user themselves.
 
 - **Why:** Consistent with the existing architecture (all data behind server services; Drizzle bypasses RLS). A client-side check is not a security boundary.
 

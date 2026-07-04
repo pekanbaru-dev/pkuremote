@@ -15,9 +15,11 @@ GitHub issue #20 asks for an administrator-only panel (dashboard, event manageme
 ## Capabilities
 
 ### New Capabilities
+
 - `admin-access`: How the app identifies an administrator (env-based allow-list), the `requireAdmin` / `isAdmin` server-only helper contract, the two-layer gate on the `/admin` route group (auth in hooks, role in the admin layout), and the placeholder admin landing route.
 
 ### Modified Capabilities
+
 - `user-auth`: The "Guarded routes redirect to `/login`" requirement changes — `GUARDED_PREFIXES` gains `/admin`, so `/admin/*` joins `/myprofile` as an authentication-guarded prefix.
 
 ## Impact

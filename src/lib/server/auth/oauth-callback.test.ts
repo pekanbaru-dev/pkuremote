@@ -10,7 +10,7 @@ function clientWith(exchange: (code: string) => Promise<{ error: Error | null }>
 
 describe("resolveOAuthCallback", () => {
 	it("exchanges the code and redirects to next on success", async () => {
-		const exchange = vi.fn(async (_code: string) => ({ error: null }));
+		const exchange = vi.fn(async () => ({ error: null }));
 		const result = await resolveOAuthCallback({
 			supabase: clientWith(exchange),
 			code: "abc-123",

@@ -5,12 +5,14 @@ The app is deployed as an adapter-node server behind Caddy (`reverse_proxy http:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Store event banners on the VPS local disk, with no external object store or extra credentials.
 - A server-only service to upload (validated) and delete banners, returning a stable public path.
 - Serve stored files uniformly in dev and prod.
 - Persist uploads across Docker redeploys.
 
 **Non-Goals:**
+
 - No Supabase Storage, no service-role key, no external bucket.
 - No image transformation/resizing/CDN.
 - No general media library — just event banners.
@@ -19,28 +21,33 @@ The app is deployed as an adapter-node server behind Caddy (`reverse_proxy http:
 ## Decisions
 
 ### Store under a configurable `UPLOAD_DIR` outside the build
+
 Uploads are written to `UPLOAD_DIR` (dev `./uploads`, prod `/data/uploads`), never into `static/`.
 
 - **Why:** `static/` is immutable at runtime (baked into the build; the Docker image is read-only for app code). A separate configurable dir is the only place runtime writes survive and can be volume-mounted.
 - **Alternatives considered:** Writing into `static/uploads` — rejected: not served after build and not writable in the image.
 
 ### Serve files via a SvelteKit GET route, not Caddy `file_server`
+
 `src/routes/uploads/[file]/+server.ts` reads the requested file from `UPLOAD_DIR` and streams it with `Content-Type` and `Cache-Control: public, max-age=31536000, immutable`. It validates the filename is a plain basename (rejects `/`, `..`, absolute paths) before touching disk.
 
 - **Why:** One code path that works in `pnpm dev` (no Caddy) and in prod. UUID filenames are content-stable, so `immutable` caching is safe and offloads repeat loads to the browser/proxy.
 - **Alternatives considered:** Caddy `file_server` serving the volume — faster in prod (Node never streams bytes) but doesn't exist in dev, splitting behavior. Deferred as a pure prod optimization; the volume can be mounted read-only into Caddy later without changing stored URLs.
 
 ### Validate type + size server-side; uuid object keys
+
 `uploadEventBanner(file)` rejects anything outside the image MIME allowlist or above the size cap, and writes under `{uuid}.{ext}`.
 
 - **Why:** The server is the only trustworthy validation point. UUID keys prevent collisions and remove any user-controlled path component (no traversal on write).
 
 ### Replace-on-edit deletes the old file
+
 Event management calls `deleteEventBanner(oldUrl)` after a successful new upload + DB update. `deleteEventBanner` maps the public path back to a basename under `UPLOAD_DIR` (rejecting anything that escapes it) and unlinks best-effort; failures are logged, not thrown.
 
 - **Why:** Prevents orphan-file accumulation on disk; best-effort so a stale/missing file never corrupts committed state.
 
 ### Persistence: named volume + node-owned directory
+
 Add a named volume at `UPLOAD_DIR` on `app` in both compose files, and `mkdir -p $UPLOAD_DIR && chown -R node:node $UPLOAD_DIR` in the `Dockerfile` before `USER node`.
 
 - **Why:** Without a volume, uploads vanish on redeploy. Because the container runs as `node`, the directory must be node-owned; pre-creating it in the image means the named volume inherits that ownership on first initialization, so the unprivileged user can write.
