@@ -21,8 +21,13 @@ import type { User } from "@supabase/supabase-js";
  * `ADMIN_EMAILS` (that allow-list is what `requireAdmin` checks).
  */
 
-/** Fixed synthetic id for the dev-login user (all-zero UUID). */
-export const DEV_ADMIN_USER_ID = "00000000-0000-0000-0000-000000000000";
+/**
+ * Fixed id for the dev-login user. A valid, non-nil UUID (GoTrue rejects the
+ * all-zero UUID), distinct from the seed author (`…0001`). Run
+ * `pnpm db:seed-dev-admin` once to provision a real auth.users + profiles row
+ * at this id so profile-bound flows (booking, /myprofile) work under the bypass.
+ */
+export const DEV_ADMIN_USER_ID = "00000000-0000-0000-0000-0000000000de";
 
 /**
  * Return the dev-login email ONLY when running under the dev server and a
