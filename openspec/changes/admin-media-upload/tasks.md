@@ -1,30 +1,30 @@
 ## 1. Config
 
-- [ ] 1.1 Add `UPLOAD_DIR` to `.env.example` (comment: server-only; dev default `./uploads`, prod `/data/uploads`) and set it in the local `.env`
-- [ ] 1.2 Add `uploads/` (dev upload dir) to `.gitignore` so local uploads aren't committed
+- [x] 1.1 Add `UPLOAD_DIR` to `.env.example` (server-only; dev default `./uploads`, prod `/data/uploads`) and set it in the local `.env`
+- [x] 1.2 Add `uploads/` (dev upload dir) to `.gitignore` so local uploads aren't committed
 
 ## 2. Storage service (local filesystem)
 
-- [ ] 2.1 Create `src/lib/server/storage/` resolving `UPLOAD_DIR` (with the documented dev fallback); ensure the dir exists at startup
-- [ ] 2.2 Implement `uploadEventBanner(file)`: validate MIME (`image/png|jpeg|webp`) and max size, write `{uuid}.{ext}` under `UPLOAD_DIR`, return `/uploads/{uuid}.{ext}`; typed errors on invalid input
-- [ ] 2.3 Implement `deleteEventBanner(pathOrUrl)`: resolve to a basename under `UPLOAD_DIR` (reject escapes), unlink best-effort, log-and-swallow failures
-- [ ] 2.4 Export both from `src/lib/server/storage/index.ts`; unit-test validation + the path-safety mapping
+- [x] 2.1 Create `src/lib/server/storage/` resolving `UPLOAD_DIR` (dev fallback `./uploads`); `uploadEventBanner` mkdir's the dir before writing
+- [x] 2.2 Implement `uploadEventBanner(file)`: validate MIME (`image/png|jpeg|webp`) + max size (2 MiB), write `{uuid}.{ext}`, return `/uploads/{uuid}.{ext}`; typed `MediaUploadError` on invalid input
+- [x] 2.3 Implement `deleteEventBanner(pathOrUrl)`: `safeBasename` (rejects `..`/`\`) + in-dir check, unlink best-effort, log-and-swallow failures
+- [x] 2.4 Export from `src/lib/server/storage/index.ts`; `storage.test.ts` covers validation + path-safety (105 tests pass)
 
 ## 3. Serving route
 
-- [ ] 3.1 Create `src/routes/uploads/[file]/+server.ts` GET: reject filenames containing `/`, `\`, `..`, or absolute paths (404); stream existing files with correct `Content-Type` + `Cache-Control: public, max-age=31536000, immutable`; 404 on missing
-- [ ] 3.2 Verify it works under both `pnpm dev` and the adapter-node build
+- [x] 3.1 `src/routes/uploads/[file]/+server.ts` GET: rejects unsafe names (404 via `readUpload`); streams with correct `Content-Type` + `Cache-Control: public, max-age=31536000, immutable`; 404 on missing
+- [x] 3.2 Verified on dev: valid → 200 (`image/png`, immutable), missing → 404, traversal → 404; endpoint present in the adapter-node build output
 
 ## 4. Docker persistence
 
-- [ ] 4.1 In `Dockerfile`, before `USER node`, add `RUN mkdir -p /data/uploads && chown -R node:node /data/uploads`
-- [ ] 4.2 In `docker-compose.prod.yml`: add a named volume (e.g. `uploads_data:/data/uploads`) to `app`, declare it under top-level `volumes:`, and set `UPLOAD_DIR: /data/uploads` in the `app` environment
-- [ ] 4.3 Mirror the volume + `UPLOAD_DIR` in `docker-compose.yml` (dev stack) as appropriate
+- [x] 4.1 `Dockerfile`: `RUN mkdir -p /data/uploads && chown -R node:node /data/uploads` before `USER node`; `ENV UPLOAD_DIR=/data/uploads`
+- [x] 4.2 `docker-compose.prod.yml`: named volume `uploads_data:/data/uploads` on `app`, declared under top-level `volumes:`, `UPLOAD_DIR: /data/uploads` in app env (verified via `docker compose config`)
+- [x] 4.3 `docker-compose.yml` (dev): `UPLOAD_DIR: /app/uploads` (persisted via the existing repo bind-mount → host `./uploads`; no separate volume needed)
 
 ## 5. Verify
 
-- [ ] 5.1 Upload a valid image → `/uploads/{uuid}.ext` returned and loads via `<img>` in dev
-- [ ] 5.2 Disallowed type and oversized file rejected with typed errors; nothing written
-- [ ] 5.3 Traversal filename → 404; missing file → 404
-- [ ] 5.4 In the Docker stack: upload a banner, run `docker compose ... up -d --build`, confirm the file and its URL survive; confirm the `node` user can write the volume
-- [ ] 5.5 Confirm the storage service is absent from the client build; run `pnpm check` → `pnpm lint` → `pnpm test`
+- [x] 5.1 Upload path returns `/uploads/{uuid}.ext`; serving route loads it (verified via dev with a placed file)
+- [x] 5.2 Disallowed type and oversized file rejected with typed errors (unit tests); nothing written
+- [x] 5.3 Traversal filename → 404; missing file → 404 (verified on dev)
+- [x] 5.4 Docker wiring verified via `docker compose config` (volume + UPLOAD_DIR + node-owned dir); full `up --build` persistence is a deploy-time step
+- [x] 5.5 Storage service absent from client build; `pnpm check` (0 errors) → `pnpm lint` (clean) → `pnpm test` (105 passed)

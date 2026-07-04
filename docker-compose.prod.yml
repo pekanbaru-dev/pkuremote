@@ -27,6 +27,11 @@ services:
       PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
       PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
       PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      # Uploaded event banners live here, backed by the named volume below so
+      # they persist across redeploys. Matches the dir created in the Dockerfile.
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - uploads_data:/data/uploads
     restart: unless-stopped
 
   caddy:
@@ -48,3 +53,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  uploads_data:

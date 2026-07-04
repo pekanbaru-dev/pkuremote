@@ -41,3 +41,6 @@ caddy_data/
 # `.env` via `{env:VAR_NAME}` placeholders).
 
 .mcp.json
+
+# Local event-banner uploads (dev)
+/uploads/
