@@ -1,8 +1,11 @@
 # admin-dashboard Specification
 
 ## Purpose
+
 TBD - created by archiving change admin-dashboard. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: `/admin` renders the admin dashboard
 
 The system SHALL render an admin dashboard at `/admin` (replacing the placeholder page), inside the admin shell and behind the `/admin` gate. The dashboard SHALL present, at minimum: total events, upcoming events count, total active registrations, and overall capacity fill. The route's `load` SHALL obtain these from a server-only metrics service.
@@ -58,4 +61,3 @@ The dashboard SHALL render a short list of the most recent registrations (attend
 
 - **WHEN** there are no registrations and no upcoming events
 - **THEN** each list renders a friendly empty state instead of an empty container
-

@@ -1,8 +1,11 @@
 # admin-event-management Specification
 
 ## Purpose
+
 TBD - created by archiving change admin-event-management. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: The admin event list shows all events with management actions
 
 The system SHALL provide `/admin/events` rendering a table of all events (upcoming and past) with, per row: title, start date/time, status, quota/remaining slots, and assigned categories. The table SHALL provide actions to create a new event, edit an existing event, and delete an event. The route SHALL be admin-gated (inherits the `/admin` gate) and render inside the admin shell.
@@ -96,4 +99,3 @@ The event and category write services (`createEvent`, `updateEvent`, `deleteEven
 
 - **WHEN** a write service receives input violating a constraint (e.g. `pricePromo ≥ priceNormal`)
 - **THEN** it returns a typed validation error before hitting the database, rather than surfacing a raw constraint-violation exception
-

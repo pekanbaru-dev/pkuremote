@@ -3,7 +3,9 @@
 ## Purpose
 
 TBD - created by archiving change add-supabase-google-auth. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: Sign-in is a single Google OAuth action
 
 The system SHALL expose sign-in as a single "Continue with Google" action on `/login`. The action SHALL be implemented as a SvelteKit form `action` that calls Supabase Auth's `signInWithOAuth({ provider: 'google', options: { redirectTo } })` server-side. The `redirectTo` SHALL be the absolute URL of `/auth/callback?next=<safe-target>`, where `<safe-target>` is the post-sign-in destination (defaults to `/myprofile`, or a user-supplied `?redirect=` query parameter validated to be a same-origin path starting with `/`).
@@ -173,4 +175,3 @@ If `signInWithOAuth` returns an error (network failure, Supabase misconfiguratio
 
 - **WHEN** the user submits `/login` and the server-side `signInWithOAuth` call returns an error
 - **THEN** the page renders the message "Login dengan Google belum tersedia. Hubungi admin." and the raw error is logged server-side only
-

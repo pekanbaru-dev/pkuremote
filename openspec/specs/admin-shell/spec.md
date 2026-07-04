@@ -1,8 +1,11 @@
 # admin-shell Specification
 
 ## Purpose
+
 TBD - created by archiving change admin-shell. Update Purpose after archive.
+
 ## Requirements
+
 ### Requirement: The `/admin` route group renders inside an admin shell layout
 
 The system SHALL provide `src/routes/admin/+layout.svelte` that renders every `/admin/*` route inside an admin shell composed of a sidebar navigation, a top bar, and a content region. The routed page SHALL render in the content region via `{@render children()}`. The shell components SHALL live in the admin feature slice `src/lib/features/admin/` and be consumed through its `index.ts` barrel (no deep imports).
@@ -63,4 +66,3 @@ The admin shell top bar SHALL display the signed-in administrator's identity (di
 
 - **WHEN** the administrator activates the sign-out control in the top bar
 - **THEN** the existing sign-out action runs, the session is cleared, and the browser is redirected to `/`
-
