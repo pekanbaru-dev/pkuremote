@@ -3,7 +3,10 @@ import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { env } from "$env/dynamic/public";
 
-const GUARDED_PREFIXES = ["/myprofile"];
+// Authentication-guarded path prefixes. Matching unauthenticated requests are
+// redirected to /login. This is an AUTH-only guard — it does not evaluate admin
+// status; authorization for /admin/* is handled in src/routes/admin/+layout.server.ts.
+const GUARDED_PREFIXES = ["/myprofile", "/admin"];
 
 const supabase: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(
