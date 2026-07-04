@@ -10,8 +10,11 @@
  */
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
+import { isUniqueViolation } from "$lib/server/db/pg-error";
 import { events, eventCategories } from "../../../../db/schema";
 import type { EventCategory, EventStatus } from "../../features/events/types.ts";
+
+export { isUniqueViolation };
 
 /** Typed error codes returned by the event write services. The action layer
  *  switches on these to surface field-level messages instead of a 500. */
@@ -151,11 +154,6 @@ export function diffCategoryIds(
 		toAdd: [...nextSet].filter((id) => !currentSet.has(id)),
 		toRemove: [...currentSet].filter((id) => !nextSet.has(id))
 	};
-}
-
-/** True when a caught DB error is a Postgres unique-constraint violation. */
-export function isUniqueViolation(err: unknown): boolean {
-	return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
 
 /**
