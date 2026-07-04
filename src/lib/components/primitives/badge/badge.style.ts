@@ -16,7 +16,7 @@ export const badgeVariants = tv({
 			success: "bg-success text-on-success",
 			warning: "bg-warning text-on-warning",
 			info: "bg-info text-on-info",
-			clean: "bg-muted text-muted-foreground"
+			clean: "bg-surface-container-high text-on-surface-variant"
 		},
 		variant: {
 			solid: undefined,
@@ -49,7 +49,7 @@ export const badgeVariants = tv({
 		{ variant: "soft", intent: "success", class: "bg-success-container text-on-success-container" },
 		{ variant: "soft", intent: "warning", class: "bg-warning-container text-on-warning-container" },
 		{ variant: "soft", intent: "info", class: "bg-info-container text-on-info-container" },
-		{ variant: "soft", intent: "clean", class: "bg-muted text-ink" }
+		{ variant: "soft", intent: "clean", class: "bg-surface-container-high text-on-surface-variant" }
 	],
 	defaultVariants: {
 		intent: "primary",

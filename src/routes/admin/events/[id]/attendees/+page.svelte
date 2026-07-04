@@ -125,7 +125,7 @@
 											>
 												<Input type="hidden" name="id" value={reg.id} />
 												<Input type="hidden" name="status" value={target} />
-												<Button type="submit" variant="ghost" size="sm">
+												<Button type="submit" variant="outline" size="sm">
 													Tandai {statusLabel[target]}
 												</Button>
 											</form>
