@@ -50,7 +50,7 @@ The app talks to a **generic OIDC issuer** via discovery (`${OIDC_ISSUER}/.well-
 Dex runs as a Docker Compose service in **development only**, never shipped to prod. In prod the app points `OIDC_ISSUER` straight at Google.
 
 - **Why:** keeps the prod stack at three services on a weak VPS; Google-direct costs zero running services. Dex earns its keep purely as a local, offline, credential-free rehearsal of the OIDC path plus a learning artifact.
-- **Consequence:** because the dev app runs on the **host** (`pnpm dev`), not inside the compose network, both the browser and the app reach Dex at the same `http://localhost:5556`. This sidesteps the Dex issuer/hostname split (`dex:5556` vs `localhost`) that would bite a containerized app — a real simplification of the dev-only choice.
+- **Consequence / dev topology:** the repo's `docker-dev-loop` runs the app _inside_ compose, where `localhost:5556` points at the app container, not Dex — so the issuer must resolve identically from both browser and app. Two supported topologies (see `docker-dev-loop` spec): **(1) host-run app** (`pnpm dev`) with `OIDC_ISSUER=http://localhost:5556` — recommended for OIDC work, and what makes the "localhost sidesteps the hostname split" simplification true; **(2) containerized app** with `OIDC_ISSUER=http://dex:5556` plus a `127.0.0.1 dex` `/etc/hosts` alias so both sides resolve the same issuer. `localhost:5556` with a containerized app is explicitly unsupported.
 - **Dev login source:** Dex `enablePasswordDB` + `staticPasswords` (bcrypt-hashed local accounts baked into `dex-config.yaml`) — deterministic test identities, no Google credentials, no internet. No Google connector behind Dex in dev.
 
 ### D4: DB-backed sessions (not stateless JWT)
@@ -82,6 +82,15 @@ Reverse the `profiles` RLS policies and `auth.uid()` usage (they enforce nothing
 
 - **Why:** RLS was only meaningful with PostgREST/anon-key access, which we don't use. One direct connection removes the pooler/DDL split entirely.
 
+### D8: Auth-flow security details carried over from the current implementation
+
+The OIDC rewrite MUST preserve protections the Supabase flow (or its `safeRedirectTarget`) already had, and add the ones OIDC requires:
+
+- **Send `state`, `nonce`, and PKCE `code_challenge` (S256) as authorization parameters.** A provider only echoes a `nonce` it received; generating/storing a nonce without sending it would make every callback's nonce check fail.
+- **Preserve the post-login target across the round-trip.** `redirect_uri` is the bare `/auth/callback` (no `?next=`), so the sanitized target is stored in a transient cookie at sign-in and recovered in the callback — otherwise a user bounced from `/admin` loses the destination and lands on `/myprofile`.
+- **Keep the backslash open-redirect check.** `safeRedirectTarget` must reject `/\evil.com` as well as `//evil.com` (browsers may normalize `\` to `/`), not just the `//` form.
+- **Normalize emails (trim + lower-case) before lookup/insert and for `ADMIN_EMAILS`.** Postgres uniqueness is case-sensitive; without normalization `Ayu@Pku.dev` and `ayu@pku.dev` create two identities while the admin check (already lower-cased) sees only one. Uniqueness is enforced case-insensitively.
+
 ## Risks / Trade-offs
 
 - **Dev/prod provider divergence** → Mitigated by D2 (one generic OIDC path; issuer is the only difference) and D3 (host-run dev app removes the issuer/hostname split).
@@ -95,7 +104,7 @@ Reverse the `profiles` RLS policies and `auth.uid()` usage (they enforce nothing
 
 Greenfield cutover (no data carry-over), sequenced so the app never half-depends on both systems:
 
-1. Add `arctic` + `jose`; scaffold `users`/`oauth_accounts`/`sessions` schema and generate migrations; re-point `profiles` FK; drop the RLS + trigger migrations.
+1. Add `arctic` + `jose`; scaffold `users`/`oauth_accounts`/`sessions` schema. **Baseline the migration history** — the existing `0000`/`0001` reference `auth.users`/`auth.uid()`/the `authenticated` role and fail on plain Postgres before any repair migration runs, so squash/regenerate `db/migrations/` from the final self-hosted schema (greenfield makes rewriting history safe) rather than appending a re-point migration.
 2. Implement the OIDC integration (discovery, Arctic authorize/callback, jose verification), the DB session store, and the profile upsert. Keep behavior behind the same routes (`/login`, `/auth/callback`, `/myprofile`) and the same `GUARDED_PREFIXES` guard.
 3. Rewrite `hooks.server.ts` (session lookup replaces `safeGetSession`/`getUser`), `app.d.ts` (app user type replaces Supabase `User`), and the seed scripts (direct inserts).
 4. Add the dev-only Dex service + `dex-config.yaml`; collapse env to a single `DATABASE_URL`; add `OIDC_*`; update `.env.example`, `DEPLOY.md`, `LOCAL_DEV_ADMIN.md`.

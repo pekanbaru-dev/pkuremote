@@ -47,7 +47,7 @@ Dex SHALL be configured to always present its login screen — it SHALL NOT auto
 
 ### Requirement: Dex is a faithful stand-in requiring no app code differences
 
-The app SHALL treat Dex and Google identically through the generic OIDC integration; the only configuration difference between environments SHALL be the value of `OIDC_ISSUER` (and the corresponding client credentials/redirect URI). No branch in application code SHALL special-case Dex versus Google. Because the dev app runs on the host (`pnpm dev`), the browser and the app SHALL both reach Dex at the same `http://localhost:5556`, so the issuer in id_tokens matches for both parties.
+The app SHALL treat Dex and Google identically through the generic OIDC integration; the only configuration difference between environments SHALL be the value of `OIDC_ISSUER` (and the corresponding client credentials/redirect URI). No branch in application code SHALL special-case Dex versus Google. The `OIDC_ISSUER` value MUST resolve to the same Dex instance from both the browser and the app per the dev-loop topology requirement (see `docker-dev-loop`): with a **host-run app** (`pnpm dev`), both use `http://localhost:5556`; with a **containerized app**, both use a shared hostname (`http://dex:5556` plus a `/etc/hosts` alias) — never `http://localhost:5556`, which inside the container points at the app, not Dex.
 
 #### Scenario: Switching issuer requires no code change
 
