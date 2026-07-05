@@ -8,6 +8,10 @@ bun.lockb
 # Miscellaneous
 /static/
 
+# Human-facing design/decision records (prose, hand-formatted with ASCII
+# diagrams/tables Prettier would reflow). Not source — excluded from the lint gate.
+docs/
+
 # JSON-LD component embeds a <script> tag with a templated payload that
 # Prettier mis-parses as JSON.
 src/lib/components/atoms/JsonLd.svelte
