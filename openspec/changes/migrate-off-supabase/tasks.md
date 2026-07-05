@@ -5,20 +5,21 @@
 - [ ] 1.3 Add `db/schema/oauth-accounts.ts` (`oauth_accounts`: provider, provider_uid, user_id FK→users, UNIQUE `(provider, provider_uid)`) and re-export
 - [ ] 1.4 Add `db/schema/sessions.ts` (`sessions`: id hash PK, user_id FK→users cascade, expires_at, created_at, index on user_id) and re-export
 - [ ] 1.5 Re-point `db/schema/profiles.ts` FK `id → users.id` (shared PK); delete `db/auth-ref.ts`
-- [ ] 1.6 `pnpm db:generate` — new migration for users/oauth_accounts/sessions/profiles FK
-- [ ] 1.7 Add a migration that drops `profiles` RLS policies, disables RLS, and drops the `on_auth_user_created` trigger + `public.handle_new_user()` function
+- [ ] 1.6 Ensure `users.email` uniqueness is case-insensitive (store normalized lower-cased email + `UNIQUE`, or a unique index on `lower(email)`)
+- [ ] 1.7 **Baseline the migration history** — the existing `0000`/`0001` reference `auth.users`/`auth.uid()`/the `authenticated` role and will fail on plain Postgres before any repair migration runs. Squash/regenerate `db/migrations/` from the final self-hosted schema (no `auth` refs, no RLS, `profiles.id` → `public.users`); confirm `pnpm db:migrate` applies top-to-bottom on an empty `postgres:16`
 
 ## 2. OIDC integration (Arctic + jose)
 
 - [ ] 2.1 Add an OIDC config/discovery helper (read `OIDC_ISSUER`/`OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET`/`OIDC_REDIRECT_URI`; fetch `.well-known/openid-configuration`; expose authorize/token/jwks)
-- [ ] 2.2 Implement `startOidcSignIn` with Arctic: generate state + PKCE `code_verifier` + nonce, set transient httpOnly cookies, build the authorization URL (`openid email profile`)
-- [ ] 2.3 Implement callback resolution: validate `state`, exchange code via Arctic, verify `id_token` with jose against JWKS (`iss`/`aud`/`nonce`/`exp`), reject when `email_verified !== true`; return verified claims or a typed error
-- [ ] 2.4 Unit tests for callback resolution (mirror `oauth-callback.test.ts`): error param, state mismatch, id_token verification failure, `next` sanitization
+- [ ] 2.2 Implement `startOidcSignIn` with Arctic: generate state + PKCE `code_verifier` + nonce; store them **and the sanitized post-login target** (`safeRedirectTarget(?redirect)`) in transient httpOnly cookies; build the authorization URL with `scope=openid email profile` **plus `state`, `nonce`, and `code_challenge` (S256) as authorization parameters**, `redirect_uri` = bare `/auth/callback`
+- [ ] 2.3 Implement callback resolution: validate `state`, exchange code via Arctic, verify `id_token` with jose against JWKS (`iss`/`aud`/`nonce`/`exp`), reject when `email_verified !== true`; recover the post-login target from its cookie; return verified claims + target or a typed error
+- [ ] 2.4 Confirm `safeRedirectTarget` still rejects `//` **and `/\`** (backslash open-redirect); keep/extend its tests
+- [ ] 2.5 Unit tests for callback resolution (mirror `oauth-callback.test.ts`): error param, state mismatch, id_token verification failure, missing/false `email_verified`, target preservation (`/admin` survives), backslash/`//` target rejection
 
 ## 3. Session store & provisioning
 
 - [ ] 3.1 Implement the session store (create: random token → store its hash, `expires_at = now + 6h`; validate by hashed id + expiry; delete by id; delete-on-encounter for expired rows)
-- [ ] 3.2 Implement the transactional identity upsert with match precedence — `(provider, sub)` → else `email` (link) → else create `users` + `oauth_accounts` + `profiles`; display_name from `name` claim, fallback email local part / "Pengguna"; avatar_url from `picture`, nullable; idempotent
+- [ ] 3.2 Implement the transactional identity upsert: **normalize the email claim (trim + lower-case) first** and use it for all lookups/inserts/`ADMIN_EMAILS`; match precedence `(provider, sub)` → else normalized `email` (link) → else create `users` + `oauth_accounts` + `profiles`; display_name from `name` claim, fallback email local part / "Pengguna"; avatar_url from `picture`, nullable; idempotent
 - [ ] 3.3 Unit tests: provisioning idempotency, name fallback, session hash-not-plaintext, expiry rejection
 
 ## 4. Wire routes & hooks
@@ -35,10 +36,10 @@
 - [ ] 5.1 Rewrite `db/seed.ts`: direct insert into `users` + `profiles` (drop `supabase.auth.admin.createUser`, drop service-role/URL reads); keep idempotent
 - [ ] 5.2 Rewrite `db/seed-dev-admin.ts`: direct insert of the fixed dev-admin `users` + `profiles` row (no Supabase admin API)
 - [ ] 5.3 Add `dex-config.yaml` (issuer `http://localhost:5556`, static OIDC client matching dev `OIDC_*`, `enablePasswordDB` + 2–3 `staticPasswords` (admin in `ADMIN_EMAILS` + attendee), each `email_verified: true`, login screen always shown / no connector skip)
-- [ ] 5.4 Add a `dex` service to `docker-compose.yml` (dev only); confirm it is absent from `docker-compose.prod.yml` and `docker-compose.deploy.yml`
+- [ ] 5.4 Update `docker-compose.yml` (dev): add an in-stack `postgres` service and a **dev-only** `dex` service (publish `5556`); wire `app` to `DATABASE_URL` (→ postgres) + `OIDC_*`; document the `OIDC_ISSUER` topology (host-run `pnpm dev` → `localhost:5556`; containerized → `dex:5556` + `/etc/hosts` alias); confirm Dex is absent from `docker-compose.prod.yml`/`docker-compose.deploy.yml`
 - [ ] 5.5 Collapse env to a single `DATABASE_URL`; update `drizzle.config.ts` to use it (drop `DIRECT_URL`)
-- [ ] 5.6 Rewrite `.env.example`: remove all Supabase vars + `DIRECT_URL`; add `OIDC_*`; document Dex-in-dev vs Google-in-prod
-- [ ] 5.7 Update prod compose (`docker-compose.prod.yml`, `docker-compose.deploy.yml`) to drop Supabase env and forward `OIDC_*`
+- [ ] 5.6 Rewrite `.env.example`: remove all Supabase vars + `DIRECT_URL`; add `OIDC_*`, `POSTGRES_*`; document Dex-in-dev vs Google-in-prod and the dev `OIDC_ISSUER` topology
+- [ ] 5.7 Update prod compose (`docker-compose.prod.yml`, `docker-compose.deploy.yml`): **add an in-stack `postgres` service + `postgres_data` volume** (`app` `depends_on` postgres), swap Supabase env for `DATABASE_URL` (→ postgres) + `OIDC_*` + `ADMIN_EMAILS`; update the `production-deploy` spec + README deploy section (Postgres service, volume, migrate step)
 
 ## 6. Remove Supabase & documentation
 

@@ -107,7 +107,7 @@ The repository SHALL contain a `db/seed.ts` script that inserts at least one row
 
 ### Requirement: App-owned `users` and `oauth_accounts` tables
 
-The Drizzle schema SHALL define a `users` table at `db/schema/users.ts` with `id` (uuid, primary key, default `gen_random_uuid()`), `email` (text, NOT NULL, UNIQUE, case-insensitive match responsibility at the app layer), `email_verified` (boolean, NOT NULL, default false), and `created_at` (timestamptz, NOT NULL, default now()). It SHALL define an `oauth_accounts` table at `db/schema/oauth-accounts.ts` with `provider` (text, NOT NULL), `provider_uid` (text, NOT NULL — the OIDC `sub`), `user_id` (uuid, NOT NULL, FK → `users.id`, `ON DELETE CASCADE`), and a UNIQUE constraint on `(provider, provider_uid)`. Both tables SHALL be re-exported from `db/schema/index.ts`. The former `db/auth-ref.ts` shim (`pgSchema("auth").table("users")`) SHALL be removed.
+The Drizzle schema SHALL define a `users` table at `db/schema/users.ts` with `id` (uuid, primary key, default `gen_random_uuid()`), `email` (text, NOT NULL), `email_verified` (boolean, NOT NULL, default false), and `created_at` (timestamptz, NOT NULL, default now()). Email uniqueness SHALL be **case-insensitive**: the app stores the normalized (trimmed, lower-cased) email, and the schema enforces uniqueness on that value — either a `UNIQUE` constraint on the normalized column or a unique index on `lower(email)`. Two sign-ins for the same mailbox in different casing MUST NOT be able to create two `users` rows. It SHALL define an `oauth_accounts` table at `db/schema/oauth-accounts.ts` with `provider` (text, NOT NULL), `provider_uid` (text, NOT NULL — the OIDC `sub`), `user_id` (uuid, NOT NULL, FK → `users.id`, `ON DELETE CASCADE`), and a UNIQUE constraint on `(provider, provider_uid)`. Both tables SHALL be re-exported from `db/schema/index.ts`. The former `db/auth-ref.ts` shim (`pgSchema("auth").table("users")`) SHALL be removed.
 
 #### Scenario: A user and linked account are created on first sign-in
 
@@ -119,10 +119,29 @@ The Drizzle schema SHALL define a `users` table at `db/schema/users.ts` with `id
 - **WHEN** an insert attempts a second `oauth_accounts` row with the same `(provider, provider_uid)`
 - **THEN** Postgres rejects it with a unique-constraint violation
 
+#### Scenario: Case-different emails cannot create two users
+
+- **WHEN** a `users` row exists with normalized email `ayu@pku.dev` and an insert attempts `Ayu@Pku.dev`
+- **THEN** the normalized value collides and the database rejects the second insert (case-insensitive uniqueness), so only one identity exists
+
 #### Scenario: No `auth` schema reference remains
 
 - **WHEN** the schema is inspected
 - **THEN** no table references `auth.users` and `db/auth-ref.ts` does not exist
+
+### Requirement: Migration history applies cleanly to an empty self-hosted Postgres
+
+The migration history SHALL apply top-to-bottom against a fresh, empty, plain Postgres (`postgres:16`) with no Supabase objects. The current history is Supabase-coupled and cannot: `0000_init.sql` adds `profiles.id` as a foreign key to `auth.users`, and `0001` creates RLS policies / the `handle_new_user` trigger against the Supabase `auth` schema, `auth.uid()`, and the `authenticated` role — none of which exist on a plain Postgres, so `pnpm db:migrate` fails on `0000`/`0001` before any later repair migration is reached. A **later re-point/drop migration is therefore not sufficient**; the change SHALL instead **baseline the history** — squash/rewrite the Drizzle migrations into a clean baseline generated from the final self-hosted schema (`users`, `oauth_accounts`, `sessions`, `profiles` FK → `public.users`, no RLS, no `auth` references) — so a fresh `pnpm db:migrate` succeeds end-to-end. Because the migration is greenfield (no data to preserve), rewriting history is acceptable.
+
+#### Scenario: Fresh migrate succeeds on empty Postgres
+
+- **WHEN** `pnpm db:migrate` runs against an empty `postgres:16` database with no `auth` schema
+- **THEN** every migration applies without error and the resulting schema contains `users`, `oauth_accounts`, `sessions`, and a `profiles` table whose `id` FK references `public.users`
+
+#### Scenario: No migration references Supabase objects
+
+- **WHEN** the migration SQL under `db/migrations/` is inspected after the baseline
+- **THEN** no migration references `auth.users`, `auth.uid()`, the `authenticated` role, or a `handle_new_user` trigger
 
 ### Requirement: DB-backed `sessions` table
 
