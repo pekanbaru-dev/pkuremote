@@ -59,8 +59,8 @@ Use for **external library/framework documentation** instead of guessing APIs or
 Use for **driving a real browser** to validate rendered UI/UX: navigate, screenshot, inspect the accessibility tree, click, fill, and check responsive states. Prefer this over one-off Playwright scripts for visual checks.
 
 - Runs via `npx @playwright/mcp@latest` (no auth). Chromium is installed on first use; if a launch fails, run `pnpm exec playwright install chromium`.
-- Typical flow: navigate to a `pnpm dev` URL (e.g. `http://localhost:5173/admin`), snapshot the page, then assert on layout/contrast/hover states.
-- Local admin routes need the dev-login bypass — set `DEV_ADMIN_EMAIL` (see `LOCAL_DEV_ADMIN.md`) so `/admin/*` is reachable without Google login.
+- Typical flow: navigate to a `pnpm dev` URL (e.g. `http://localhost:5175/admin`), snapshot the page, then assert on layout/contrast/hover states.
+- Local admin routes need the dev-login bypass — set `DEV_ADMIN_EMAIL` (see `docs/local-dev-admin.md`) so `/admin/*` is reachable without Google login.
 
 ### MCP server configuration
 
@@ -86,7 +86,7 @@ A new server is added in **all four** config files in one commit (use `enabled: 
 
 Package manager is **pnpm** (not npm/yarn). The `test` script chains `test:unit` then `test:e2e`.
 
-- `pnpm dev` — dev server on `http://localhost:5173`
+- `pnpm dev` — dev server on `http://localhost:5175`
 - `pnpm build` — production build (SvelteKit + Vite)
 - `pnpm check` — `svelte-kit sync` then `svelte-check` (typecheck + Svelte diagnostics). Run this after any `.svelte` or `.ts` edit.
 - `pnpm lint` — `prettier --check . && eslint .`

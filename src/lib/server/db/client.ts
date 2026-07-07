@@ -13,7 +13,7 @@ function getDb(): Database {
 	const databaseUrl = env.DATABASE_URL;
 	if (!databaseUrl) {
 		throw new Error(
-			"DATABASE_URL is not set. Copy .env.example to .env and fill in the Supabase pooler URL."
+			"DATABASE_URL is not set. Copy .env.example to .env and fill in the connection string for the app's Postgres."
 		);
 	}
 	const client = postgres(databaseUrl, { prepare: false });

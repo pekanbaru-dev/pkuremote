@@ -1,5 +1,5 @@
 /**
- * Events service — reads from the Supabase `events` table via Drizzle,
+ * Events service — reads from the `events` table via Drizzle,
  * with categories eager-loaded through the `event_categories` join.
  *
  * Replaces the previous hardcoded `services/dummy-events.ts`. Callers

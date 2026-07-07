@@ -2,7 +2,7 @@ import { pgTable, uuid, text, timestamp, integer, index, check } from "drizzle-o
 import { sql } from "drizzle-orm";
 
 /**
- * Events table — the canonical event row in Supabase.
+ * Events table — the canonical event row.
  *
  * The `category` column is the typed enum used for the EventCard's footer
  * CTA label (`workshop` → "Book Now", `meetup` / `talk` → "RSVP", else

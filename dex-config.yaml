@@ -1,0 +1,52 @@
+# Dex — LOCAL DEVELOPMENT ONLY OIDC provider.
+#
+# A faithful, offline, credential-free stand-in for the production issuer
+# (Google). The app talks to a generic OIDC issuer, so the SAME code path runs
+# here and against Google — only OIDC_ISSUER differs. This file is NOT shipped
+# to production (see docker-compose.prod.yml / docker-compose.deploy.yml, which
+# have no Dex service).
+#
+# Issuer topology (see docs/local-dev-admin.md): this config uses
+# `http://localhost:5556`, which works when the app runs on the HOST via
+# `pnpm dev` (recommended for OIDC work) — both the browser and the host-run
+# app reach Dex at localhost:5556. For a CONTAINERIZED app, switch both this
+# `issuer` and OIDC_ISSUER to `http://dex:5556` and add `127.0.0.1 dex` to your
+# /etc/hosts. `localhost:5556` with a containerized app is unsupported.
+
+issuer: http://localhost:5556
+
+storage:
+  type: memory
+
+web:
+  http: 0.0.0.0:5556
+
+oauth2:
+  # Skip the consent screen; the password login form is still shown so a
+  # developer picks which of the static test users to sign in as.
+  skipApprovalScreen: true
+
+staticClients:
+  - id: pkuremote-dev
+    name: PKU Remote (dev)
+    secret: pkuremote-dev-secret
+    redirectURIs:
+      - http://localhost:5175/auth/callback
+
+# Password-database login with a small set of deterministic test identities.
+# The local connector marks these emails verified, so id_tokens carry
+# `email_verified: true` and pass the app's strict verified-email gate.
+enablePasswordDB: true
+
+staticPasswords:
+  # Admin test user — email is in the dev ADMIN_EMAILS, so /admin is reachable.
+  - email: "admin@pkubersua.local"
+    # bcrypt hash of the password "password" (generated with `htpasswd -bnBC 10`).
+    hash: "$2a$10$axHGEKsgJQVy9h1/gmKp1OAS5RC4wPWGKzUsClkAQ5wALXUpWPG9a"
+    username: "admin"
+    userID: "11111111-1111-1111-1111-111111111111"
+  # Attendee test user — exercises booking under a non-admin identity.
+  - email: "attendee@pkubersua.local"
+    hash: "$2a$10$axHGEKsgJQVy9h1/gmKp1OAS5RC4wPWGKzUsClkAQ5wALXUpWPG9a"
+    username: "attendee"
+    userID: "22222222-2222-2222-2222-222222222222"

@@ -1,6 +1,6 @@
 # docs/
 
-Human-facing design & decision records for the team.
+Human-facing design & decision records — and setup guides — for the team.
 
 This folder is for **discussion and decisions between teammates** — the *why* behind
 significant changes, the options weighed, and what we chose. It's meant to be read by people.
@@ -16,6 +16,13 @@ contract that drives our AI-assisted implementation workflow (proposal → desig
 
 When a change is significant enough to explain to a teammate, write an ADR here **and** link it
 from the corresponding OpenSpec change (and the GitHub issue).
+
+## Guides
+
+Practical how-to docs for working on the project.
+
+- [Local development setup](local-dev.md) — spin up the local stack (app + Postgres + Dex OIDC), sign in with the test users, and troubleshoot common port conflicts.
+- [Local admin access](local-dev-admin.md) — reach `/admin` locally via the dev-login bypass (and the real Dex login path), plus why the bypass can't leak to production.
 
 ## Architecture Decision Records (`adr/`)
 

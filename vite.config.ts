@@ -11,6 +11,11 @@ export default defineConfig({
 	define: {
 		__ENABLE_CARTA_SSR_HIGHLIGHTER__: false
 	},
+	// Dev server on 5175 (not Vite's default 5173) so this project can run
+	// alongside another local Vite app that holds 5173. Preview/e2e stay on 4173.
+	server: {
+		port: 5175
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({

@@ -106,7 +106,7 @@ The homepage and a representative event detail page SHALL pass a manual Lighthou
 
 ### Requirement: The base URL is read from `PUBLIC_SITE_URL` everywhere
 
-The `PUBLIC_SITE_URL` environment variable (already used for `sitemap.xml` and canonical links) SHALL be the single source of truth for the site's absolute URL. The homepage, the event detail page, the sitemap endpoint, the robots endpoint, and the JSON-LD `organizer.url` SHALL all read from this variable. The variable's value in production is `https://pkubersua.com`; the value in local dev is `http://localhost:5173`. The `.env.example` file SHALL document both values.
+The `PUBLIC_SITE_URL` environment variable (already used for `sitemap.xml` and canonical links) SHALL be the single source of truth for the site's absolute URL. The homepage, the event detail page, the sitemap endpoint, the robots endpoint, and the JSON-LD `organizer.url` SHALL all read from this variable. The variable's value in production is `https://pkubersua.com`; the value in local dev is `http://localhost:5175`. The `.env.example` file SHALL document both values.
 
 #### Scenario: A developer changes `PUBLIC_SITE_URL` to a staging host
 
@@ -115,5 +115,5 @@ The `PUBLIC_SITE_URL` environment variable (already used for `sitemap.xml` and c
 
 #### Scenario: A reviewer checks the rendered canonical link
 
-- **WHEN** a reviewer fetches `/` with `PUBLIC_SITE_URL=http://localhost:5173`
-- **THEN** the `<link rel="canonical">` `href` is `http://localhost:5173/`.
+- **WHEN** a reviewer fetches `/` with `PUBLIC_SITE_URL=http://localhost:5175`
+- **THEN** the `<link rel="canonical">` `href` is `http://localhost:5175/`.

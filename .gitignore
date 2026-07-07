@@ -47,3 +47,6 @@ caddy_data/
 
 # Playwright MCP scratch output
 .playwright-mcp/
+
+# Local-only compose override (port remaps, etc.)
+docker-compose.override.yml

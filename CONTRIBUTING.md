@@ -16,13 +16,13 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5175` in your browser.
 
 ## Available commands
 
 | Command          | Description                                                            |
 | ---------------- | ---------------------------------------------------------------------- |
-| `pnpm dev`       | Dev server on `http://localhost:5173`                                  |
+| `pnpm dev`       | Dev server on `http://localhost:5175`                                  |
 | `pnpm build`     | Production build (SvelteKit + Vite)                                    |
 | `pnpm check`     | `svelte-kit sync` then `svelte-check` (typecheck + Svelte diagnostics) |
 | `pnpm lint`      | `prettier --check . && eslint .`                                       |

@@ -1,64 +1,21 @@
-import { createServerClient } from "@supabase/ssr";
 import { type Handle, redirect } from "@sveltejs/kit";
-import { sequence } from "@sveltejs/kit/hooks";
 import { dev } from "$app/environment";
-import { env } from "$env/dynamic/public";
 import { env as privateEnv } from "$env/dynamic/private";
 import { makeDevAdminUser, resolveDevLoginEmail } from "$lib/server/auth/dev-user";
+import { SESSION_COOKIE, resolveSessionUser } from "$lib/server/auth/session";
 
 // Authentication-guarded path prefixes. Matching unauthenticated requests are
 // redirected to /login. This is an AUTH-only guard — it does not evaluate admin
 // status; authorization for /admin/* is handled in src/routes/admin/+layout.server.ts.
 const GUARDED_PREFIXES = ["/myprofile", "/admin"];
 
-const supabase: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(
-		env.PUBLIC_SUPABASE_URL,
-		env.PUBLIC_SUPABASE_ANON_KEY,
-		{
-			cookies: {
-				getAll: () => event.cookies.getAll(),
-				setAll: (cookiesToSet) => {
-					for (const { name, value, options } of cookiesToSet) {
-						event.cookies.set(name, value, { ...options, path: options?.path ?? "/" });
-					}
-				}
-			}
-		}
-	);
-
-	event.locals.safeGetSession = async () => {
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
-		if (!session) {
-			return { session: null, user: null };
-		}
-
-		const {
-			data: { user },
-			error
-		} = await event.locals.supabase.auth.getUser();
-		if (error) {
-			return { session: null, user: null };
-		}
-
-		return { session, user };
-	};
-
-	return resolve(event, {
-		filterSerializedResponseHeaders: (name) =>
-			name === "content-range" || name === "x-supabase-api-version"
-	});
-};
-
 // One-time warning so it's obvious in the dev server logs that real auth is
 // being bypassed. `dev` is compiled to `false` in the production build.
 let devLoginWarned = false;
 
-const authGuard: Handle = async ({ event, resolve }) => {
+export const handle: Handle = async ({ event, resolve }) => {
 	// DEV-ONLY: when running under the dev server with DEV_ADMIN_EMAIL set,
-	// inject a synthetic user instead of reading the Supabase session. See
+	// inject a synthetic user instead of reading the session. See
 	// $lib/server/auth/dev-user for the double-gated safety rationale.
 	const devEmail = resolveDevLoginEmail(dev, privateEnv.DEV_ADMIN_EMAIL);
 	if (devEmail) {
@@ -70,7 +27,14 @@ const authGuard: Handle = async ({ event, resolve }) => {
 		}
 		event.locals.user = makeDevAdminUser(devEmail);
 	} else {
-		const { user } = await event.locals.safeGetSession();
+		// Validate the session against the sessions table (not a remote auth
+		// server). An unknown/expired session yields a null user; a stale cookie
+		// is cleared (resolveSessionUser also delete-on-encounters expired rows).
+		const token = event.cookies.get(SESSION_COOKIE);
+		const user = token ? await resolveSessionUser(token) : null;
+		if (token && !user) {
+			event.cookies.delete(SESSION_COOKIE, { path: "/" });
+		}
 		event.locals.user = user;
 	}
 
@@ -84,5 +48,3 @@ const authGuard: Handle = async ({ event, resolve }) => {
 
 	return resolve(event);
 };
-
-export const handle: Handle = sequence(supabase, authGuard);

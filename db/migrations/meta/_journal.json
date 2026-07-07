@@ -5,43 +5,8 @@
 		{
 			"idx": 0,
 			"version": "7",
-			"when": 1782298490039,
-			"tag": "0000_init",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1782314744623,
-			"tag": "0001_redundant_roxanne_simpson",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1783075499389,
-			"tag": "0002_panoramic_orphan",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1783077586626,
-			"tag": "0003_parallel_speed",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1783077747922,
-			"tag": "0004_lean_nekra",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1783078074766,
-			"tag": "0005_productive_spirit",
+			"when": 1783447286423,
+			"tag": "0000_natural_quasimodo",
 			"breakpoints": true
 		}
 	]
