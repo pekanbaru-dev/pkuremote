@@ -1,20 +1,17 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import type { User } from "@supabase/supabase-js";
 	import Menu from "@lucide/svelte/icons/menu";
 	import LogOut from "@lucide/svelte/icons/log-out";
 	import { Avatar, Button } from "$lib/components/primitives";
 	import { Sheet, SheetContent, SheetTrigger } from "$lib/components/ui/sheet";
 	import AdminSidebar from "./admin-sidebar.svelte";
 
-	let { user, children }: { user: User | null; children: Snippet } = $props();
+	let { user, children }: { user: App.User | null; children: Snippet } = $props();
 
 	let sheetOpen = $state(false);
 
-	const displayName = $derived(
-		(user?.user_metadata?.full_name as string | undefined) ?? user?.email ?? "Admin"
-	);
-	const avatarUrl = $derived(user?.user_metadata?.avatar_url as string | undefined);
+	const displayName = $derived(user?.displayName ?? user?.email ?? "Admin");
+	const avatarUrl = $derived(user?.avatarUrl ?? undefined);
 </script>
 
 <div class="bg-canvas text-ink min-h-screen">

@@ -1,5 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import { loadMyProfile } from "$lib/server/auth/myprofile-load";
+import { SESSION_COOKIE, deleteSession } from "$lib/server/auth/session";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -10,8 +11,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	signOut: async ({ locals }) => {
-		await locals.supabase.auth.signOut();
+	signOut: async ({ cookies }) => {
+		const token = cookies.get(SESSION_COOKIE);
+		if (token) {
+			await deleteSession(token);
+		}
+		cookies.delete(SESSION_COOKIE, { path: "/" });
 		redirect(303, "/");
 	}
 };

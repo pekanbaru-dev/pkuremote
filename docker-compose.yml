@@ -1,29 +1,77 @@
 # Local dev stack for the SvelteKit FE.
 #
-# Brings up Vite's dev server on http://localhost:5173 with hot reload, backed
-# by the Supabase Cloud project configured in `.env`. No Caddy, no HTTPS.
+# Brings up three services: `app` (Vite dev server on http://localhost:5175
+# with hot reload), `postgres` (in-stack database, mirroring prod), and a
+# DEV-ONLY `dex` OIDC provider (http://localhost:5556). No Caddy, no HTTPS,
+# no Supabase.
 #
 # Usage:
-#   docker compose up --build
-#   # then open http://localhost:5173
+#   docker compose up --build     # then open http://localhost:5175
 #
-# Edit a `.svelte` or `.ts` file under the repo root and Vite HMR picks it up.
+# OIDC topology (see docs/local-dev-admin.md): `dex-config.yaml` advertises
+# `http://localhost:5556`, which resolves identically from browser and app
+# ONLY when the app runs on the HOST via `pnpm dev` — the recommended way to
+# test the real login path. Point host-run `pnpm dev` at the composed services
+# with:
+#   DATABASE_URL=postgresql://pkuremote:pkuremote@localhost:5432/pkuremote
+#   OIDC_ISSUER=http://localhost:5556
+# For everyday non-auth UI work in the containerized `app`, use the
+# DEV_ADMIN_EMAIL bypass (see .env.example) and skip Dex entirely. Driving real
+# OIDC from the containerized app requires topology 2 (dex:5556 + /etc/hosts).
 
 services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pkuremote}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pkuremote}
+      POSTGRES_DB: ${POSTGRES_DB:-pkuremote}
+    ports:
+      # Published so host-run `pnpm db:migrate`/`pnpm db:seed`/`pnpm dev` can reach it.
+      - 127.0.0.1:5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pkuremote}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  dex:
+    image: ghcr.io/dexidp/dex:v2.41.1
+    command: dex serve /etc/dex/config.yaml
+    ports:
+      - 127.0.0.1:5556:5556
+    volumes:
+      - ./dex-config.yaml:/etc/dex/config.yaml:ro
+    restart: unless-stopped
+
   app:
     build:
       context: .
       target: dev
     command: pnpm dev --host 0.0.0.0
     ports:
-      - 127.0.0.1:5173:5173
+      - 127.0.0.1:5175:5175
     environment:
-      # SvelteKit reads $PUBLIC_* at build time and at runtime.
-      PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
-      PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
-      # Uploads land under the bind-mounted repo (→ host ./uploads, gitignored),
-      # so they persist across container restarts without a separate volume.
+      # In-stack Postgres over the compose network. Built from POSTGRES_* (not
+      # the host's DATABASE_URL, which points at localhost for host-run tooling)
+      # so the containerized app always reaches the `postgres` service.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-pkuremote}:${POSTGRES_PASSWORD:-pkuremote}@postgres:5432/${POSTGRES_DB:-pkuremote}
+      # OIDC → Dex. NOTE: with this containerized app, localhost:5556 points at
+      # the app, not Dex — real OIDC login needs host-run `pnpm dev` (topology 1)
+      # or dex:5556 + /etc/hosts (topology 2). Everyday work uses DEV_ADMIN_EMAIL.
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:5556}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-pkuremote-dev}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-pkuremote-dev-secret}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-http://localhost:5175/auth/callback}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-admin@pkubersua.local}
+      DEV_ADMIN_EMAIL: ${DEV_ADMIN_EMAIL:-}
+      # Uploads land under the bind-mounted repo (→ host ./uploads, gitignored).
       UPLOAD_DIR: /app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
       # Bind-mount the source so HMR sees live edits.
       - .:/app
@@ -36,3 +84,4 @@ services:
 volumes:
   app_node_modules:
   app_svelte_kit:
+  pg_data:

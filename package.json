@@ -57,12 +57,12 @@
 		"vitest-browser-svelte": "^2.1.1"
 	},
 	"dependencies": {
-		"@supabase/ssr": "^0.12.0",
-		"@supabase/supabase-js": "^2.108.2",
+		"arctic": "^3.7.0",
 		"carta-md": "^4.11.2",
 		"clsx": "^2.1.1",
 		"drizzle-orm": "^0.45.2",
 		"isomorphic-dompurify": "^3.18.0",
+		"jose": "^6.2.3",
 		"marked": "^18.0.5",
 		"nanoid": "^5.1.16",
 		"postgres": "^3.4.9",

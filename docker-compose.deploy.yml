@@ -1,50 +1,69 @@
 # Registry-based production stack — this is what the SERVER runs.
 #
-# Unlike docker-compose.prod.yml (which builds the image locally), this file
-# PULLS the image that the Deploy workflow built and pushed to GHCR. The server
-# never needs the source code — only this file, the Caddyfile, and a .env.
+# This host runs a shared `caddy-proxy` (managed by the `caddyku` CLI) that
+# fronts every app on the box — this file does NOT run its own Caddy. The
+# `app` service joins the external `caddy-net` network and publishes no ports;
+# caddyku registers the domain and reverse-proxies to it by container name.
+# The database is now IN-STACK (`postgres` service + `postgres_data` volume) —
+# no more external Supabase. See DEPLOY.md for the full setup.
+#
+# This file PULLS the image the Deploy workflow built and pushed to GHCR — the
+# server never needs the source code, only this file and a .env.
 #
 # First run on the server:
 #   IMAGE_TAG=v1.0.0 docker compose -f docker-compose.deploy.yml up -d
-# The Deploy workflow sets IMAGE_TAG for you on each release; `latest` is the
-# fallback. See DEPLOY.md for the full setup.
 
 services:
   app:
     image: ghcr.io/pekanbaru-dev/pkuremote:${IMAGE_TAG:-latest}
     pull_policy: always
+    container_name: pkuremote_app
     environment:
       PORT: 3000
       ORIGIN: https://${SITE_DOMAIN}
-      DATABASE_URL: ${DATABASE_URL}
-      PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
-      PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+      # In-stack Postgres over the internal (default) network.
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      # OIDC → Google in production (generic OIDC; same code path as dev's Dex).
+      OIDC_ISSUER: ${OIDC_ISSUER}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI}
       # Admin allow-list read at runtime by requireAdmin ($env/dynamic/private).
       # Without it the /admin panel fails closed (no admins) in production.
       ADMIN_EMAILS: ${ADMIN_EMAILS}
       UPLOAD_DIR: /data/uploads
     volumes:
       - uploads_data:/data/uploads
+    networks:
+      - caddy-net
+      - default
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2.8
-    depends_on:
-      - app
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+  postgres:
+    image: postgres:16
     environment:
-      SITE_DOMAIN: ${SITE_DOMAIN}
-      ACME_EMAIL: ${ACME_EMAIL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
+
+networks:
+  caddy-net:
+    external: true
 
 volumes:
-  caddy_data:
-  caddy_config:
   uploads_data:
+  postgres_data:

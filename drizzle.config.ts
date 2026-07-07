@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 
-const directUrl = process.env.DIRECT_URL;
-if (!directUrl) {
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
 	throw new Error(
-		"DIRECT_URL is not set. Copy .env.example to .env and fill in the Supabase direct connection string."
+		"DATABASE_URL is not set. Copy .env.example to .env and fill in the connection string for the app's Postgres."
 	);
 }
 
@@ -13,7 +13,7 @@ export default defineConfig({
 	out: "./db/migrations",
 	dialect: "postgresql",
 	dbCredentials: {
-		url: directUrl
+		url: databaseUrl
 	},
 	strict: true,
 	verbose: true

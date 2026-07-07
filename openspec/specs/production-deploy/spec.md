@@ -18,7 +18,7 @@ The project SHALL use `@sveltejs/adapter-node` (and SHALL NOT use `@sveltejs/ada
 #### Scenario: Dev server is unaffected
 
 - **WHEN** a developer runs `pnpm dev`
-- **THEN** the dev server still starts on `http://localhost:5173` and the adapter swap does not change the dev-time behavior
+- **THEN** the dev server still starts on `http://localhost:5175` and the adapter swap does not change the dev-time behavior
 
 ### Requirement: Multi-stage Dockerfile produces a small runtime image
 

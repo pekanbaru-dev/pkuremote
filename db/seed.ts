@@ -1,53 +1,34 @@
 /**
- * Seed script — populates the Supabase project with one row per content table
+ * Seed script — populates the app's Postgres with one row per content table
  * so Drizzle Studio and the FE have something to show.
  *
  * Idempotent: re-running does not error or duplicate rows (uses
  * `onConflictDoNothing` and a deterministic seed user).
  *
  * Prerequisites:
- *   - `.env` is filled in (DATABASE_URL, DIRECT_URL, SUPABASE_SERVICE_ROLE_KEY)
+ *   - `.env` is filled in (single `DATABASE_URL`)
  *   - `pnpm db:migrate` has been run
+ *
+ * The seed user is a direct insert into the app-owned `users` table (no
+ * external auth admin API, no service-role key).
  */
 import "dotenv/config";
-import { createClient } from "@supabase/supabase-js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { sql } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "./schema";
-import { profiles, events, announcements, posts, categories, eventCategories } from "./schema";
+import {
+	users,
+	profiles,
+	events,
+	announcements,
+	posts,
+	categories,
+	eventCategories
+} from "./schema";
 
 const SEED_USER_ID = "00000000-0000-0000-0000-000000000001";
 const SEED_USER_EMAIL = "seed-author@pkubersua.local";
-
-async function ensureSeedUser(): Promise<void> {
-	const url = process.env.PUBLIC_SUPABASE_URL;
-	const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-	if (!url || !serviceKey) {
-		throw new Error("PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for seeding.");
-	}
-
-	const supabase = createClient(url, serviceKey, {
-		auth: { autoRefreshToken: false, persistSession: false }
-	});
-
-	const { data, error } = await supabase.auth.admin.createUser({
-		id: SEED_USER_ID,
-		email: SEED_USER_EMAIL,
-		email_confirm: true,
-		aud: "authenticated"
-	});
-
-	if (error && error.message !== "{}" && !error.message.includes("already been registered")) {
-		throw new Error(`Failed to create seed user: ${error.message}`);
-	}
-
-	if (data.user) {
-		console.log(`  ✓ seed user ${SEED_USER_EMAIL} (${data.user.id})`);
-	} else {
-		console.log(`  · seed user ${SEED_USER_EMAIL} already exists`);
-	}
-}
 
 const CATEGORIES: { name: string; slug: string }[] = [
 	{ name: "Workshop", slug: "workshop" },
@@ -126,10 +107,6 @@ const EVENTS: {
 ];
 
 async function seedContent(): Promise<void> {
-	// Prefer DATABASE_URL (the pooler) because the direct-connection host
-	// (db.<project-ref>.supabase.co) is IPv6-only and not reachable from
-	// every network. The pooler is fine for INSERTs and supports the
-	// `onConflictDoNothing` semantics the seed relies on.
 	const url = process.env.DATABASE_URL;
 	if (!url) {
 		throw new Error("DATABASE_URL is required for seeding.");
@@ -138,7 +115,11 @@ async function seedContent(): Promise<void> {
 	const client = postgres(url, { prepare: false });
 	const db = drizzle(client, { schema });
 
-	console.log("  · inserting profiles row");
+	console.log("  · inserting seed user + profile");
+	await db
+		.insert(users)
+		.values({ id: SEED_USER_ID, email: SEED_USER_EMAIL, emailVerified: true })
+		.onConflictDoNothing();
 	await db
 		.insert(profiles)
 		.values({ id: SEED_USER_ID, displayName: "Seed Author" })
@@ -222,8 +203,7 @@ async function seedContent(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-	console.log("Seeding Supabase project…");
-	await ensureSeedUser();
+	console.log("Seeding database…");
 	await seedContent();
 	console.log("Seed complete.");
 }

@@ -1,14 +1,15 @@
-# Production stack for the SvelteKit FE.
+# Production stack for the SvelteKit FE (builds the image locally).
 #
-# Brings up two services: `app` (the prod Node bundle) and `caddy` (HTTPS
-# reverse proxy with automatic Let's Encrypt certs). The `app` service is
-# reachable only on the internal Docker network; the `caddy` service
-# publishes ports 80 and 443 to the host.
+# Three services: `app` (the prod Node bundle), `postgres` (in-stack database —
+# no more external Supabase), and `caddy` (HTTPS reverse proxy with automatic
+# Let's Encrypt certs). Only `caddy` publishes host ports (80/443); `app` and
+# `postgres` are reachable only on the internal Docker network. No Supabase.
 #
 # Usage:
-#   cp .env.example .env   # fill in SITE_DOMAIN and ACME_EMAIL
+#   cp .env.example .env   # fill SITE_DOMAIN, ACME_EMAIL, POSTGRES_*, OIDC_*
 #   docker compose -f docker-compose.prod.yml up -d --build
-#   docker compose -f docker-compose.prod.yml logs -f caddy   # watch cert issuance
+#   # apply migrations against the in-stack db (one-off, from the app image):
+#   docker compose -f docker-compose.prod.yml run --rm app node -e "…"  # see DEPLOY.md
 #
 # Rollback:
 #   docker compose -f docker-compose.prod.yml down
@@ -23,18 +24,40 @@ services:
     environment:
       PORT: 3000
       ORIGIN: https://${SITE_DOMAIN}
-      DATABASE_URL: ${DATABASE_URL}
-      PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
-      PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+      # In-stack Postgres over the internal network (no external database).
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       PUBLIC_SITE_URL: https://${SITE_DOMAIN}
+      # OIDC → Google in production (generic OIDC; same code path as dev's Dex).
+      OIDC_ISSUER: ${OIDC_ISSUER}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI}
       # Admin allow-list read at runtime by requireAdmin ($env/dynamic/private).
-      # Without this the /admin panel fails closed (no admins) in production.
+      # Without it the /admin panel fails closed (no admins) in production.
       ADMIN_EMAILS: ${ADMIN_EMAILS}
       # Uploaded event banners live here, backed by the named volume below so
       # they persist across redeploys. Matches the dir created in the Dockerfile.
       UPLOAD_DIR: /data/uploads
     volumes:
       - uploads_data:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   caddy:
@@ -57,3 +80,4 @@ volumes:
   caddy_data:
   caddy_config:
   uploads_data:
+  postgres_data:

@@ -20,11 +20,11 @@ describe("resolveDevLoginEmail", () => {
 });
 
 describe("makeDevAdminUser", () => {
-	it("builds a Supabase-shaped user carrying the given email and the fixed id", () => {
+	it("builds an app user carrying the given email and the fixed id", () => {
 		const user = makeDevAdminUser("admin@example.com");
 		expect(user.id).toBe(DEV_ADMIN_USER_ID);
 		expect(user.email).toBe("admin@example.com");
-		expect(user.aud).toBe("authenticated");
-		expect(user.app_metadata.provider).toBe("dev");
+		expect(user.displayName).toBe("Dev Admin");
+		expect(user.avatarUrl).toBeNull();
 	});
 });

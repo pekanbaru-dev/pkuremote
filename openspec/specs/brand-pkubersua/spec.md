@@ -27,12 +27,12 @@ Every tracked file that references the old brand name SHALL be updated to use "P
 
 ### Requirement: The public surface URL is `pkubersua.com`
 
-The canonical public URL of the site SHALL be `https://pkubersua.com`. This URL is the value of `PUBLIC_SITE_URL` in production, the value of the canonical link on every public page, the host portion of every URL in `sitemap.xml`, and the host portion of the `Sitemap:` line in `robots.txt`. The local dev value remains `http://localhost:5173`. The `.env.example` file SHALL list both values.
+The canonical public URL of the site SHALL be `https://pkubersua.com`. This URL is the value of `PUBLIC_SITE_URL` in production, the value of the canonical link on every public page, the host portion of every URL in `sitemap.xml`, and the host portion of the `Sitemap:` line in `robots.txt`. The local dev value remains `http://localhost:5175`. The `.env.example` file SHALL list both values.
 
 #### Scenario: A developer sets up local dev
 
 - **WHEN** a developer copies `.env.example` to `.env` and starts the dev server
-- **THEN** `PUBLIC_SITE_URL=http://localhost:5173` and the homepage's canonical link points at `http://localhost:5173/`.
+- **THEN** `PUBLIC_SITE_URL=http://localhost:5175` and the homepage's canonical link points at `http://localhost:5175/`.
 
 #### Scenario: A production deploy happens
 

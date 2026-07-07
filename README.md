@@ -8,64 +8,70 @@ The public site for the Pekanbaru remote-worker community — a quiet, editorial
 
 ## Local development
 
+> **New to the project?** [`docs/local-dev.md`](docs/local-dev.md) is the
+> step-by-step setup guide — spin up the local stack (app + Postgres + Dex), sign
+> in with the test users, and troubleshoot common port conflicts. The sections
+> below are the condensed version.
+
 ### Quickstart (Docker — recommended)
 
-The fastest path. No local Node required, hot reload works.
+The fastest path. No local Node required, hot reload works. Brings up the app,
+an in-stack Postgres, and a dev-only Dex OIDC provider.
 
 ```sh
-cp .env.example .env          # fill in the Supabase project values (see step 2)
-pnpm db:migrate               # apply the initial schema
+cp .env.example .env          # defaults work out of the box for local dev
+docker compose up --build     # app :5175, postgres :5432, dex :5556
+pnpm db:migrate               # apply the schema to the composed Postgres
 pnpm db:seed                  # insert one row per content table
-docker compose up --build     # start Vite on http://localhost:5173
+# open http://localhost:5175
 ```
 
-Stop with `Ctrl-C` or `docker compose down`.
+Stop with `Ctrl-C` or `docker compose down`. For `/admin` work, set
+`DEV_ADMIN_EMAIL` (see [Signing in locally](#1a-signing-in-locally)).
 
-### Quickstart (host Node — fastest iteration)
+### Quickstart (host Node — fastest iteration, and best for OIDC work)
 
 ```sh
 cp .env.example .env
+docker compose up -d postgres dex   # just the db + Dex; app runs on the host
 pnpm install
 pnpm db:migrate
 pnpm db:seed
-pnpm dev                      # Vite on http://localhost:5173
+pnpm dev                            # Vite on http://localhost:5175
 ```
 
 ### Full walkthrough
 
-Prerequisites: **Node 22+** (for the host-Node path), **Docker** (for the Docker path), **pnpm 9+**, and a free [Supabase Cloud](https://supabase.com) account.
+Prerequisites: **Node 22+** (for the host-Node path), **Docker** (for both
+paths), **pnpm 9+**. No external accounts — the database and the OIDC provider
+both run locally in Docker.
 
-### 1. Create a Supabase project
+### 1. The local dev stack
 
-1. Go to [supabase.com/dashboard](https://supabase.com/dashboard) and create a new project (free tier is fine).
-2. Wait for the project to finish provisioning (~2 minutes).
-3. From the dashboard, copy:
-   - **Project URL** and **anon key** and **service_role key** from `Project Settings → API`.
-   - **Connection string (Transaction pooler)** and **Direct connection** from `Project Settings → Database` (use the URI format).
+`docker compose up` brings up three services (no Supabase, no cloud accounts):
 
-> Free-tier projects pause after 7 days of inactivity. Unpause from the dashboard; the data is preserved.
+- **`postgres`** — the app's own Postgres, published on `localhost:5432`.
+- **`dex`** — a dev-only [Dex](https://dexidp.io) OIDC provider on
+  `localhost:5556`, a faithful offline stand-in for Google (the app's auth code
+  path is identical; only `OIDC_ISSUER` differs between dev and prod).
+- **`app`** — Vite's dev server on `localhost:5175`, bind-mounted for HMR.
 
-### 1a. Enable the Google sign-in provider
+For OIDC work, the **host-Node path is recommended** (run `pnpm dev` on the host
+against the composed `postgres`/`dex`), because the issuer `http://localhost:5556`
+then resolves identically from the browser and the app. See
+[`docs/local-dev-admin.md`](docs/local-dev-admin.md) for the containerized-app topology.
 
-The Supabase side is one toggle. The reason it's not "just a switch" is that Google requires **you** to register an OAuth client (Supabase can't share a generic one). Two prep steps in Google Cloud, one toggle in Supabase, one allow-list entry.
+### 1a. Signing in locally
 
-**In Google Cloud Console** — [console.cloud.google.com](https://console.cloud.google.com/):
+Two ways to authenticate — full detail in [`docs/local-dev-admin.md`](docs/local-dev-admin.md):
 
-1. **APIs & Services → OAuth consent screen** → External → fill in app name + support email → save.
-2. **APIs & Services → Credentials → Create Credentials → OAuth client ID** → **Web application** → under **Authorized redirect URIs** add:
-   ```
-   https://<your-project-ref>.supabase.co/auth/v1/callback
-   ```
-   Save and copy the **Client ID** and **Client secret**.
-
-**In Supabase** — [supabase.com/dashboard](https://supabase.com/dashboard):
-
-3. **Authentication → Providers → Google** → toggle on → paste the Client ID and Client secret → save. The Supabase callback URL shown on this page must match step 2 byte-for-byte.
-4. **Authentication → URL Configuration** → add `http://localhost:5173/auth/callback` (dev) and your prod origin + `/auth/callback` (e.g. `https://example.com/auth/callback`) to the redirect allow-list. Supabase validates the **full** `redirectTo` URL — including the `/auth/callback` path — against this list, so a bare-origin entry like `http://localhost:5173` is not enough and the OAuth round-trip will be rejected. (`/login` builds the `redirectTo` as `<origin>/auth/callback?next=<safe-target>`.)
-
-That's it. A `profiles` row is created automatically the first time a Google identity signs in, by the `handle_new_user` trigger in `db/migrations/0001_*.sql`.
-
-> **Can't do Google OAuth on localhost?** For working on the `/admin` panel you can use the dev-login bypass instead — see [`LOCAL_DEV_ADMIN.md`](LOCAL_DEV_ADMIN.md).
+- **Dev-login bypass (fastest)** — set `DEV_ADMIN_EMAIL` (and add the same email
+  to `ADMIN_EMAILS`) in `.env`; `pnpm dev` then signs you in as that user with
+  no OAuth. Best for day-to-day admin work. Run `pnpm db:seed-dev-admin` once so
+  booking / `/myprofile` work too.
+- **Real OIDC via Dex** — leave `DEV_ADMIN_EMAIL` unset and sign in through the
+  Dex login form (test users `admin@pkubersua.local` / `attendee@pkubersua.local`,
+  password `password`). Exercises the real Arctic + session machinery.
 
 ### 2. Configure environment
 
@@ -73,49 +79,55 @@ That's it. A `profiles` row is created automatically the first time a Google ide
 cp .env.example .env
 ```
 
-Open `.env` and fill in the values you copied. The five variables the FE and the Drizzle scripts need are:
+The committed defaults in `.env.example` work as-is for the local Docker stack.
+The variables the FE and the Drizzle scripts need are:
 
-- `PUBLIC_SUPABASE_URL` — Project URL
-- `PUBLIC_SUPABASE_ANON_KEY` — anon key
-- `SUPABASE_SERVICE_ROLE_KEY` — service_role key (server-only; never expose to the browser)
-- `DATABASE_URL` — Transaction pooler (port 6543, used at runtime)
-- `DIRECT_URL` — Direct connection (port 5432, used for migrations and seed)
+- `DATABASE_URL` — a single direct connection to the app's Postgres. Local
+  default: `postgresql://pkuremote:pkuremote@localhost:5432/pkuremote` (used by
+  `pnpm db:migrate`/`db:seed` and host-run `pnpm dev`; the containerized app
+  reaches `postgres:5432` on its own).
+- `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` — credentials for the
+  in-stack `postgres` service.
+- `OIDC_ISSUER` / `OIDC_CLIENT_ID` / `OIDC_CLIENT_SECRET` / `OIDC_REDIRECT_URI` —
+  the OIDC provider. Local defaults point at Dex; in prod they point at Google.
+- `ADMIN_EMAILS` — comma-separated admin allow-list (`/admin` access).
+- `DEV_ADMIN_EMAIL` — optional dev-login bypass (see above).
 
-> The keys in `.env.example` are placeholders. The values you put in `.env` MUST NOT be committed — `.env` is git-ignored. **Dev-only keys must be replaced before any production deploy.**
->
-> The same `.env` shape works for dev (a free-tier project) and prod (a paid project); only the URL and the keys change between environments. No code change is required.
+> `.env` is git-ignored — never commit real secrets. There is **no** Supabase
+> URL/anon/service-role key and **no** `DIRECT_URL` — the app owns its Postgres
+> and its auth.
 
 ### 3. What the commands do
 
 The Quickstart above is the minimum to get the dev server running. For reference:
 
-- `cp .env.example .env` — copies the env template. You only need the Supabase values; the production deploy vars (`SITE_DOMAIN`, `ACME_EMAIL`, `APP_PORT`) are ignored locally.
+- `cp .env.example .env` — copies the env template; the defaults work for local dev.
+- `docker compose up` — starts `app` + `postgres` + `dex`; the repo is bind-mounted so edits trigger HMR.
 - `pnpm install` — installs Node deps on the host. Not needed if you only use the Docker path.
-- `pnpm db:migrate` — applies the SQL in `db/migrations/` to your Supabase project. Idempotent.
-- `pnpm db:seed` — inserts one row into each of `profiles`, `events`, `announcements`, `posts` so the FE and Drizzle Studio have something to show. Re-runnable, never duplicates.
-- `pnpm dev` — Vite's dev server on `http://localhost:5173` with hot reload (host Node).
-- `docker compose up --build` — same dev server, but everything in a container; the repo is bind-mounted so edits trigger HMR.
+- `pnpm db:migrate` — applies the SQL in `db/migrations/` to the Postgres at `DATABASE_URL`. Idempotent.
+- `pnpm db:seed` — inserts one row into each of `users`/`profiles`, `events`, `announcements`, `posts` so the FE and Drizzle Studio have something to show. Re-runnable, never duplicates.
+- `pnpm dev` — Vite's dev server on `http://localhost:5175` with hot reload (host Node).
 
-Open `http://localhost:5173` once any of the dev-server options is up. Run `pnpm db:studio` in another terminal for Drizzle Studio.
+Open `http://localhost:5175` once a dev server is up. Run `pnpm db:studio` in another terminal for Drizzle Studio.
 
 ### Useful commands
 
-| Command                  | What it does                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| `pnpm dev`               | Dev server on `http://localhost:5173` (host Node)                               |
-| `docker compose up`      | Dev server on `http://localhost:5173` (everything in Docker)                    |
-| `pnpm db:generate`       | Generate a new migration after editing `db/schema/`                             |
-| `pnpm db:migrate`        | Apply pending migrations to the configured Supabase project                     |
-| `pnpm db:push`           | Push schema changes directly (prototyping only — does not create a migration)   |
-| `pnpm db:studio`         | Open Drizzle Studio against the configured Supabase project                     |
-| `pnpm db:seed`           | Idempotently insert dev data                                                    |
-| `pnpm db:seed-dev-admin` | Provision the dev-login admin user ([`LOCAL_DEV_ADMIN.md`](LOCAL_DEV_ADMIN.md)) |
+| Command                  | What it does                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `pnpm dev`               | Dev server on `http://localhost:5175` (host Node)                                         |
+| `docker compose up`      | Dev server + Postgres + Dex (everything in Docker)                                        |
+| `pnpm db:generate`       | Generate a new migration after editing `db/schema/`                                       |
+| `pnpm db:migrate`        | Apply pending migrations to the Postgres at `DATABASE_URL`                                |
+| `pnpm db:push`           | Push schema changes directly (prototyping only — does not create a migration)             |
+| `pnpm db:studio`         | Open Drizzle Studio against the configured Postgres                                       |
+| `pnpm db:seed`           | Idempotently insert dev data                                                              |
+| `pnpm db:seed-dev-admin` | Provision the dev-login admin user ([`docs/local-dev-admin.md`](docs/local-dev-admin.md)) |
 
 ## Commands
 
 | Command            | Description                                                            |
 | ------------------ | ---------------------------------------------------------------------- |
-| `pnpm dev`         | Dev server on `http://localhost:5173`                                  |
+| `pnpm dev`         | Dev server on `http://localhost:5175`                                  |
 | `pnpm build`       | Production build (SvelteKit + Vite)                                    |
 | `pnpm check`       | `svelte-kit sync` then `svelte-check` (typecheck + Svelte diagnostics) |
 | `pnpm lint`        | `prettier --check . && eslint .`                                       |
@@ -124,8 +136,8 @@ Open `http://localhost:5173` once any of the dev-server options is up. Run `pnpm
 | `pnpm test:e2e`    | Playwright (installs browsers first)                                   |
 | `pnpm test`        | Unit then e2e, in that order                                           |
 | `pnpm db:generate` | Generate a new Drizzle migration from `db/schema/`                     |
-| `pnpm db:migrate`  | Apply pending migrations to Supabase                                   |
-| `pnpm db:push`     | Push schema directly to Supabase (no migration file)                   |
+| `pnpm db:migrate`  | Apply pending migrations to the Postgres at `DATABASE_URL`             |
+| `pnpm db:push`     | Push schema directly to the DB (no migration file)                     |
 | `pnpm db:studio`   | Open Drizzle Studio                                                    |
 | `pnpm db:seed`     | Insert dev data (idempotent)                                           |
 
@@ -133,53 +145,18 @@ Verify after edits: `pnpm check` → `pnpm lint` → `pnpm test`.
 
 ## Deploy (production)
 
-Production is a two-container stack: the SvelteKit Node build (`app`) fronted by Caddy (`caddy`) for HTTPS with automatic Let's Encrypt certs. The `app` container is reachable only on the internal Docker network; the `caddy` container publishes ports `80` and `443` to the host.
+Production is a tag-triggered GHCR image deployed by GitHub Actions onto a VPS,
+where it runs as a three-service stack — the SvelteKit Node build (`app`), an
+in-stack `postgres`, and a shared Caddy reverse proxy (managed by the
+[`caddyku`](https://github.com/jufianto/caddyku) CLI) that terminates HTTPS with
+automatic Let's Encrypt certs. Auth is the app's own OIDC flow (Arctic +
+DB-backed sessions) against Google — there is no Supabase.
 
-### 1. Prerequisites
-
-- A VPS running Linux with Docker + Docker Compose v2.
-- DNS: an **A** (or **AAAA**) record for `$SITE_DOMAIN` pointing at the host's public IP. **This must be in place before the first deploy**, otherwise Caddy will retry and fail to obtain a cert. Verify with `dig +short $SITE_DOMAIN`.
-- A Supabase Cloud project (paid tier for prod, or a separate free-tier project to isolate dev data).
-- The host's public IP allowed through the cloud firewall on TCP `80` and `443`.
-
-### 2. Configure environment
-
-On the server:
-
-```sh
-cp .env.example .env
-```
-
-Edit `.env` and set the production values:
-
-- `SITE_DOMAIN` — the FQDN the site serves (must match the DNS record).
-- `ACME_EMAIL` — contact email for the Let's Encrypt account (uncomment the line).
-- `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` — from the production Supabase project's API Settings.
-- `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL`, `DIRECT_URL` — from the production project.
-
-> The keys in `.env` are dev-only for a free-tier project. **The values in this server-side `.env` MUST be the production project's values**, not the dev project's.
-
-### 3. Start the stack
-
-```sh
-docker compose -f docker-compose.prod.yml up -d --build
-```
-
-Watch the cert issuance:
-
-```sh
-docker compose -f docker-compose.prod.yml logs -f caddy
-```
-
-The first start takes ~30 seconds while Caddy talks to Let's Encrypt. When you see `certificate obtained successfully`, the site is live at `https://$SITE_DOMAIN`.
-
-### 4. Roll back
-
-```sh
-docker compose -f docker-compose.prod.yml down
-```
-
-The `caddy_data` and `caddy_config` named volumes persist by default; destroy them only if you want a clean slate (this forces a fresh Let's Encrypt registration on the next start).
+**See [`DEPLOY.md`](DEPLOY.md) for the full runbook**: one-time server setup
+(Docker, firewall, `caddyku`, the Google OAuth client, the server `.env`), the
+GitHub `production` Environment + secrets, and the release / rollback flow
+(`git tag v1.2.0 && git push origin v1.2.0`). Database migrations are applied
+manually over an SSH tunnel (also in `DEPLOY.md`), not by the deploy.
 
 ## Project structure
 
@@ -195,15 +172,16 @@ src/
     ├── +page.svelte      # Landing page (header, hero, event, announcements, posts, about, footer)
     └── layout.css        # Tailwind v4 @theme tokens + base + component classes
 db/
-├── schema/               # Drizzle table definitions (Postgres)
+├── schema/               # Drizzle table definitions (users, oauth_accounts, sessions, profiles, …)
 ├── migrations/           # Generated SQL migrations (committed)
-└── seed.ts               # Idempotent dev-data seeder
+├── seed.ts               # Idempotent dev-data seeder
+└── seed-dev-admin.ts     # Provision the dev-login bypass user (docs/local-dev-admin.md)
 
 # Container / deploy
 Dockerfile                # multi-stage: base / build / dev / runtime
-docker-compose.yml        # local dev: Vite on :5173
-docker-compose.prod.yml   # production: app + caddy (HTTPS, Let's Encrypt)
-Caddyfile                 # Caddy v2 config (HTTP→HTTPS, HSTS, reverse proxy)
+docker-compose.yml        # local dev: app + postgres + dex (OIDC) on :5175/:5432/:5556
+docker-compose.deploy.yml # production: app + postgres, joins the shared caddy-proxy (see DEPLOY.md)
+dex-config.yaml           # dev-only Dex OIDC provider config
 .dockerignore             # keep the build context small
 ```
 
