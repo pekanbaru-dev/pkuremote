@@ -27,10 +27,10 @@ rollback ────────────▶ Actions ▸ Deploy (production)
                        enter an older image tag, e.g. sha-abc1234 (no rebuild)
 ```
 
-Production deploys on every **merge to `master`**, but the `production`
-Environment's **Required reviewers** hold the job at "Waiting" until you
-**Approve** — so nothing goes live unattended. A push to **`staging-test`**
-force-deploys with no gate (currently to the same box/domain/DB as prod).
+Production deploys on every **merge to `master`**, gated by the `production`
+Environment's **Required reviewers** (the job waits for an Approve click). A push
+to **`staging-test`** force-deploys with **no gate** — it goes live immediately
+on the same box/domain/DB as prod (no separate staging host yet).
 
 ---
 
@@ -173,31 +173,23 @@ Non-secret; baked into the image at build time:
 | `PUBLIC_SITE_URL`      | `https://pkubersua.web.id` |
 | `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`      |
 
-### SSH secrets live at the **repository** level
+### Secrets & the approval gate
 
-The deploy connection secrets are **repository** secrets (Settings ▸ Secrets and
-variables ▸ Actions ▸ _Repository secrets_), **not** environment secrets — the
-`staging-test` workflow has no environment (so no gate) and can only read
-repo-level secrets, and production shares the same box:
+The two workflows authenticate differently — on purpose:
 
-| Secret            | Purpose                                    |
-| ----------------- | ------------------------------------------ |
-| `SSH_HOST`        | server IP or hostname                      |
-| `SSH_USER`        | the deploy user                            |
-| `SSH_PRIVATE_KEY` | private half of the deploy key (see below) |
-| `SSH_PORT`        | SSH port if not `22` (optional)            |
-| `DEPLOY_DIR`      | e.g. `/home/<user>/projects/pkuremote`     |
+- **Production (`deploy.yml`, on `master`)** runs with `environment: production`,
+  which is the **approval gate** (Required reviewers) and also holds its SSH
+  secrets. Nothing ships to prod without an Approve click.
+- **Staging (`deploy-staging.yml`, on `staging-test`)** has **no** environment —
+  that's what makes it force-deploy — so it reads the SSH connection from
+  **repository** secrets instead.
 
-### The `production` Environment (Settings ▸ Environments ▸ New environment)
+So the connection details live in **both** scopes:
 
-Name it **`production`**, then:
-
-- **Required reviewers** ▸ add yourself — this is the **approval gate**: every
-  merge-to-`master` deploy pauses at "Waiting" until you Approve.
-- **Deployment branches and tags** ▸ _Selected_ ▸ add rule **`master`** — only
-  `master` may deploy to this environment.
-- No environment secrets needed — the workflow reads the repo-level SSH secrets
-  above.
+| Scope                        | Where                                                     | Holds                                                                                                     |
+| ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `production` **Environment** | Settings ▸ Environments ▸ production                      | **Required reviewers** (gate) + `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SSH_PORT` (opt), `DEPLOY_DIR` |
+| **Repository** secrets       | Settings ▸ Secrets and variables ▸ Actions ▸ _Repository_ | the same `SSH_*` + `DEPLOY_DIR` (so the ungated staging deploy can authenticate)                          |
 
 ### Deploy SSH key
 
