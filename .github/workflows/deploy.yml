@@ -6,7 +6,7 @@ name: Deploy (production)
 #
 #   Release : merge a PR to master -> approve the "Waiting" deployment in Actions
 #   Rollback: Actions -> Deploy (production) -> "Run workflow" -> enter an older
-#             image tag (e.g. sha-abc1234 or latest)
+#             immutable image tag (e.g. sha-abc1234; NOT latest)
 #
 # Requires (see DEPLOY.md):
 #   - REPO-level secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_DIR
@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       image:
-        description: "Existing image tag to redeploy (rollback), e.g. sha-abc1234 or latest"
+        description: "Immutable image tag to redeploy, e.g. sha-abc1234 (NOT latest — latest is overwritten on every deploy, so it never rolls back)"
         required: true
 
 # Never run two production-target deploys at once (staging shares this group).
