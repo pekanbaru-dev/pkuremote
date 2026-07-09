@@ -1,14 +1,12 @@
 name: Deploy (staging-test)
 
 # Force-deploys the `staging-test` branch with NO approval gate — a push here
-# goes live immediately. There is no separate staging server yet, so this
-# targets the SAME box, domain, and database as production
-# (https://pkubersua.web.id). Treat a push to `staging-test` as "deploy to prod
-# right now, no approval." When a real staging host exists, point this at it.
+# builds and deploys immediately (no PR, no Approve click). There is no separate
+# staging host yet, so it targets the SAME box/domain/DB as production
+# (https://pkubersua.web.id): a push to `staging-test` goes live on the real site.
 #
-# Uses REPO-level secrets (SSH_HOST/SSH_USER/SSH_PRIVATE_KEY/DEPLOY_DIR) — it
-# has no `environment:` (that's what removes the gate), so it cannot read
-# environment-scoped secrets.
+# It has NO `environment:` (that's what removes the gate), so it authenticates
+# with REPO-level secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_DIR.
 on:
   push:
     branches: [staging-test]
@@ -27,7 +25,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # No `environment:` on purpose → no approval gate (force deploy).
+    # No `environment:` on purpose → no approval gate (force deploy). Reads
+    # repo-level SSH secrets (env-scoped secrets would require the gated env).
     steps:
       - uses: actions/checkout@v4
 
