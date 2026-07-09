@@ -43,7 +43,7 @@ Note its public IP.
 
 ### 2. Point DNS at it **before the first deploy**
 
-Create an `A` record: `pkubersua.com → <server IP>`. The shared Caddy cannot
+Create an `A` record: `pkubersua.web.id → <server IP>`. The shared Caddy cannot
 obtain a TLS certificate until the domain resolves to the server.
 
 ### 3. Install Docker + Compose
@@ -84,7 +84,7 @@ cd ~/projects/pkuremote
 # copy docker-compose.deploy.yml from the repo (scp, git archive, or paste)
 ```
 
-`DEPLOY_DIR` (the GitHub Environment secret, below) must point at this directory.
+`DEPLOY_DIR` (the GitHub repository secret, below) must point at this directory.
 
 ### 6. Set up the Google OAuth client
 
@@ -92,8 +92,8 @@ Auth is a generic OIDC flow; in production the issuer is Google.
 
 1. Google Cloud Console ▸ **APIs & Services ▸ Credentials ▸ Create credentials
    ▸ OAuth client ID ▸ Web application**.
-2. **Authorized redirect URI**: `https://pkubersua.com/auth/callback` (the app's
-   own callback — no Supabase redirect URL).
+2. **Authorized redirect URI**: `https://pkubersua.web.id/auth/callback` (the
+   app's own callback — no Supabase redirect URL).
 3. Note the **Client ID** and **Client secret** for the server `.env` below.
 
 ### 7. Create the server `.env`
@@ -103,7 +103,7 @@ In `~/projects/pkuremote/.env` (never committed). Read by
 
 ```ini
 # --- Domain ---
-SITE_DOMAIN=pkubersua.com
+SITE_DOMAIN=pkubersua.web.id
 
 # --- In-stack Postgres (the database is no longer external) ---
 POSTGRES_USER=pkuremote
@@ -114,10 +114,10 @@ POSTGRES_DB=pkuremote
 OIDC_ISSUER=https://accounts.google.com
 OIDC_CLIENT_ID=<google-client-id>
 OIDC_CLIENT_SECRET=<google-client-secret>
-OIDC_REDIRECT_URI=https://pkubersua.com/auth/callback
+OIDC_REDIRECT_URI=https://pkubersua.web.id/auth/callback
 
 # --- Admin access (comma-separated admin emails) ---
-ADMIN_EMAILS=admin@pkubersua.com
+ADMIN_EMAILS=you@gmail.com,teammate@gmail.com
 ```
 
 `DATABASE_URL` is **not** set by hand — the compose file builds it from the
@@ -136,7 +136,7 @@ caddyku init-app \
   --compose-file docker-compose.deploy.yml \
   --service app \
   --container pkuremote_app \
-  --domain pkubersua.com \
+  --domain pkubersua.web.id \
   --upstream pkuremote_app:3000
 ```
 
@@ -175,21 +175,32 @@ Non-secret; baked into the image at build time:
 
 ### Secrets & the approval gate
 
-The two workflows authenticate differently — on purpose:
+Both workflows read the **same repository-level** SSH secrets — the ungated
+`staging-test` workflow has no Environment, so it can only read repo-level
+secrets, and the gated `deploy.yml` reads them too (an Environment job falls back
+to repo-level secrets when the Environment doesn't redefine them). Keep them in
+**one** place:
 
-- **Production (`deploy.yml`, on `master`)** runs with `environment: production`,
-  which is the **approval gate** (Required reviewers) and also holds its SSH
-  secrets. Nothing ships to prod without an Approve click.
-- **Staging (`deploy-staging.yml`, on `staging-test`)** has **no** environment —
-  that's what makes it force-deploy — so it reads the SSH connection from
-  **repository** secrets instead.
+| Scope                  | Where                                                     | Holds                                                                     |
+| ---------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Repository** secrets | Settings ▸ Secrets and variables ▸ Actions ▸ _Repository_ | `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SSH_PORT` (opt), `DEPLOY_DIR` |
 
-So the connection details live in **both** scopes:
+The gate itself is on the **`production` Environment** (Settings ▸ Environments ▸
+production): its **Required reviewers** are what make `deploy.yml` wait for an
+Approve click. The Environment holds no SSH secrets of its own.
 
-| Scope                        | Where                                                     | Holds                                                                                                     |
-| ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `production` **Environment** | Settings ▸ Environments ▸ production                      | **Required reviewers** (gate) + `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, `SSH_PORT` (opt), `DEPLOY_DIR` |
-| **Repository** secrets       | Settings ▸ Secrets and variables ▸ Actions ▸ _Repository_ | the same `SSH_*` + `DEPLOY_DIR` (so the ungated staging deploy can authenticate)                          |
+> **⚠️ Why `staging-test` push is restricted.** The staging workflow is ungated
+> and deploys to the **same prod box** using those repo-level SSH secrets. A
+> push-triggered workflow runs from the pushed branch, so anyone who could push
+> to `staging-test` could edit the workflow in the same push and run arbitrary
+> SSH on production — bypassing the approval gate entirely. To close that, the
+> **`restrict-staging-test` ruleset** limits `creation`/`update`/`deletion` of
+> `staging-test` to the **admin role** (bypass `RepositoryRole:5`). Non-admin
+> collaborators can no longer push it. Admins retain access because a repo admin
+> can bypass the gate regardless (they can edit the Environment, its reviewers,
+> or secrets), so admin-vs-non-admin is the only enforceable boundary here. If
+> you later want to narrow this to a specific subset, create a GitHub **team**
+> and swap the bypass actor to that team.
 
 ### Deploy SSH key
 
@@ -199,8 +210,12 @@ ssh-keygen -t ed25519 -f deploy_key -C "github-deploy" -N ""
 
 - **Public** key (`deploy_key.pub`) → append to the server's
   `~/.ssh/authorized_keys` for `SSH_USER`.
-- **Private** key (`deploy_key`) → paste into the `SSH_PRIVATE_KEY` environment
-  secret. Then delete both local files.
+- **Private** key (`deploy_key`) → set as the **repository** secret
+  `SSH_PRIVATE_KEY` (Settings ▸ Secrets and variables ▸ Actions ▸ _Repository_,
+  **not** an Environment secret — the ungated `staging-test` workflow has no
+  environment and can only read repo-level secrets). Then delete both local
+  files. Avoid pasting the key into a chat/terminal that echoes it; pipe from the
+  file instead: `gh secret set SSH_PRIVATE_KEY < deploy_key`.
 
 There are **no TLS certificates to upload** — the shared Caddy issues and renews
 them automatically.
@@ -240,11 +255,19 @@ and database as production, so a push here goes live on the real site.
 git push origin HEAD:staging-test
 ```
 
+Only **repo admins** can push `staging-test` (the `restrict-staging-test`
+ruleset — see "Secrets & the approval gate" for why). If your push is rejected
+with a ruleset violation, you're not an admin; use the normal PR-to-`master`
+path instead.
+
 ## Rolling back
 
-**Actions ▸ Deploy (production) ▸ Run workflow ▸** enter a previous image tag
-(e.g. `sha-abc1234`, from the older run's logs, or `latest`). No rebuild — the
-server pulls that already-published image and restarts. Or on the server:
+**Actions ▸ Deploy (production) ▸ Run workflow ▸** enter a previous **immutable**
+image tag (e.g. `sha-abc1234`, from the older run's logs). Do **not** use
+`latest` — every successful deploy overwrites it, so it points at the _current_
+(bad) image and would redeploy the very thing you're rolling back from. No
+rebuild — the server pulls that already-published image and restarts. Or on the
+server:
 
 ```bash
 cd ~/projects/pkuremote
@@ -255,7 +278,7 @@ IMAGE_TAG=sha-abc1234 docker compose -f docker-compose.deploy.yml up -d
 
 ## Config reference — where each value lives
 
-| Value                                                                         | Server `.env` | GitHub Variable | GitHub Secret (production) |
+| Value                                                                         | Server `.env` | GitHub Variable | GitHub Secret (repository) |
 | ----------------------------------------------------------------------------- | :-----------: | :-------------: | :------------------------: |
 | `SITE_DOMAIN`                                                                 |      ✅       |                 |                            |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB`                         |      ✅       |                 |                            |
@@ -264,8 +287,8 @@ IMAGE_TAG=sha-abc1234 docker compose -f docker-compose.deploy.yml up -d
 | `PUBLIC_SITE_URL`, `PUBLIC_CONTACT_EMAIL` (baked at build)                    |               |       ✅        |                            |
 | `SSH_HOST` / `SSH_USER` / `SSH_PRIVATE_KEY` / `SSH_PORT` / `DEPLOY_DIR`       |               |                 |             ✅             |
 
-Secrets never leave the server or the GitHub Environment; the image itself
-carries no secrets.
+Secrets never leave the server or the GitHub repository secret store; the image
+itself carries no secrets.
 
 ## Database migrations
 

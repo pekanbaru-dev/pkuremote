@@ -7,10 +7,12 @@ name: Deploy (staging-test)
 #
 # It has NO `environment:` (that's what removes the gate), so it authenticates
 # with REPO-level secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_DIR.
+# Push-only, no `workflow_dispatch`: a manual dispatch could pick ANY ref and
+# ship it to the prod box with no gate, so the only way in is an actual push to
+# `staging-test`.
 on:
   push:
     branches: [staging-test]
-  workflow_dispatch:
 
 # Share the production concurrency group so a staging deploy and a prod deploy
 # can never run against the box at the same time.
@@ -25,6 +27,11 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Only a real push to the `staging-test` branch may run this ungated,
+    # prod-targeting job. `github.event.deleted` rejects branch-DELETION push
+    # events (their SHA falls back to the default branch, which would otherwise
+    # deploy the wrong image as `:staging`).
+    if: github.ref_name == 'staging-test' && github.event.deleted != true
     # No `environment:` on purpose → no approval gate (force deploy). Reads
     # repo-level SSH secrets (env-scoped secrets would require the gated env).
     steps:
