@@ -10,20 +10,27 @@ with automatic Let's Encrypt certificates. Auth is the app's own OIDC flow
 ## Pipeline at a glance
 
 ```
-PR / push to main ──▶ CI (.github/workflows/ci.yml)
+PR ─────────────────▶ CI (.github/workflows/ci.yml)
                        check · lint · test · build          (no image built)
 
-git tag v1.2.0 ──────▶ Deploy (.github/workflows/deploy.yml)
-   & push tag          build image ▶ push ghcr.io/pekanbaru-dev/pkuremote:v1.2.0 + :latest
-                       ▶ [production Environment gate]
+merge to master ─────▶ Deploy production (.github/workflows/deploy.yml)
+                       build image ▶ push :sha-<commit> + :latest
+                       ▶ [production Environment gate — waits for Approve]
                        ▶ ssh server: docker compose pull && up -d
 
-rollback ────────────▶ Actions ▸ Deploy ▸ "Run workflow" ▸ enter an older tag
-                       (no rebuild — server just pulls the existing image)
+push staging-test ───▶ Deploy staging-test (.github/workflows/deploy-staging.yml)
+                       build image ▶ push :staging
+                       ▶ NO gate — ssh server: docker compose pull && up -d
+                       (targets the SAME server/DB as prod — no staging box yet)
+
+rollback ────────────▶ Actions ▸ Deploy (production) ▸ "Run workflow" ▸
+                       enter an older image tag, e.g. sha-abc1234 (no rebuild)
 ```
 
-An image is built **only when you push a version tag**, to keep Actions minutes
-low. Merges to `main` only run the quality gate.
+Production deploys on every **merge to `master`**, but the `production`
+Environment's **Required reviewers** hold the job at "Waiting" until you
+**Approve** — so nothing goes live unattended. A push to **`staging-test`**
+force-deploys with no gate (currently to the same box/domain/DB as prod).
 
 ---
 
@@ -161,28 +168,36 @@ echo <PAT_with_read:packages> | docker login ghcr.io -u <github-user> --password
 
 Non-secret; baked into the image at build time:
 
-| Variable               | Example                 |
-| ---------------------- | ----------------------- |
-| `PUBLIC_SITE_URL`      | `https://pkubersua.com` |
-| `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`   |
+| Variable               | Example                    |
+| ---------------------- | -------------------------- |
+| `PUBLIC_SITE_URL`      | `https://pkubersua.web.id` |
+| `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`      |
+
+### SSH secrets live at the **repository** level
+
+The deploy connection secrets are **repository** secrets (Settings ▸ Secrets and
+variables ▸ Actions ▸ _Repository secrets_), **not** environment secrets — the
+`staging-test` workflow has no environment (so no gate) and can only read
+repo-level secrets, and production shares the same box:
+
+| Secret            | Purpose                                    |
+| ----------------- | ------------------------------------------ |
+| `SSH_HOST`        | server IP or hostname                      |
+| `SSH_USER`        | the deploy user                            |
+| `SSH_PRIVATE_KEY` | private half of the deploy key (see below) |
+| `SSH_PORT`        | SSH port if not `22` (optional)            |
+| `DEPLOY_DIR`      | e.g. `/home/<user>/projects/pkuremote`     |
 
 ### The `production` Environment (Settings ▸ Environments ▸ New environment)
 
 Name it **`production`**, then:
 
-- **Deployment branches and tags** ▸ _Selected_ ▸ add rule `v*` — only version
-  tags can deploy here.
-- _(Optional)_ **Required reviewers** ▸ add yourself — deploys then pause for a
-  one-click approval.
-- **Environment secrets**:
-
-  | Secret            | Purpose                                    |
-  | ----------------- | ------------------------------------------ |
-  | `SSH_HOST`        | server IP or hostname                      |
-  | `SSH_USER`        | the deploy user                            |
-  | `SSH_PRIVATE_KEY` | private half of the deploy key (see below) |
-  | `SSH_PORT`        | SSH port if not `22` (optional)            |
-  | `DEPLOY_DIR`      | e.g. `/home/<user>/projects/pkuremote`     |
+- **Required reviewers** ▸ add yourself — this is the **approval gate**: every
+  merge-to-`master` deploy pauses at "Waiting" until you Approve.
+- **Deployment branches and tags** ▸ _Selected_ ▸ add rule **`master`** — only
+  `master` may deploy to this environment.
+- No environment secrets needed — the workflow reads the repo-level SSH secrets
+  above.
 
 ### Deploy SSH key
 
@@ -203,17 +218,16 @@ them automatically.
 ## First deploy
 
 Once the server has the compose file + `.env`, the domain is registered with
-`caddyku` (step 8), DNS resolves, and GitHub is configured, apply the initial
-schema + seed (see "Database migrations" below), then:
+`caddyku` (step 8), DNS resolves, and GitHub is configured, **merge a PR to
+`master`**. The Deploy (production) workflow starts and pauses at "Waiting";
+open **Actions ▸ the run ▸ Review deployments ▸ Approve**. It then builds the
+image, pushes to GHCR, SSHes in, and runs `docker compose pull && up -d`.
 
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
+> First cutover only: the in-stack Postgres starts empty, so apply the initial
+> schema + seed (see "Database migrations" below) right after the first deploy —
+> the app 500s until migrations run.
 
-The Deploy workflow builds the image, pushes it to GHCR, (waits for approval if
-enabled,) SSHes in, and runs `docker compose pull && up -d`. Watch the shared
-proxy pick it up:
+Watch the shared proxy pick it up:
 
 ```bash
 cd ~/projects/caddy-proxy && docker compose logs -f caddy
@@ -222,21 +236,27 @@ caddyku status   # shows OK once the app container is reachable
 
 ## Releasing a new version
 
+Merge your PR to `master` → **Approve** the deployment in Actions. That's it.
+
+## Deploying to staging-test (no approval)
+
+Push the `staging-test` branch — it force-deploys immediately, no gate. **Note:**
+until a dedicated staging host exists this targets the **same** server, domain,
+and database as production, so a push here goes live on the real site.
+
 ```bash
-git checkout main && git pull
-git tag v0.2.0
-git push origin v0.2.0
+git push origin HEAD:staging-test
 ```
 
 ## Rolling back
 
-**Actions ▸ Deploy ▸ Run workflow ▸** enter a previous tag (e.g. `v0.1.0`). No
-rebuild — the server pulls that already-published image and restarts. Or on the
-server directly:
+**Actions ▸ Deploy (production) ▸ Run workflow ▸** enter a previous image tag
+(e.g. `sha-abc1234`, from the older run's logs, or `latest`). No rebuild — the
+server pulls that already-published image and restarts. Or on the server:
 
 ```bash
 cd ~/projects/pkuremote
-IMAGE_TAG=v0.1.0 docker compose -f docker-compose.deploy.yml up -d
+IMAGE_TAG=sha-abc1234 docker compose -f docker-compose.deploy.yml up -d
 ```
 
 ---
