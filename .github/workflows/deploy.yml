@@ -1,25 +1,27 @@
-name: Deploy
+name: Deploy (production)
 
-# Production deploy, triggered ONLY by pushing a version tag (e.g. v1.2.0) or by
-# a manual run (for rollback). No image is built on regular pushes to main, so
-# this is the single place a production image is created and shipped.
+# Production deploy. Triggered by a merge to `master`, but GATED: the job pauses
+# on the `production` Environment until a required reviewer clicks Approve, so
+# nothing ships to https://pkubersua.web.id without a human OK.
 #
-#   Release : git tag v1.2.0 && git push origin v1.2.0
-#   Rollback: Actions -> Deploy -> "Run workflow" -> enter an older tag (v1.1.0)
+#   Release : merge a PR to master -> approve the "Waiting" deployment in Actions
+#   Rollback: Actions -> Deploy (production) -> "Run workflow" -> enter an older
+#             image tag (e.g. sha-abc1234 or latest)
 #
-# DORMANT until you: (1) create the `production` GitHub Environment with the
-# SSH_* secrets, and (2) have a server running docker-compose.deploy.yml.
-# See DEPLOY.md for the full first-run setup.
+# Requires (see DEPLOY.md):
+#   - REPO-level secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_DIR
+#     (repo-level, not environment-level, so the staging workflow can share them)
+#   - `production` Environment with Required reviewers + a branch policy allowing `master`
 on:
   push:
-    tags: ["v*"]
+    branches: [master]
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Existing image tag to (re)deploy, e.g. v1.1.0 — used for rollback."
+      image:
+        description: "Existing image tag to redeploy (rollback), e.g. sha-abc1234 or latest"
         required: true
 
-# Never run two production deploys at once; do NOT cancel one in flight.
+# Never run two production-target deploys at once (staging shares this group).
 concurrency:
   group: deploy-production
   cancel-in-progress: false
@@ -33,25 +35,24 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}
+      url: https://pkubersua.web.id
     steps:
-      - name: Resolve version
+      - name: Resolve image tag
         id: ver
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ inputs.image }}" >> "$GITHUB_OUTPUT"
             echo "build=false" >> "$GITHUB_OUTPUT"
           else
-            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/checkout@v4
         if: steps.ver.outputs.build == 'true'
 
-      - name: Set up Buildx
+      - uses: docker/setup-buildx-action@v3
         if: steps.ver.outputs.build == 'true'
-        uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
         if: steps.ver.outputs.build == 'true'
@@ -61,9 +62,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # New release: build the image from the tagged commit and push it as the
-      # version tag plus `latest`. On a rollback run this is skipped — the older
-      # image already exists in GHCR and the server just pulls it.
+      # Build the image from the merged commit and push it as :sha-<short> plus
+      # :latest. On a rollback run this is skipped — the older image already
+      # exists in GHCR and the server just pulls it.
       - name: Build and push release image
         if: steps.ver.outputs.build == 'true'
         uses: docker/build-push-action@v6
@@ -72,16 +73,14 @@ jobs:
           target: runtime
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.ver.outputs.version }}
+            ghcr.io/${{ github.repository }}:${{ steps.ver.outputs.tag }}
             ghcr.io/${{ github.repository }}:latest
           build-args: |
-            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}
+            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.web.id' }}
             PUBLIC_CONTACT_EMAIL=${{ vars.PUBLIC_CONTACT_EMAIL || 'hello@pkubersua.com' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # SSH to the server and roll the stack to the target image tag. Secrets and
-      # the branch/tag policy live on the `production` Environment.
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -92,7 +91,7 @@ jobs:
           script: |
             set -euo pipefail
             cd "${{ secrets.DEPLOY_DIR }}"
-            export IMAGE_TAG='${{ steps.ver.outputs.version }}'
+            export IMAGE_TAG='${{ steps.ver.outputs.tag }}'
             docker compose -f docker-compose.deploy.yml pull
             docker compose -f docker-compose.deploy.yml up -d --remove-orphans
             docker image prune -f
