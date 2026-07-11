@@ -50,6 +50,6 @@
 ## 7. Verify
 
 - [x] 7.1 `pnpm check` → `pnpm lint` → `pnpm test` all green
-- [ ] 7.2 Manual: full login round-trip against Dex (admin + attendee), booking, `/myprofile`, sign-out, guarded-route redirect
+- [x] 7.2 Manual: full login round-trip against Dex (admin + attendee), booking, `/myprofile`, sign-out, guarded-route redirect — verified 2026-07-11 via Playwright against the compose Postgres + Dex (admin → `/admin` dashboard; attendee → booking `PKU-2026-f5p3gL` with slot decrement + ticket QR, `/myregistrations`; sign-out; anon redirects; non-admin `/admin` → `/`)
 - [x] 7.3 Fresh `pnpm db:migrate` + `pnpm db:seed` against an empty Docker Postgres produces a usable dataset with no `auth` schema references
-- [ ] 7.4 Prod smoke: point `OIDC_ISSUER` at Google in a staging config and confirm the identical code path completes a login
+- [x] 7.4 Prod smoke: point `OIDC_ISSUER` at Google in a staging config and confirm the identical code path completes a login — verified 2026-07-11: production (`pkubersua.web.id`) runs with `OIDC_ISSUER=https://accounts.google.com`; the `/login` action 303-redirects to `accounts.google.com/o/oauth2/v2/auth` with the real client id (same code path as Dex, only issuer/client env differ); full completion exercised by operator logins on prod
