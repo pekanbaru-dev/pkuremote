@@ -3,7 +3,7 @@ name: Deploy (staging-test)
 # Force-deploys the `staging-test` branch with NO approval gate — a push here
 # builds and deploys immediately (no PR, no Approve click). There is no separate
 # staging host yet, so it targets the SAME box/domain/DB as production
-# (https://pkubersua.web.id): a push to `staging-test` goes live on the real site.
+# (https://pkubersua.com): a push to `staging-test` goes live on the real site.
 #
 # It has NO `environment:` (that's what removes the gate), so it authenticates
 # with REPO-level secrets: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_DIR.
@@ -54,7 +54,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:staging
           build-args: |
-            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.web.id' }}
+            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}
             PUBLIC_CONTACT_EMAIL=${{ vars.PUBLIC_CONTACT_EMAIL || 'hello@pkubersua.com' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

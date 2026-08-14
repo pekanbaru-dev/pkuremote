@@ -2,7 +2,7 @@ name: Deploy (production)
 
 # Production deploy. Triggered by a merge to `master`, but GATED: the job pauses
 # on the `production` Environment until a required reviewer clicks Approve, so
-# nothing ships to https://pkubersua.web.id without a human OK.
+# nothing ships to https://pkubersua.com without a human OK.
 #
 #   Release : merge a PR to master -> approve the "Waiting" deployment in Actions
 #   Rollback: Actions -> Deploy (production) -> "Run workflow" -> enter an older
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://pkubersua.web.id
+      url: https://pkubersua.com
     steps:
       - name: Resolve image tag
         id: ver
@@ -76,7 +76,7 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ steps.ver.outputs.tag }}
             ghcr.io/${{ github.repository }}:latest
           build-args: |
-            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.web.id' }}
+            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}
             PUBLIC_CONTACT_EMAIL=${{ vars.PUBLIC_CONTACT_EMAIL || 'hello@pkubersua.com' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

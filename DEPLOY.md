@@ -43,7 +43,7 @@ Note its public IP.
 
 ### 2. Point DNS at it **before the first deploy**
 
-Create an `A` record: `pkubersua.web.id → <server IP>`. The shared Caddy cannot
+Create an `A` record: `pkubersua.com → <server IP>`. The shared Caddy cannot
 obtain a TLS certificate until the domain resolves to the server.
 
 ### 3. Install Docker + Compose
@@ -92,7 +92,7 @@ Auth is a generic OIDC flow; in production the issuer is Google.
 
 1. Google Cloud Console ▸ **APIs & Services ▸ Credentials ▸ Create credentials
    ▸ OAuth client ID ▸ Web application**.
-2. **Authorized redirect URI**: `https://pkubersua.web.id/auth/callback` (the
+2. **Authorized redirect URI**: `https://pkubersua.com/auth/callback` (the
    app's own callback — no Supabase redirect URL).
 3. Note the **Client ID** and **Client secret** for the server `.env` below.
 
@@ -103,7 +103,7 @@ In `~/projects/pkuremote/.env` (never committed). Read by
 
 ```ini
 # --- Domain ---
-SITE_DOMAIN=pkubersua.web.id
+SITE_DOMAIN=pkubersua.com
 
 # --- In-stack Postgres (the database is no longer external) ---
 POSTGRES_USER=pkuremote
@@ -114,7 +114,7 @@ POSTGRES_DB=pkuremote
 OIDC_ISSUER=https://accounts.google.com
 OIDC_CLIENT_ID=<google-client-id>
 OIDC_CLIENT_SECRET=<google-client-secret>
-OIDC_REDIRECT_URI=https://pkubersua.web.id/auth/callback
+OIDC_REDIRECT_URI=https://pkubersua.com/auth/callback
 
 # --- Admin access (comma-separated admin emails) ---
 ADMIN_EMAILS=you@gmail.com,teammate@gmail.com
@@ -136,7 +136,7 @@ caddyku init-app \
   --compose-file docker-compose.deploy.yml \
   --service app \
   --container pkuremote_app \
-  --domain pkubersua.web.id \
+  --domain pkubersua.com \
   --upstream pkuremote_app:3000
 ```
 
@@ -170,7 +170,7 @@ Non-secret; baked into the image at build time:
 
 | Variable               | Example                    |
 | ---------------------- | -------------------------- |
-| `PUBLIC_SITE_URL`      | `https://pkubersua.web.id` |
+| `PUBLIC_SITE_URL`      | `https://pkubersua.com`    |
 | `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`      |
 
 ### Secrets & the approval gate
