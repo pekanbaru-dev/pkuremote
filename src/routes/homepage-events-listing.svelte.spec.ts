@@ -33,7 +33,9 @@ describe("homepage Lihat semua reveal", () => {
 			}
 		});
 
-		await expect.element(page.getByRole("link", { name: "Lihat semua" })).not.toBeInTheDocument();
+		await expect
+			.element(page.getByRole("link", { name: "Lihat semua", exact: true }))
+			.not.toBeInTheDocument();
 	});
 
 	it("shows the Lihat semua link when there are 7 past events", async () => {
@@ -47,7 +49,7 @@ describe("homepage Lihat semua reveal", () => {
 			}
 		});
 
-		const link = page.getByRole("link", { name: "Lihat semua" });
+		const link = page.getByRole("link", { name: "Lihat semua", exact: true });
 		await expect.element(link).toBeVisible();
 		await expect.element(link).toHaveAttribute("href", "/events");
 	});
