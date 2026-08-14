@@ -13,7 +13,7 @@
 	let { events, class: className }: EventListProps = $props();
 </script>
 
-<ul class={cn("flex flex-col gap-8", className)}>
+<ul class={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", className)}>
 	{#each events as event (event.id)}
 		<li>
 			<EventCard {event} />

@@ -32,7 +32,7 @@
 
 <header class={cn("flex flex-col gap-6", className)}>
 	{#if event.bannerUrl}
-		<div class="aspect-[16/9] w-full overflow-hidden rounded-md bg-surface-container">
+		<div class="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-surface-container shadow-lg">
 			<img
 				src={event.bannerUrl}
 				alt=""
@@ -48,13 +48,13 @@
 	<div class="flex flex-col gap-3">
 		{#if isPast}
 			<span
-				class="inline-flex w-fit items-center rounded-full bg-muted px-2.5 py-0.5 text-[0.75rem] font-medium text-muted-foreground"
+				class="inline-flex w-fit items-center rounded-md bg-surface-container-high px-2.5 py-1 text-[0.75rem] font-semibold text-on-surface-variant"
 			>
 				Selesai
 			</span>
 		{:else}
 			<span
-				class="inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[0.75rem] font-medium text-primary"
+				class="inline-flex w-fit items-center rounded-md bg-primary-container px-2.5 py-1 text-[0.75rem] font-semibold text-on-primary-container"
 			>
 				Akan datang
 			</span>
