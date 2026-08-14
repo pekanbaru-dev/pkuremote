@@ -168,10 +168,10 @@ instead (it holds no secrets — DB/OIDC creds are injected at runtime, only
 
 Non-secret; baked into the image at build time:
 
-| Variable               | Example                    |
-| ---------------------- | -------------------------- |
-| `PUBLIC_SITE_URL`      | `https://pkubersua.com`    |
-| `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`      |
+| Variable               | Example                 |
+| ---------------------- | ----------------------- |
+| `PUBLIC_SITE_URL`      | `https://pkubersua.com` |
+| `PUBLIC_CONTACT_EMAIL` | `hello@pkubersua.com`   |
 
 ### Secrets & the approval gate
 
@@ -311,15 +311,15 @@ only destroying that volume requires re-running migrate + seed.
 
 ## Troubleshooting
 
-| Symptom                                        | Likely cause                                                                 |
-| ---------------------------------------------- | ---------------------------------------------------------------------------- |
-| Caddy can't get a cert                         | DNS not pointing at the server yet, or 80/443 blocked                        |
-| `stat docker-compose.deploy.yml: no such file` | `DEPLOY_DIR` doesn't match where the compose file was copied                 |
-| `caddyku status` shows "not running"           | app container isn't up — `docker compose -f docker-compose.deploy.yml up -d` |
-| `caddyku status` shows "not on caddy-net"      | compose file wasn't patched by `caddyku init-app` — re-run it                |
-| App 500s on first request                      | migrations not applied to the in-stack Postgres yet (see above)              |
-| Login fails / `oauth_callback` error           | `OIDC_REDIRECT_URI` doesn't match Google's Authorized redirect URI           |
-| `/admin` locks everyone out                    | `ADMIN_EMAILS` missing/empty in the server `.env`                            |
-| `docker compose pull` denied: denied            | `GITHUB_TOKEN` didn't reach the SSH step's login — check `envs:`/`env:` wiring in the workflow, not the server (it self-logs in every run) |
-| Deploy job stuck "Waiting"                     | required reviewer enabled — approve it in the run                            |
-| Empty OG/canonical URLs                        | `PUBLIC_SITE_URL` Variable not set when the image was built                  |
+| Symptom                                        | Likely cause                                                                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Caddy can't get a cert                         | DNS not pointing at the server yet, or 80/443 blocked                                                                                      |
+| `stat docker-compose.deploy.yml: no such file` | `DEPLOY_DIR` doesn't match where the compose file was copied                                                                               |
+| `caddyku status` shows "not running"           | app container isn't up — `docker compose -f docker-compose.deploy.yml up -d`                                                               |
+| `caddyku status` shows "not on caddy-net"      | compose file wasn't patched by `caddyku init-app` — re-run it                                                                              |
+| App 500s on first request                      | migrations not applied to the in-stack Postgres yet (see above)                                                                            |
+| Login fails / `oauth_callback` error           | `OIDC_REDIRECT_URI` doesn't match Google's Authorized redirect URI                                                                         |
+| `/admin` locks everyone out                    | `ADMIN_EMAILS` missing/empty in the server `.env`                                                                                          |
+| `docker compose pull` denied: denied           | `GITHUB_TOKEN` didn't reach the SSH step's login — check `envs:`/`env:` wiring in the workflow, not the server (it self-logs in every run) |
+| Deploy job stuck "Waiting"                     | required reviewer enabled — approve it in the run                                                                                          |
+| Empty OG/canonical URLs                        | `PUBLIC_SITE_URL` Variable not set when the image was built                                                                                |
