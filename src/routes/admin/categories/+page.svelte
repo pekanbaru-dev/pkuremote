@@ -57,27 +57,34 @@
 	{:else}
 		<div class="overflow-x-auto rounded-xl border border-hairline">
 			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>Nama</Table.Head>
-						<Table.Head>Slug</Table.Head>
-						<Table.Head class="text-right">Aksi</Table.Head>
+				<Table.Header class="bg-surface-container-low">
+					<Table.Row class="hover:bg-transparent">
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Nama</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Slug</Table.Head
+						>
+						<Table.Head
+							class="text-label-md font-semibold text-on-surface-variant uppercase text-right"
+							>Aksi</Table.Head
+						>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
 					{#each data.categories as category (category.id)}
-						<Table.Row>
-							<Table.Cell class="font-medium text-ink">{category.name}</Table.Cell>
-							<Table.Cell class="text-on-surface-variant">{category.slug}</Table.Cell>
-							<Table.Cell>
-								<div class="flex justify-end gap-2">
+						<Table.Row class="border-hairline">
+							<Table.Cell class="py-3.5 font-medium text-ink">{category.name}</Table.Cell>
+							<Table.Cell class="py-3.5 text-on-surface-variant">{category.slug}</Table.Cell>
+							<Table.Cell class="py-3.5">
+								<div class="flex justify-end gap-1.5">
 									<Button variant="ghost" size="sm" onclick={() => (pendingEdit = category)}>
 										Ubah
 									</Button>
 									<Button
 										variant="ghost"
 										size="sm"
-										class="text-error"
+										class="text-danger hover:text-danger hover:bg-danger/10"
 										onclick={() => (pendingDelete = category)}
 									>
 										Hapus

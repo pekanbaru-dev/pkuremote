@@ -61,11 +61,11 @@
 	</header>
 
 	<div class="flex flex-wrap gap-2">
-		<Badge intent="clean">Total: {data.counts.total}</Badge>
-		<Badge intent="primary">Terkonfirmasi: {data.counts.confirmed}</Badge>
-		<Badge intent="success">Hadir: {data.counts.attended}</Badge>
-		<Badge intent="warning">Tidak Hadir: {data.counts.no_show}</Badge>
-		<Badge intent="clean">Dibatalkan: {data.counts.cancelled}</Badge>
+		<Badge variant="soft" intent="clean">Total: {data.counts.total}</Badge>
+		<Badge variant="soft" intent="primary">Terkonfirmasi: {data.counts.confirmed}</Badge>
+		<Badge variant="soft" intent="success">Hadir: {data.counts.attended}</Badge>
+		<Badge variant="soft" intent="warning">Tidak Hadir: {data.counts.no_show}</Badge>
+		<Badge variant="soft" intent="clean">Dibatalkan: {data.counts.cancelled}</Badge>
 	</div>
 
 	{#if data.counts.total === 0}
@@ -84,32 +84,53 @@
 
 		<div class="overflow-x-auto rounded-xl border border-hairline">
 			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>Nama</Table.Head>
-						<Table.Head>No. HP</Table.Head>
-						<Table.Head>Status</Table.Head>
-						<Table.Head>No. Registrasi</Table.Head>
-						<Table.Head>Tanggal</Table.Head>
-						<Table.Head class="text-right">Check-in</Table.Head>
+				<Table.Header class="bg-surface-container-low">
+					<Table.Row class="hover:bg-transparent">
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Nama</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>No. HP</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Status</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>No. Registrasi</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Tanggal</Table.Head
+						>
+						<Table.Head
+							class="text-label-md font-semibold text-on-surface-variant uppercase text-right"
+							>Check-in</Table.Head
+						>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
 					{#each rows as reg (reg.id)}
-						<Table.Row class={reg.status === "cancelled" ? "opacity-60" : ""}>
-							<Table.Cell class="font-medium text-ink">{reg.attendeeName}</Table.Cell>
-							<Table.Cell class="whitespace-nowrap">{reg.attendeePhone}</Table.Cell>
-							<Table.Cell>
-								<Badge intent={statusIntent[reg.status]}>{statusLabel[reg.status]}</Badge>
+						<Table.Row
+							class={reg.status === "cancelled" ? "border-hairline opacity-60" : "border-hairline"}
+						>
+							<Table.Cell class="py-3.5 font-medium text-ink">{reg.attendeeName}</Table.Cell>
+							<Table.Cell class="py-3.5 whitespace-nowrap text-on-surface-variant"
+								>{reg.attendeePhone}</Table.Cell
+							>
+							<Table.Cell class="py-3.5">
+								<Badge variant="soft" intent={statusIntent[reg.status]}>
+									{statusLabel[reg.status]}
+								</Badge>
 							</Table.Cell>
-							<Table.Cell class="font-mono text-xs whitespace-nowrap">
+							<Table.Cell
+								class="py-3.5 font-mono text-xs whitespace-nowrap text-on-surface-variant"
+							>
 								{reg.registrationNumber}
 							</Table.Cell>
-							<Table.Cell class="whitespace-nowrap">
+							<Table.Cell class="py-3.5 whitespace-nowrap text-on-surface-variant">
 								{dateFmt.format(new Date(reg.createdAt))}
 							</Table.Cell>
-							<Table.Cell>
-								<div class="flex justify-end gap-2">
+							<Table.Cell class="py-3.5">
+								<div class="flex justify-end gap-1.5">
 									{#if reg.status === "cancelled"}
 										<span class="text-on-surface-variant text-xs">—</span>
 									{:else}

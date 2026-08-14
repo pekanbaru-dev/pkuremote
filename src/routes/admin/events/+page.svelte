@@ -67,32 +67,51 @@
 	{:else}
 		<div class="overflow-x-auto rounded-xl border border-hairline">
 			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head>Judul</Table.Head>
-						<Table.Head>Tanggal</Table.Head>
-						<Table.Head>Status</Table.Head>
-						<Table.Head>Kuota</Table.Head>
-						<Table.Head>Kategori</Table.Head>
-						<Table.Head class="text-right">Aksi</Table.Head>
+				<Table.Header class="bg-surface-container-low">
+					<Table.Row class="hover:bg-transparent">
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Judul</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Tanggal</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Status</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Kuota</Table.Head
+						>
+						<Table.Head class="text-label-md font-semibold text-on-surface-variant uppercase"
+							>Kategori</Table.Head
+						>
+						<Table.Head
+							class="text-label-md font-semibold text-on-surface-variant uppercase text-right"
+							>Aksi</Table.Head
+						>
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
 					{#each data.events as event (event.id)}
-						<Table.Row>
-							<Table.Cell class="font-medium text-ink">{event.title}</Table.Cell>
-							<Table.Cell class="whitespace-nowrap">{formatDate(event.startsAt)}</Table.Cell>
-							<Table.Cell>
-								<Badge intent={statusIntent[event.status]}>{statusLabel[event.status]}</Badge>
+						<Table.Row class="border-hairline">
+							<Table.Cell class="py-3.5 font-medium text-ink">{event.title}</Table.Cell>
+							<Table.Cell class="py-3.5 whitespace-nowrap text-on-surface-variant"
+								>{formatDate(event.startsAt)}</Table.Cell
+							>
+							<Table.Cell class="py-3.5">
+								<Badge variant="soft" intent={statusIntent[event.status]}>
+									{statusLabel[event.status]}
+								</Badge>
 							</Table.Cell>
-							<Table.Cell class="whitespace-nowrap">{quotaLabel(event)}</Table.Cell>
-							<Table.Cell>
+							<Table.Cell class="py-3.5 whitespace-nowrap text-on-surface-variant"
+								>{quotaLabel(event)}</Table.Cell
+							>
+							<Table.Cell class="py-3.5">
 								<span class="text-on-surface-variant text-sm">
 									{event.categories.map((c) => c.name).join(", ") || "—"}
 								</span>
 							</Table.Cell>
-							<Table.Cell>
-								<div class="flex justify-end gap-2">
+							<Table.Cell class="py-3.5">
+								<div class="flex justify-end gap-1.5">
 									<Button href="/admin/events/{event.id}/attendees" variant="ghost" size="sm"
 										>Peserta</Button
 									>
@@ -102,7 +121,7 @@
 									<Button
 										variant="ghost"
 										size="sm"
-										class="text-error"
+										class="text-danger hover:text-danger hover:bg-danger/10"
 										onclick={() => (pendingDelete = event)}
 									>
 										Hapus

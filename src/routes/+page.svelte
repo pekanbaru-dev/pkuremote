@@ -1,18 +1,15 @@
 <script lang="ts">
 	/* eslint-disable svelte/no-restricted-html-elements, svelte/require-each-key, svelte/no-at-html-tags */
 	import { page } from "$app/state";
+	import { onMount } from "svelte";
 	import type { PageData } from "./$types.js";
 	import { PUBLIC_SITE_URL } from "$env/static/public";
 	import { buildLandingJsonLd } from "$lib/features/events";
 	import Search from "@lucide/svelte/icons/search";
-	import MapPin from "@lucide/svelte/icons/map-pin";
 	import Menu from "@lucide/svelte/icons/menu";
-	import ChevronDown from "@lucide/svelte/icons/chevron-down";
 	import CalendarDays from "@lucide/svelte/icons/calendar-days";
 	import Users from "@lucide/svelte/icons/users";
 	import Bookmark from "@lucide/svelte/icons/bookmark";
-	import ArrowRight from "@lucide/svelte/icons/arrow-right";
-	import MailOpen from "@lucide/svelte/icons/mail-open";
 	import Code2 from "@lucide/svelte/icons/code-2";
 	import PenTool from "@lucide/svelte/icons/pen-tool";
 	import Rocket from "@lucide/svelte/icons/rocket";
@@ -21,11 +18,29 @@
 	let { data }: { data: PageData } = $props();
 	const user = $derived(page.data.user);
 	const accountHref = $derived(user ? "/myprofile" : "/login");
-	const accountLabel = $derived(user ? "Profil saya" : "Log in");
+	const accountLabel = $derived(user ? "Dashboard" : "Login / Sign Up");
 	const landingJsonLd = buildLandingJsonLd();
 	let mobileMenuOpen = $state(false);
+	let hasScrolled = $state(false);
 	let keyword = $state("");
 	let toast = $state("");
+	const typingPhrases = [
+		"Cerita",
+		"Cerita",
+		"Cerita",
+		"Pasangan",
+		"Oleh-oleh",
+		"Kenangan",
+		"Talam Durian",
+		"Kemojo",
+		"Keripik Nenas",
+		"Lapek Bugih"
+	];
+	let typingPhrase = $state("");
+	let typingIndex = $state(0);
+	let typingCharacterIndex = $state(0);
+	let isDeleting = $state(false);
+	let isCorrectingTypo = $state(false);
 	const categories = [
 		["Semua Event", CalendarDays, "emerald"],
 		["Teknologi", Code2, "violet"],
@@ -35,40 +50,49 @@
 		["Seni & Budaya", PenTool, "amber"],
 		["Hobi", Camera, "pink"]
 	] as const;
+	const categoryStyles = {
+		emerald: "bg-[#073d3d] text-white group-hover:bg-[#0a5350]",
+		violet: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white",
+		orange: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white",
+		teal: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white",
+		purple: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white",
+		amber: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white",
+		pink: "bg-[#e6f2f0] text-[#0a5350] group-hover:bg-[#0a5350] group-hover:text-white"
+	} as const;
 	const communities = [
 		[
 			"PKUBersua",
 			"1.284 members",
 			"Komunitas kolaboratif di Pekanbaru untuk berbagi dan bertumbuh.",
-			Users,
+			"PK",
 			"amber"
 		],
 		[
 			"Pekanbaru Developer",
 			"842 members",
 			"Wadah bagi developer untuk belajar, berbagi, dan membuat impact bersama.",
-			Code2,
+			"PD",
 			"violet"
 		],
 		[
 			"Design Pekanbaru",
 			"623 members",
 			"Tempat berkumpulnya para designer untuk inspirasi dan kolaborasi.",
-			PenTool,
+			"DP",
 			"lime"
 		],
 		[
 			"Pekanbaru Startup",
 			"512 members",
 			"Bangun startup, perluas jaringan, dan wujudkan ide bersama.",
-			Rocket,
+			"SP",
 			"orange"
 		],
 		[
 			"Photography ID",
 			"436 members",
 			"Belajar fotografi, berbagi karya, dan hunting spot di sekitar Riau.",
-			Camera,
+			"PI",
 			"pink"
 		]
 	] as const;
@@ -93,6 +117,71 @@
 		toast = message;
 		setTimeout(() => (toast = ""), 2600);
 	};
+	const updateHeaderScrollState = () => {
+		hasScrolled = window.scrollY > 0;
+	};
+
+	onMount(() => {
+		updateHeaderScrollState();
+		window.addEventListener("scroll", updateHeaderScrollState, { passive: true });
+		let timer: ReturnType<typeof setTimeout>;
+		const typingDelay = () =>
+			70 + Math.random() * 60 + (Math.random() < 0.16 ? 160 + Math.random() * 260 : 0);
+		const pickNextTypingIndex = () => {
+			let nextIndex = typingIndex;
+
+			while (typingPhrases[nextIndex] === typingPhrases[typingIndex]) {
+				nextIndex = Math.floor(Math.random() * typingPhrases.length);
+			}
+
+			return nextIndex;
+		};
+
+		const tick = () => {
+			const phrase = typingPhrases[typingIndex];
+
+			if (isCorrectingTypo) {
+				typingPhrase = phrase.slice(0, typingCharacterIndex);
+				isCorrectingTypo = false;
+				timer = setTimeout(tick, 110 + Math.random() * 80);
+				return;
+			}
+
+			if (isDeleting) {
+				typingCharacterIndex -= 1;
+				typingPhrase = phrase.slice(0, typingCharacterIndex);
+
+				if (typingCharacterIndex === 0) {
+					typingIndex = pickNextTypingIndex();
+					isDeleting = false;
+					timer = setTimeout(tick, 350);
+					return;
+				}
+			} else {
+				typingCharacterIndex += 1;
+				typingPhrase = phrase.slice(0, typingCharacterIndex);
+
+				if (typingCharacterIndex < phrase.length && Math.random() < 0.018) {
+					typingPhrase += "a";
+					isCorrectingTypo = true;
+				}
+
+				if (typingCharacterIndex === phrase.length) {
+					isDeleting = true;
+					timer = setTimeout(tick, 5400);
+					return;
+				}
+			}
+
+			timer = setTimeout(tick, isDeleting ? 45 + Math.random() * 35 : typingDelay());
+		};
+
+		timer = setTimeout(tick, 450);
+		return () => {
+			clearTimeout(timer);
+			window.removeEventListener("scroll", updateHeaderScrollState);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -104,19 +193,23 @@
 
 <header
 	id="home"
-	class="relative min-h-[540px] overflow-visible bg-[#073d3d] bg-[linear-gradient(180deg,rgba(3,23,32,.18),rgba(3,23,32,.94))] text-white"
+	class="relative min-h-[540px] overflow-visible bg-[#073d3d] bg-[linear-gradient(180deg,rgba(3,23,32,.32),rgba(3,23,32,.88)),url('/images/hero/header.svg')] bg-cover bg-center bg-no-repeat text-white"
 >
 	<nav
-		class="mx-auto flex h-[72px] w-full max-w-[1180px] items-center justify-between gap-4 px-3 md:px-4"
+		class={`fixed inset-x-0 top-0 z-50 h-[72px] w-full transition-colors duration-200 ${hasScrolled ? "border-b border-slate-200/70 bg-white/88 text-[#24383c] backdrop-blur-md" : "bg-transparent text-white"}`}
 		aria-label="Navigasi utama"
 	>
-		<a href="#home" class="flex items-center gap-2.5 font-extrabold"
+		<div
+			class="mx-auto flex h-full w-full max-w-[1180px] items-center justify-between gap-4 px-3 md:px-4"
+		>
+			<a href="#home" class="flex items-center gap-2.5 font-extrabold"
 			><span
 				class="grid h-9 w-9 rotate-[30deg] place-items-center rounded-xl bg-gradient-to-br from-emerald-300 via-amber-300 to-white shadow-lg"
 				><span class="h-4 w-4 rounded border-2 border-[#073d3d]"></span></span
 			><span class="grid leading-none"
-				><b>PKUBersua</b><small class="mt-1 text-[9px] font-medium text-white/70"
-					>Komunitas. Event. Bersua.</small
+				><b>PKUBersua</b><small
+					class={`mt-1 text-[9px] font-medium ${hasScrolled ? "text-[#66747a]" : "text-white/70"}`}
+					>Komunitas, Event, Cerita</small
 				></span
 			></a
 		>
@@ -127,21 +220,16 @@
 			><a href="#partners">For Organizers</a>
 		</div>
 		<div class="flex items-center gap-2">
-			<button
-				class="hidden min-h-10 items-center gap-2 rounded-xl border border-white/35 bg-slate-950/20 px-3 text-xs font-semibold sm:flex"
-				><MapPin size={15} />Pekanbaru<ChevronDown size={13} /></button
-			><a
-				class="hidden min-h-10 items-center rounded-xl border border-white/35 bg-slate-950/20 px-4 text-xs font-semibold sm:flex"
+			<a
+				class="hidden min-h-10 items-center rounded-xl bg-[#f7b91d] px-4 text-xs font-semibold text-ink sm:flex"
 				href={accountHref}>{accountLabel}</a
-			><a
-				class="grid min-h-10 place-items-center rounded-xl bg-[#f7b91d] px-4 text-xs font-extrabold text-[#102126]"
-				href={accountHref}>Sign up</a
 			><button
-				class="grid h-10 w-10 place-items-center rounded-xl border border-white/35 bg-slate-950/20 lg:hidden"
+				class={`grid h-10 w-10 place-items-center rounded-xl border lg:hidden ${hasScrolled ? "border-slate-200 bg-slate-100 text-[#24383c]" : "border-white/35 bg-slate-950/20"}`}
 				aria-label="Buka menu"
 				aria-expanded={mobileMenuOpen}
 				onclick={() => (mobileMenuOpen = !mobileMenuOpen)}><Menu size={19} /></button
 			>
+		</div>
 		</div>
 	</nav>
 	{#if mobileMenuOpen}<div
@@ -154,51 +242,56 @@
 			><a class="rounded-xl px-3 py-2.5 text-sm font-semibold" href="#communities">Communities</a><a
 				class="rounded-xl px-3 py-2.5 text-sm font-semibold"
 				href="#articles">To Dos</a
-			><a class="rounded-xl px-3 py-2.5 text-sm font-semibold" href={accountHref}>Log in</a>
+			><a class="rounded-xl px-3 py-2.5 text-sm font-semibold" href={accountHref}>{accountLabel}</a>
 		</div>{/if}
-	<div class="mx-auto w-full max-w-[1180px] px-3 pb-20 pt-12 text-center md:px-4">
+	<div class="mx-auto w-full max-w-[1180px] px-3 pb-20 pt-28 text-center md:px-4">
 		<h1
-			class="mx-auto max-w-4xl text-[38px] font-black leading-[1.03] tracking-[-.045em] sm:text-5xl lg:text-[62px]"
+			class="mx-auto max-w-3xl text-[34px] font-bold leading-[1.15] tracking-[-.04em] text-white sm:text-[42px] lg:text-[52px]"
 		>
-			Temukan <u class="underline decoration-2 underline-offset-4">komunitasmu.</u><br />Datang.
-			Bertemu. <strong class="text-[#ffd66f]">Bersua.</strong>
+			Datang <em>’tuk</em>&nbsp;&nbsp;<u class="underline decoration-2 underline-offset-4">Bersua</u
+			>,<br />Pulang
+			<strong class="text-[#f7b91d]"
+				>Bawa <span aria-live="polite">{typingPhrase}</span><span
+					aria-hidden="true"
+					class="animate-cursor-blink">|</span
+				>.</strong
+			>
 		</h1>
-		<p class="mx-auto mt-5 max-w-2xl text-sm leading-6 text-white/80 sm:text-base">
+		<p class="mx-auto mt-4 max-w-2xl text-sm font-medium leading-6 text-white sm:text-base">
 			PKUBersua adalah tempat terbaik untuk menemukan event dan komunitas yang relevan untukmu di
 			Pekanbaru.
 		</p>
 		<form
-			class="mx-auto mt-8 w-full max-w-[880px] rounded-2xl bg-white/95 p-3.5 text-left text-[#102126] shadow-2xl"
+			class="mx-auto mt-8 w-full max-w-[880px] rounded-2xl bg-white/95 p-4 text-left text-ink shadow-[0_18px_50px_rgba(3,23,32,0.22)] sm:p-5"
 			onsubmit={(event) => {
 				event.preventDefault();
 				showToast(keyword ? `Mencari “${keyword}” di Pekanbaru` : "Masukkan kata kunci pencarian");
 			}}
 		>
-			<div class="grid gap-2.5 md:grid-cols-[1.8fr_.8fr_auto]">
+			<div class="grid gap-5 md:grid-cols-[1fr_auto]">
 				<label
-					class="flex min-h-[54px] items-center gap-3 rounded-xl border border-[#e8ecec] bg-white px-4"
-					><Search size={17} class="text-slate-400" /><input
+					class="flex min-h-14 items-center gap-4 rounded-xl border border-slate-300 bg-white px-5 transition focus-within:border-[#0a5350] focus-within:ring-2 focus-within:ring-[#0a5350]/10"
+				>
+					<Search size={17} class="text-slate-400" />
+					<input
 						bind:value={keyword}
 						type="search"
 						placeholder="Cari event, komunitas, atau topik"
 						class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-					/></label
-				><label
-					class="flex min-h-[54px] items-center gap-3 rounded-xl border border-[#e8ecec] bg-white px-4"
-					><MapPin size={17} class="text-slate-400" /><select
-						class="w-full bg-transparent text-sm font-medium outline-none"
-						><option>Pekanbaru</option><option>Rumbai</option><option>Panam</option></select
-					></label
-				><button
-					class="min-h-[50px] rounded-xl bg-[#f7b91d] px-6 text-sm font-extrabold"
-					type="submit">Cari Sekarang</button
+					/>
+				</label>
+				<button
+					class="min-h-14 w-full rounded-xl bg-[#f7b91d] px-7 text-sm font-semibold md:w-44"
+					type="submit"
 				>
+					Temukan
+				</button>
 			</div>
-			<div class="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+			<div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-1 text-xs text-slate-500">
 				<b class="text-slate-700">Trending:</b
 				>{#each ["Teknologi", "Startup", "Desain", "Webinar", "Bisnis", "Gratis", "Weekend"] as trend}<button
 						type="button"
-						class="rounded-full bg-slate-100 px-3 py-1.5"
+						class="rounded-full border border-slate-200 bg-white px-3 py-1.5 transition hover:border-[#0a5350] hover:text-[#0a5350]"
 						onclick={() => (keyword = trend)}>{trend}</button
 					>{/each}
 			</div>
@@ -208,30 +301,44 @@
 
 <main class="mx-auto w-full max-w-[1180px] px-3 pb-10 md:px-4">
 	<div
-		class="relative z-10 -mt-1 grid overflow-hidden rounded-2xl border border-[#e8ecec] bg-white shadow-xl lg:-mt-11 sm:grid-cols-2 lg:grid-cols-7"
+		class="relative z-10 -mt-1 grid overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_16px_40px_rgba(7,61,61,0.14)] lg:-mt-11 sm:grid-cols-2 lg:grid-cols-7"
 	>
-		{#each categories as [label, Icon]}<a
+		{#each categories as [label, Icon, tone]}<a
 				href="#events"
-				class="grid min-h-[88px] place-items-center gap-1.5 border-b border-r border-[#e8ecec] p-3 text-center text-xs font-bold transition hover:bg-slate-50"
-				><span class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600"
-					><Icon size={20} /></span
+				class={[
+					"group grid min-h-[88px] place-items-center gap-1.5 border-b border-r border-slate-100 p-3 text-center text-xs font-semibold text-ink transition",
+					tone === "emerald"
+						? "border-b-2 border-b-[#073d3d] bg-[#f7fbfa]"
+						: "hover:bg-[#fffdf5]"
+				]}
+				><span
+					class={[
+						"grid h-9 w-9 place-items-center rounded-xl transition duration-200 group-hover:scale-105",
+						categoryStyles[tone]
+					]}><Icon size={20} /></span
 				>{label}</a
 			>{/each}
 	</div>
 	<section id="events" class="pt-11">
 		<div class="mb-5 flex items-end justify-between gap-4">
 			<div>
-				<h2 class="text-xl font-black tracking-tight sm:text-2xl">Event Populer Minggu Ini 🔥</h2>
-				<p class="mt-1 text-xs text-[#66747a]">Temukan event seru dan bertemu orang-orang baru.</p>
+				<h2 class="text-lg font-black tracking-[-0.035em] text-ink sm:text-xl">
+					Rekomendasi Buat Kamu
+				</h2>
+				<p class="mt-0.5 text-sm leading-6 text-[#66747a]">
+					Temukan event seru dan bertemu orang-orang baru.
+				</p>
 			</div>
 			<a
-				class="flex shrink-0 items-center gap-1 text-xs font-extrabold text-[#0a5350]"
-				href="/events">Lihat semua event <ArrowRight size={14} /></a
+				class="inline-flex min-h-11 items-center rounded-lg px-1 text-sm font-bold text-[#0a5350] underline decoration-[#f7b91d] decoration-2 underline-offset-4 transition hover:text-[#073d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-4"
+				href="/events"
 			>
+				Lihat semua event
+			</a>
 		</div>
 		<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 			{#each data.events.slice(0, 4) as event (event.id)}<article
-					class="overflow-hidden rounded-2xl border border-[#e8ecec] bg-white shadow-md"
+					class="overflow-hidden rounded-2xl border border-slate-200 bg-white"
 				>
 					<a
 						href="/events/{event.slug}"
@@ -245,7 +352,9 @@
 							>
 								{event.title}
 							</div>{/if}
-						<div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/85"></div>
+						<div
+							class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/90"
+						></div>
 						<span
 							class="absolute left-3 top-3 rounded-md bg-violet-700 px-2 py-1 text-[9px] font-black"
 							>{event.categories[0]?.name ?? "KOMUNITAS"}</span
@@ -258,13 +367,30 @@
 							}}><Bookmark size={16} /></button
 						>
 						<div class="absolute inset-x-4 bottom-4">
-							<h3 class="text-[22px] font-black leading-[1.05]">{event.title}</h3>
-							<p class="mt-2 text-[11px] text-white/80">{formatDate(event.startsAt)}</p>
-							<p class="mt-1 text-[11px] text-white/80">{event.location}</p>
+							<h3
+								class="text-lg font-black leading-[1.1] [-webkit-text-stroke:0.75px_#334155] [paint-order:stroke_fill]"
+							>
+								{event.title}
+							</h3>
+							<p
+								class="mt-2 text-[11px] text-white/95 [-webkit-text-stroke:0.35px_#334155] [paint-order:stroke_fill]"
+							>
+								{formatDate(event.startsAt)}
+							</p>
+							<p
+								class="mt-1 text-[11px] text-white/95 [-webkit-text-stroke:0.35px_#334155] [paint-order:stroke_fill]"
+							>
+								{event.location}
+							</p>
 						</div></a
 					>
 					<div class="flex justify-between px-3.5 py-3 text-[11px] font-bold">
-						<span>PKUBersua</span><span class="text-emerald-600">{price(event)}</span>
+						<span class="flex items-center gap-1.5"
+							><span
+								class="grid h-6 w-6 place-items-center rounded-full bg-violet-700 text-[8px] font-black text-white"
+								aria-hidden="true">PK</span
+							>PKUBersua</span
+						><span class="text-[#0a5350] underline decoration-[#f7b91d] decoration-2 underline-offset-4">{price(event)}</span>
 					</div>
 				</article>{:else}<p class="col-span-full p-8 text-center text-sm text-[#66747a]">
 					Belum ada event mendatang.
@@ -275,7 +401,7 @@
 			<div class="flex justify-between">
 				<div>
 					<h2 class="text-xl font-black">Event Sebelumnya</h2>
-					<p class="mt-1 text-xs text-[#66747a]">Lihat apa yang sudah kita selenggarakan.</p>
+					<p class="mt-1 text-sm text-[#66747a]">Lihat apa yang sudah kita selenggarakan.</p>
 				</div>
 				{#if data.pastEventsTotal > 6}<a class="text-xs font-bold text-[#0a5350]" href="/events"
 						>Lihat semua</a
@@ -283,75 +409,90 @@
 			</div>
 		</section>{/if}
 	<section id="communities" class="pt-11">
-		<div class="mb-5 flex items-end justify-between gap-4">
-			<div>
-				<h2 class="text-xl font-black tracking-tight sm:text-2xl">Komunitas Populer</h2>
-				<p class="mt-1 text-xs text-[#66747a]">
-					Temukan ruang yang cocok untuk berkembang bersama.
+		<div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+			<div class="max-w-[36rem]">
+				<h2 class="text-lg font-black tracking-[-0.035em] text-ink sm:text-xl">
+					Komunitas Populer
+				</h2>
+				<p class="mt-0.5 text-sm leading-6 text-[#66747a]">
+					Temukan circle baru, bertukar ide, dan tumbuh bersama komunitas lokal.
 				</p>
 			</div>
-			<a class="text-xs font-extrabold text-[#0a5350]" href="#communities"
-				>Lihat semua komunitas →</a
+			<a
+				class="inline-flex min-h-11 items-center rounded-lg px-1 text-sm font-bold text-[#0a5350] underline decoration-[#f7b91d] decoration-2 underline-offset-4 transition hover:text-[#073d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-4"
+				href="#communities"
 			>
+				Lihat semua komunitas
+			</a>
 		</div>
-		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-			{#each communities as [name, members, description, Icon]}<article
-					class="flex min-h-[270px] flex-col items-center rounded-2xl border border-[#e8ecec] bg-white p-4 pt-6 text-center shadow-md"
+		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+			{#each communities as [name, , description, avatar]}<article
+					class="group flex min-h-[280px] flex-col items-center overflow-hidden rounded-xl border border-slate-200 bg-white p-5 text-center transition duration-200 hover:-translate-y-1 hover:border-[#0a5350]/25 hover:shadow-[0_14px_36px_rgba(7,61,61,0.10)] motion-reduce:transform-none motion-reduce:transition-none"
 				>
-					<span class="grid h-16 w-16 place-items-center rounded-2xl bg-amber-50 text-amber-500"
-						><Icon size={30} /></span
+					<span
+						class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-[#ffefc5] text-amber-500 transition-colors group-hover:bg-[#f7b91d] group-hover:text-[#073d3d]"
 					>
-					<h3 class="mt-3 text-sm font-black">{name}</h3>
-					<small class="mt-1 text-[11px] text-slate-400">{members}</small>
-					<p class="mt-3 text-xs leading-5 text-[#66747a]">{description}</p>
+						<span class="text-lg font-black tracking-tight">{avatar}</span>
+					</span>
+					<h3 class="mt-4 text-[15px] font-bold leading-5 text-ink">{name}</h3>
+					<p class="mt-2 max-w-[18rem] text-xs leading-[1.7] text-[#66747a]">{description}</p>
 					<button
-						class="mt-auto w-full rounded-xl bg-amber-50 py-2.5 text-xs font-extrabold text-amber-800"
-						onclick={() => showToast(`Bergabung dengan ${name}`)}>Join Community</button
+						type="button"
+						class="mt-auto min-h-9 w-full rounded-xl bg-[#073d3d] px-4 py-2 text-[11px] font-bold text-white transition hover:bg-[#0a5350] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-2 active:translate-y-px"
+						aria-label={`Bergabung dengan ${name}`}
+						onclick={() => showToast(`Bergabung dengan ${name}`)}
 					>
+						Join Community
+					</button>
 				</article>{/each}
 		</div>
 		<div
-			class="mt-5 grid overflow-hidden rounded-2xl border border-[#e8ecec] bg-gradient-to-r from-violet-50/60 to-amber-50/60 sm:grid-cols-2 lg:grid-cols-5"
+			class="mt-8 grid min-h-[138px] overflow-hidden rounded-2xl border border-[#edf0f4] bg-gradient-to-r from-[#f9f8ff] via-white to-[#fffdf3] sm:grid-cols-2 lg:grid-cols-5"
 		>
-			<div class="p-5 lg:col-span-1">
-				<h3 class="font-black">Kenapa PKUBersua?</h3>
+			<div class="p-5 lg:col-span-1 lg:p-6">
+				<h3 class="font-black text-[#0a5350]">Kenapa PKUBersua?</h3>
 				<p class="mt-1 text-xs leading-5 text-[#66747a]">
 					Semua yang kamu butuhkan untuk bertumbuh, belajar, dan bertemu.
 				</p>
 			</div>
-			<div class="min-h-[124px] border-t border-[#e8ecec] p-5 lg:border-l">
+			<div class="min-h-[138px] border-t border-[#edf0f4] p-5 lg:border-l lg:p-6">
 				<CalendarDays size={23} class="mb-2 text-amber-500" />
-				<h3 class="text-sm font-black">Temukan Event</h3>
+				<h3 class="text-[15px] font-black text-[#0a5350]">Temukan Event</h3>
 				<p class="mt-1 text-xs leading-5 text-[#66747a]">
 					Bertemu, belajar, dan berkembang bersama.
 				</p>
 			</div>
-			<div class="min-h-[124px] border-t border-[#e8ecec] p-5 lg:border-l">
+			<div class="min-h-[138px] border-t border-[#edf0f4] p-5 lg:border-l lg:p-6">
 				<Users size={23} class="mb-2 text-amber-500" />
-				<h3 class="text-sm font-black">Bangun Relasi</h3>
+				<h3 class="text-[15px] font-black text-[#0a5350]">Bangun Relasi</h3>
 				<p class="mt-1 text-xs leading-5 text-[#66747a]">
 					Bertemu, belajar, dan berkembang bersama.
 				</p>
 			</div>
-			<div class="min-h-[124px] border-t border-[#e8ecec] p-5 lg:border-l">
+			<div class="min-h-[138px] border-t border-[#edf0f4] p-5 lg:border-l lg:p-6">
 				<Users size={23} class="mb-2 text-amber-500" />
-				<h3 class="text-sm font-black">Ikut Komunitas</h3>
+				<h3 class="text-[15px] font-black text-[#0a5350]">Ikut Komunitas</h3>
 				<p class="mt-1 text-xs leading-5 text-[#66747a]">
 					Bertemu, belajar, dan berkembang bersama.
 				</p>
 			</div>
-			<div class="min-h-[124px] border-t border-[#e8ecec] p-5 lg:border-l">
+			<div class="min-h-[138px] border-t border-[#edf0f4] p-5 lg:border-l lg:p-6">
 				<Rocket size={23} class="mb-2 text-amber-500" />
-				<h3 class="text-sm font-black">Kembangkan Diri</h3>
+				<h3 class="text-[15px] font-black text-[#0a5350]">Kembangkan Diri</h3>
 				<p class="mt-1 text-xs leading-5 text-[#66747a]">
 					Bertemu, belajar, dan berkembang bersama.
 				</p>
 			</div>
 		</div>
 		<div
-			class="relative mt-5 grid gap-6 rounded-2xl bg-gradient-to-r from-[#142a61] to-[#4c188b] p-6 text-white lg:grid-cols-[1.15fr_1fr] lg:items-center"
+			class="relative mt-8 grid gap-6 rounded-2xl border border-slate-100 bg-gradient-to-r from-[#142a61] to-[#4c188b] p-6 text-white lg:grid-cols-[1.15fr_1fr] lg:items-center"
 		>
-			<MailOpen size={90} class="absolute -left-3 top-2 -rotate-12 text-white/15" />
+			<img
+				src="/images/hero/rebung.svg"
+				alt=""
+				aria-hidden="true"
+				class="absolute -left-3 top-2 h-[90px] w-[90px] -rotate-12 object-contain opacity-15"
+			/>
 			<div class="relative lg:pl-24">
 				<h3 class="text-lg font-black">Jangan lewatkan event seru lainnya!</h3>
 				<p class="mt-1 text-xs leading-5 text-white/70">
@@ -369,9 +510,8 @@
 					required
 					type="email"
 					placeholder="Masukkan email kamu"
-					class="min-h-11 min-w-0 flex-1 rounded-lg px-3 text-sm text-[#102126] outline-none"
-				/><button
-					class="min-h-11 rounded-lg bg-[#f7b91d] px-6 text-sm font-extrabold text-[#102126]"
+					class="min-h-11 min-w-0 flex-1 rounded-lg px-3 text-sm text-ink outline-none"
+				/><button class="min-h-11 rounded-lg bg-[#f7b91d] px-6 text-xs font-semibold text-ink"
 					>Berlangganan</button
 				>
 			</form>
@@ -380,53 +520,81 @@
 	<section id="articles" class="pt-11">
 		<div class="mb-5 flex items-end justify-between">
 			<div>
-				<h2 class="text-xl font-black tracking-tight sm:text-2xl">Artikel & Blog Terbaru</h2>
-				<p class="mt-1 text-xs text-[#66747a]">Insight dan cerita dari komunitas Pekanbaru.</p>
+				<h2 class="text-lg font-black tracking-[-0.035em] text-ink sm:text-xl">
+					Artikel & Blog Terbaru
+				</h2>
+				<p class="mt-0.5 text-sm leading-6 text-[#66747a]">
+					Insight dan cerita dari komunitas Pekanbaru.
+				</p>
 			</div>
-			<a class="text-xs font-extrabold text-[#0a5350]" href="#articles">Lihat semua artikel →</a>
+			<a
+				class="inline-flex min-h-11 items-center rounded-lg px-1 text-sm font-bold text-[#0a5350] underline decoration-[#f7b91d] decoration-2 underline-offset-4 transition hover:text-[#073d3d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-4"
+				href="#articles"
+			>
+				Lihat semua artikel
+			</a>
 		</div>
 		<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 			{#each articles as article}<article
-					class="overflow-hidden rounded-2xl border border-[#e8ecec] bg-white shadow-md"
+					class="overflow-hidden rounded-2xl border border-slate-200 bg-white"
 				>
 					<div class="h-40 bg-gradient-to-br from-[#2e3230] to-[#315c53]"></div>
-					<div class="p-4">
-						<span class="rounded-md bg-violet-50 px-2 py-1 text-[9px] font-black text-violet-700"
-							>KOMUNITAS</span
-						>
+					<div class="flex min-h-[138px] flex-col p-4">
+						<div class="flex items-center justify-between gap-3">
+							<span class="rounded-md bg-violet-100 px-2 py-1 text-[10px] font-semibold text-violet-700"
+								>Komunitas</span
+							>
+							<span class="text-xs leading-5 text-[#66747a]">12 Agu 2026</span>
+						</div>
 						<h3 class="mt-3 text-[15px] font-black leading-5">{article}</h3>
-						<p class="mt-2 text-xs leading-5 text-[#66747a]">
-							Cerita, tips, dan insight untuk bertumbuh bersama komunitas.
-						</p>
-						<small class="mt-3 block text-[10px] text-slate-400">12 Agu 2026 · 5 min read</small>
+						<div class="mt-auto flex items-center gap-2 text-xs leading-5 text-[#66747a]">
+							<span
+								class="grid h-6 w-6 place-items-center rounded-full bg-violet-700 text-[8px] font-black text-white"
+								aria-hidden="true">PK</span
+							>
+							<span>PKUBersua · 5 min read</span>
+						</div>
 					</div>
 				</article>{/each}
 		</div>
 		<div
 			id="partners"
-			class="my-11 rounded-2xl border border-amber-100 bg-gradient-to-r from-emerald-50/60 to-amber-50/80 p-5 sm:p-7"
+			class="relative my-11 overflow-hidden rounded-[28px] border border-[#32267a] bg-gradient-to-r from-[#142a61] to-[#4c188b] px-5 py-7 text-white sm:px-8 sm:py-9"
 		>
-			<div class="flex flex-col items-start justify-between gap-5 lg:flex-row">
-				<div>
-					<small class="text-[10px] font-black tracking-widest text-emerald-700"
-						>PARTNERSHIP ECOSYSTEM</small
-					>
-					<h2 class="mt-1 text-xl font-black sm:text-2xl">
-						Berkolaborasi dengan brand dan komunitas <span class="text-amber-500">terbaik</span>
+			<div
+				class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#f7b91d]/10 blur-2xl"
+			></div>
+			<img
+				src="/images/hero/rebung.svg"
+				alt=""
+				aria-hidden="true"
+				class="pointer-events-none absolute -right-8 top-[42%] h-[310px] w-[310px] -translate-y-1/2 -rotate-12 object-contain opacity-[0.12]"
+			/>
+			<div class="relative z-10 grid items-start gap-6 lg:grid-cols-[1fr_auto]">
+				<div class="max-w-3xl">
+					<p class="text-[10px] font-extrabold tracking-[0.18em] text-[#ffd66f]">
+						PARTNERSHIP ECOSYSTEM
+					</p>
+					<h2 class="mt-2 text-2xl font-black tracking-[-0.035em] sm:text-[30px]">
+						Tumbuh bersama partner yang
+						<span class="text-[#ffd66f]">percaya pada Pekanbaru.</span>
 					</h2>
-					<p class="mt-1 max-w-2xl text-xs leading-5 text-[#66747a]">
-						PKUBersua bekerja sama dengan berbagai perusahaan, komunitas, dan institusi di
-						Pekanbaru.
+					<p class="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+						Kami membuka kolaborasi untuk brand, komunitas, dan institusi yang ingin menciptakan
+						dampak nyata melalui event lokal.
 					</p>
 				</div>
-				<button
-					class="w-full rounded-xl bg-[#073d3d] px-5 py-3 text-sm font-extrabold text-white lg:w-auto"
-					onclick={() => showToast("Kami akan menghubungi kamu")}>Jadi Partner PKUBersua →</button
+				<a
+					href="#partners"
+					class="inline-flex items-center text-sm font-semibold text-[#ffd66f] underline decoration-2 underline-offset-4 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd66f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#32267a]"
+					onclick={() => showToast("Kami akan menghubungi kamu")}
 				>
+					Ingin Jadi Partner?
+				</a>
 			</div>
-			<div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-				{#each ["Telkomsel", "gojek", "BCA", "OVO", "ruangguru", "wondr"] as partner}<div
-						class="grid min-h-[58px] place-items-center rounded-xl border border-[#e8ecec] bg-white text-sm font-black"
+			<div class="relative z-10 mt-7 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+				{#each ["IDCLOUDHOST", "gojek", "BCA", "OVO", "ruangguru", "wondr"] as partner}<div
+						class="grid min-h-[58px] place-items-center rounded-xl border border-white/15 bg-white/95 px-3 text-sm font-bold text-[#24383c] transition hover:-translate-y-0.5 hover:bg-white motion-reduce:transform-none"
 					>
 						{partner}
 					</div>{/each}
@@ -435,7 +603,7 @@
 	</section>
 </main>
 
-<footer class="bg-[#073d3d] pb-5 pt-9 text-white">
+<footer class="bg-[#032f2f] pb-5 pt-9 text-white">
 	<div
 		class="mx-auto grid w-full max-w-[1180px] gap-8 px-3 sm:grid-cols-2 lg:grid-cols-[1.55fr_repeat(4,1fr)] lg:px-4"
 	>
@@ -445,6 +613,12 @@
 				Platform komunitas dan event terbaik di Pekanbaru untuk bertemu, belajar, dan bertumbuh
 				bersama.
 			</p>
+			<a
+				href="mailto:contact@pkubersua.com"
+				class="mt-4 inline-flex text-xs font-semibold text-[#ffd66f] underline decoration-white/30 underline-offset-4 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#032f2f]"
+			>
+				contact@pkubersua.com
+			</a>
 		</div>
 		{#each [["Jelajahi", "Event · Community · Blog"], ["Untuk Organizer", "Buat Event · Kelola Event · Bantuan"], ["Perusahaan", "Tentang Kami · Mitra · Kontak"], ["Legal", "Syarat & Ketentuan · Privasi"]] as column}<div
 			>
