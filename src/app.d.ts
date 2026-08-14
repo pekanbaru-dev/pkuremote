@@ -13,6 +13,7 @@ declare global {
 			email: string;
 			displayName: string | null;
 			avatarUrl: string | null;
+			role: "user" | "editor" | "admin";
 		}
 
 		interface Locals {

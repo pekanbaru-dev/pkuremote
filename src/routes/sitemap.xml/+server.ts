@@ -1,15 +1,22 @@
 import { PUBLIC_SITE_URL } from "$env/static/public"; // baked at build time via Docker ARG
 import { getUpcomingEvents, getPastEvents } from "$lib/server/events";
+import { getAllArticles } from "$lib/server/articles";
 
 export const GET = async (): Promise<Response> => {
 	const today = new Date().toISOString().split("T")[0];
 	const allEvents = [...(await getUpcomingEvents()), ...(await getPastEvents())];
+	const articles = await getAllArticles("published");
 
 	const urls = [
 		{ loc: `${PUBLIC_SITE_URL}/`, lastmod: today },
+		{ loc: `${PUBLIC_SITE_URL}/blog`, lastmod: today },
 		...allEvents.map((e) => ({
 			loc: `${PUBLIC_SITE_URL}/events/${e.slug}`,
 			lastmod: e.startsAt.split("T")[0]
+		})),
+		...articles.map((a) => ({
+			loc: `${PUBLIC_SITE_URL}/blog/${a.slug}`,
+			lastmod: (a.updatedAt ?? a.publishedAt ?? a.createdAt).toISOString().split("T")[0]
 		}))
 	];
 

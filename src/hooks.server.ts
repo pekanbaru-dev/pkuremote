@@ -7,7 +7,7 @@ import { SESSION_COOKIE, resolveSessionUser } from "$lib/server/auth/session";
 // Authentication-guarded path prefixes. Matching unauthenticated requests are
 // redirected to /login. This is an AUTH-only guard — it does not evaluate admin
 // status; authorization for /admin/* is handled in src/routes/admin/+layout.server.ts.
-const GUARDED_PREFIXES = ["/myprofile", "/admin"];
+const GUARDED_PREFIXES = ["/myprofile", "/admin", "/my-articles"];
 
 // One-time warning so it's obvious in the dev server logs that real auth is
 // being bypassed. `dev` is compiled to `false` in the production build.
