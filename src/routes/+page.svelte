@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-restricted-html-elements, svelte/require-each-key, svelte/no-at-html-tags */
 	import { page } from "$app/state";
 	import type { PageData } from "./$types.js";
 	import { PUBLIC_SITE_URL } from "$env/static/public";
