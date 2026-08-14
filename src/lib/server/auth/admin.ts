@@ -1,56 +1,24 @@
-import { env } from "$env/dynamic/private";
 import { redirect } from "@sveltejs/kit";
 
 /**
- * Parse the `ADMIN_EMAILS` allow-list into a set of normalized (trimmed,
- * lowercased, non-empty) email addresses. The value is comma-separated and
- * supports any number of admins. An unset, blank, or separators-only value
- * yields an empty set — i.e. no admins (fail closed): a misconfigured
- * allow-list never grants access.
- */
-export function parseAdminEmails(raw: string | null | undefined): Set<string> {
-	if (!raw) return new Set();
-	return new Set(
-		raw
-			.split(",")
-			.map((entry) => entry.trim().toLowerCase())
-			.filter((entry) => entry.length > 0)
-	);
-}
-
-/**
- * True iff `email` is a member of the admin allow-list, compared
- * case-insensitively. A null/blank email is never an admin.
- */
-export function isEmailAdmin(email: string | null | undefined, adminEmails: Set<string>): boolean {
-	if (!email) return false;
-	return adminEmails.has(email.trim().toLowerCase());
-}
-
-// Cache the parsed set, re-parsing only when the raw env value changes.
-let cachedRaw: string | null | undefined = undefined;
-let cachedSet = new Set<string>();
-let cacheInitialized = false;
-
-function adminEmailSet(): Set<string> {
-	const raw = env.ADMIN_EMAILS;
-	if (!cacheInitialized || raw !== cachedRaw) {
-		cachedRaw = raw;
-		cachedSet = parseAdminEmails(raw);
-		cacheInitialized = true;
-	}
-	return cachedSet;
-}
-
-/**
- * Whether the request's validated user is an administrator. Server-only.
+ * Whether the request's validated user is an administrator.
  *
- * This is the SINGLE seam all admin gating funnels through: a future
- * DB-backed RBAC change replaces the body of this function (env allow-list →
- * role lookup) without touching any call site.
+ * Reads `locals.user.role` which is loaded from `profiles.role` in
+ * `resolveSessionUser` — no extra DB query per request.
+ *
+ * Previously this checked the `ADMIN_EMAILS` env allow-list. That seam has
+ * now been fulfilled: role is the single source of truth in the DB.
  */
 export function isAdmin(locals: App.Locals): boolean {
-	return isEmailAdmin(locals.user?.email, adminEmailSet());
+	return locals.user?.role === "admin";
+}
+
+/**
+ * Whether the request's validated user is an editor or administrator.
+ * Editors can review and publish articles; admins have full access.
+ */
+export function isEditor(locals: App.Locals): boolean {
+	return locals.user?.role === "editor" || locals.user?.role === "admin";
 }
 
 /**
@@ -64,4 +32,40 @@ export function requireAdmin(locals: App.Locals): void {
 	if (!isAdmin(locals)) {
 		redirect(303, "/");
 	}
+}
+
+/**
+ * Assert editor (or admin) access, or redirect. Used to gate
+ * `/admin/articles` routes that editors need but regular users do not.
+ */
+export function requireEditor(locals: App.Locals): void {
+	if (!isEditor(locals)) {
+		redirect(303, "/");
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Legacy helpers retained for existing tests. No longer used by runtime code.
+// Will be removed in a follow-up cleanup change once tests are updated.
+// ---------------------------------------------------------------------------
+
+/**
+ * @deprecated Use `isAdmin(locals)` instead. Kept for test compatibility.
+ */
+export function parseAdminEmails(raw: string | null | undefined): Set<string> {
+	if (!raw) return new Set();
+	return new Set(
+		raw
+			.split(",")
+			.map((entry) => entry.trim().toLowerCase())
+			.filter((entry) => entry.length > 0)
+	);
+}
+
+/**
+ * @deprecated Use `isAdmin(locals)` instead. Kept for test compatibility.
+ */
+export function isEmailAdmin(email: string | null | undefined, adminEmails: Set<string>): boolean {
+	if (!email) return false;
+	return adminEmails.has(email.trim().toLowerCase());
 }

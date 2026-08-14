@@ -137,3 +137,36 @@ export async function readUpload(
 		return null;
 	}
 }
+
+/**
+ * Validate, store, and return the public path for an article cover image.
+ * Same constraints as event banners: PNG/JPEG/WebP, max 2 MiB.
+ * Server-only; callers MUST have verified the user is authenticated first.
+ */
+export async function uploadArticleCover(file: File): Promise<string> {
+	const ext = validateBannerFile(file);
+	const dir = resolveUploadDir();
+	await mkdir(dir, { recursive: true });
+	const filename = `${randomUUID()}.${ext}`;
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	await writeFile(path.join(dir, filename), bytes);
+	return `${UPLOADS_URL_PREFIX}/${filename}`;
+}
+
+/**
+ * Best-effort removal of a previously stored article cover image.
+ * Path-safe: rejects anything that escapes the uploads dir. Failures are
+ * logged and swallowed so they never corrupt the caller's committed state.
+ */
+export async function deleteArticleCover(pathOrUrl: string): Promise<void> {
+	const name = safeBasename(pathOrUrl);
+	if (!name) return;
+	const dir = resolveUploadDir();
+	const target = path.join(dir, name);
+	if (!target.startsWith(dir + path.sep)) return;
+	try {
+		await unlink(target);
+	} catch (err) {
+		console.error(`deleteArticleCover: failed to remove ${name}:`, err);
+	}
+}

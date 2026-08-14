@@ -7,6 +7,7 @@
 </script>
 
 <nav class="flex flex-col gap-1" aria-label="Navigasi admin">
+	<p class="label-meta px-3 pb-2 pt-1">Menu</p>
 	{#each NAV_ITEMS as item (item.href)}
 		{@const Icon = item.icon}
 		{@const active = isNavItemActive(page.url.pathname, item.href)}
@@ -15,7 +16,7 @@
 			aria-current={active ? "page" : undefined}
 			onclick={onNavigate}
 			class={[
-				"text-label-lg flex items-center gap-3 rounded-lg px-3 py-2 transition-colors",
+				"text-label-lg flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
 				active
 					? "bg-primary-container text-on-primary-container font-semibold"
 					: "text-on-surface-variant hover:bg-surface-container-high hover:text-ink"

@@ -34,6 +34,7 @@ export type SessionUser = {
 	email: string;
 	displayName: string | null;
 	avatarUrl: string | null;
+	role: "user" | "editor" | "admin";
 };
 
 /**
@@ -67,7 +68,8 @@ export async function resolveSessionUser(
 			expiresAt: sessions.expiresAt,
 			email: users.email,
 			displayName: profiles.displayName,
-			avatarUrl: profiles.avatarUrl
+			avatarUrl: profiles.avatarUrl,
+			role: profiles.role
 		})
 		.from(sessions)
 		.innerJoin(users, eq(users.id, sessions.userId))
@@ -85,7 +87,8 @@ export async function resolveSessionUser(
 		id: row.userId,
 		email: row.email,
 		displayName: row.displayName ?? null,
-		avatarUrl: row.avatarUrl ?? null
+		avatarUrl: row.avatarUrl ?? null,
+		role: row.role ?? "user"
 	};
 }
 

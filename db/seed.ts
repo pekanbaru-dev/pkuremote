@@ -122,7 +122,7 @@ async function seedContent(): Promise<void> {
 		.onConflictDoNothing();
 	await db
 		.insert(profiles)
-		.values({ id: SEED_USER_ID, displayName: "Seed Author" })
+		.values({ id: SEED_USER_ID, displayName: "Seed Author", role: "admin" })
 		.onConflictDoNothing();
 
 	console.log("  · truncating events, announcements, event_categories (no natural unique key)");
@@ -187,7 +187,10 @@ async function seedContent(): Promise<void> {
 			slug: "hello-from-the-seed-script",
 			authorId: SEED_USER_ID,
 			excerpt: "A placeholder post inserted by the seed script so the table has at least one row.",
-			body: "Full post body goes here."
+			body: "## Halo dari Seed Script\n\nIni adalah artikel contoh yang dimasukkan oleh seed script agar tabel `posts` tidak kosong saat development.",
+			status: "published",
+			publishedAt: new Date(),
+			updatedAt: new Date()
 		})
 		.onConflictDoNothing();
 
