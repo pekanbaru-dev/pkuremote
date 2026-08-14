@@ -15,7 +15,7 @@ Creative north star: **The Local Meetup Board**. Halaman terasa hidup dan ramah 
 
 - Teal brand: `#073d3d` untuk hero, footer, dan CTA gelap.
 - Teal soft: `#0a5350` untuk link dan aksen navigasi.
-- Ink: `#102126` untuk teks utama.
+- Ink: `#24383c` untuk teks utama.
 - Muted: `#66747a` untuk metadata dan deskripsi.
 - Line: `#e8ecec` untuk border tipis.
 - Sun: `#f7b91d` untuk CTA utama, dengan `#ffd66f` untuk highlight hero.
@@ -23,7 +23,7 @@ Creative north star: **The Local Meetup Board**. Halaman terasa hidup dan ramah 
 
 ## Typography
 
-Hanken Grotesk digunakan untuk display dan body; Manrope digunakan untuk label kecil. Headline hero tebal, rapat namun tidak di bawah `-0.045em`. Metadata dan label boleh berukuran kecil, tetapi harus tetap terbaca.
+Plus Jakarta Sans digunakan untuk seluruh peran tipografi: display, body, dan label. Bobot 400–800 dimuat melalui Google Fonts. Headline hero tebal, rapat namun tidak di bawah `-0.045em`. Metadata dan label boleh berukuran kecil, tetapi harus tetap terbaca.
 
 ## Layout
 

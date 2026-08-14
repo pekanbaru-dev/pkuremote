@@ -26,5 +26,6 @@ describe("makeDevAdminUser", () => {
 		expect(user.email).toBe("admin@example.com");
 		expect(user.displayName).toBe("Dev Admin");
 		expect(user.avatarUrl).toBeNull();
+		expect(user.role).toBe("admin");
 	});
 });

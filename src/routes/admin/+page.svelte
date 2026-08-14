@@ -13,13 +13,29 @@
 	const dayFmt = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" });
 
 	const tiles = $derived([
-		{ label: "Total Event", value: String(m.totalEvents), icon: CalendarDaysIcon },
-		{ label: "Akan Datang", value: String(m.upcomingEvents), icon: CalendarClockIcon },
-		{ label: "Pendaftaran Aktif", value: String(m.activeRegistrations), icon: UsersIcon },
+		{
+			label: "Total Event",
+			value: String(m.totalEvents),
+			icon: CalendarDaysIcon,
+			iconClass: "bg-primary-container text-on-primary-container"
+		},
+		{
+			label: "Akan Datang",
+			value: String(m.upcomingEvents),
+			icon: CalendarClockIcon,
+			iconClass: "bg-secondary-container text-on-secondary-container"
+		},
+		{
+			label: "Pendaftaran Aktif",
+			value: String(m.activeRegistrations),
+			icon: UsersIcon,
+			iconClass: "bg-info-container text-on-info-container"
+		},
 		{
 			label: "Tingkat Keterisian",
 			value: m.capacityFill === null ? "—" : `${m.capacityFill}%`,
-			icon: GaugeIcon
+			icon: GaugeIcon,
+			iconClass: "bg-warning-container text-on-warning-container"
 		}
 	]);
 </script>
@@ -29,28 +45,34 @@
 </svelte:head>
 
 <section class="flex flex-col gap-6">
-	<header>
-		<h1 class="font-display text-headline-md text-ink">Dashboard</h1>
-		<p class="text-on-surface-variant mt-1 text-sm">Ringkasan aktivitas komunitas.</p>
+	<header class="flex items-end justify-between">
+		<div>
+			<h1 class="font-display text-headline-md text-ink">Dashboard</h1>
+			<p class="text-on-surface-variant mt-1 text-sm">Ringkasan aktivitas komunitas.</p>
+		</div>
 	</header>
 
-	<div class="grid grid-cols-2 gap-4 desktop:grid-cols-4">
+	<div class="grid grid-cols-2 gap-4 tablet:grid-cols-4">
 		{#each tiles as tile (tile.label)}
 			{@const Icon = tile.icon}
-			<Card class="border-hairline border">
-				<CardContent class="flex flex-col gap-2">
-					<div class="text-on-surface-variant flex items-center gap-2">
-						<Icon class="size-4" />
-						<span class="text-label-md">{tile.label}</span>
+			<Card>
+				<CardContent class="flex flex-col gap-4 p-5">
+					<div class="flex items-center gap-2">
+						<span class={`flex size-9 items-center justify-center rounded-lg ${tile.iconClass}`}>
+							<Icon class="size-4.5" />
+						</span>
 					</div>
-					<span class="font-display text-headline-md text-ink">{tile.value}</span>
+					<div>
+						<p class="text-label-md text-on-surface-variant">{tile.label}</p>
+						<p class="font-display text-headline-lg text-ink">{tile.value}</p>
+					</div>
 				</CardContent>
 			</Card>
 		{/each}
 	</div>
 
 	<div class="grid gap-4 tablet:grid-cols-2">
-		<Card class="border-hairline border">
+		<Card>
 			<CardContent class="flex flex-col gap-3">
 				<div class="flex items-center justify-between">
 					<h2 class="text-label-lg font-medium text-ink">Pendaftaran Terbaru</h2>
@@ -61,7 +83,7 @@
 				{:else}
 					<ul class="flex flex-col divide-y divide-hairline">
 						{#each m.recentRegistrations as reg (reg.id)}
-							<li class="flex items-center justify-between gap-3 py-2">
+							<li class="flex items-center justify-between gap-3 py-2.5">
 								<div class="min-w-0">
 									<p class="truncate font-medium text-ink">{reg.attendeeName}</p>
 									<a
@@ -81,7 +103,7 @@
 			</CardContent>
 		</Card>
 
-		<Card class="border-hairline border">
+		<Card>
 			<CardContent class="flex flex-col gap-3">
 				<div class="flex items-center justify-between">
 					<h2 class="text-label-lg font-medium text-ink">Event Akan Datang</h2>
@@ -92,7 +114,7 @@
 				{:else}
 					<ul class="flex flex-col divide-y divide-hairline">
 						{#each m.upcomingList as event (event.id)}
-							<li class="flex items-center justify-between gap-3 py-2">
+							<li class="flex items-center justify-between gap-3 py-2.5">
 								<a
 									href="/admin/events/{event.id}/edit"
 									class="link-quiet min-w-0 truncate font-medium text-ink"

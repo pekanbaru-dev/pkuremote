@@ -48,6 +48,7 @@ export function makeDevAdminUser(email: string): App.User {
 		id: DEV_ADMIN_USER_ID,
 		email,
 		displayName: "Dev Admin",
-		avatarUrl: null
+		avatarUrl: null,
+		role: "admin"
 	};
 }

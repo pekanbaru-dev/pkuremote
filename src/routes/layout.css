@@ -23,13 +23,13 @@
 	--color-surface-bright: oklch(1 0 0);
 	--color-surface-dim: oklch(0.88 0.016 190);
 	--color-surface-variant: oklch(0.89 0.016 190);
-	--color-ink: oklch(0.22 0.035 205);
+	--color-ink: oklch(0.28 0.03 205);
 	--color-muted: oklch(0.49 0.025 205);
 	--color-hairline: oklch(0.92 0.012 190);
 	--color-primary: oklch(0.29 0.07 190);
 	--color-primary-hover: oklch(0.37 0.07 190);
 	--color-primary-container: oklch(0.82 0.16 88);
-	--color-on-primary-container: oklch(0.22 0.035 205);
+	--color-on-primary-container: oklch(0.28 0.03 205);
 	--color-secondary: oklch(0.78 0.16 88);
 	--color-secondary-container: oklch(0.93 0.08 88);
 	--color-on-secondary-container: oklch(0.35 0.07 88);
@@ -54,7 +54,7 @@
 	--color-on-info-container: oklch(0.42 0.08 240);
 	--color-outline: oklch(0.569 0.026 82);
 	--color-outline-variant: oklch(0.827 0.029 81);
-	--color-on-surface: oklch(0.22 0.035 205);
+	--color-on-surface: oklch(0.28 0.03 205);
 	--color-on-surface-variant: oklch(0.49 0.025 205);
 	--color-inverse-surface: oklch(0.29 0.07 190);
 	--color-inverse-on-surface: oklch(1 0 0);
@@ -62,7 +62,7 @@
 	--color-surface-tint: oklch(0.29 0.07 190);
 
 	--color-background: oklch(1 0 0);
-	--color-foreground: oklch(0.22 0.035 205);
+	--color-foreground: oklch(0.28 0.03 205);
 	--color-primary-foreground: oklch(1 0 0);
 	--color-secondary-foreground: oklch(0.223 0.027 105);
 	--color-muted-foreground: oklch(0.49 0.025 205);
@@ -70,7 +70,7 @@
 	--color-input: oklch(0.82 0.02 190);
 	--color-ring: oklch(0.29 0.07 190);
 	--color-accent: oklch(0.975 0.008 190);
-	--color-accent-foreground: oklch(0.22 0.035 205);
+	--color-accent-foreground: oklch(0.28 0.03 205);
 	--color-destructive: oklch(0.506 0.193 28);
 	--color-destructive-foreground: oklch(1 0 0);
 	--color-popover: oklch(0.981 0.034 100);
@@ -81,22 +81,23 @@
 	--color-on-primary-fixed: #251a00;
 	--color-on-primary-fixed-variant: #5a4400;
 
-	--font-display: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
-	--font-body: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
-	--font-label: "Manrope", system-ui, -apple-system, sans-serif;
+	--font-display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+	--font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+	--font-label: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
 	/* Stitch font-family tokens — used as `font-{key}` classes in the
 	   Stitch HTML (e.g. `font-body-md`, `font-headline-xl`). Each
 	   maps to a font-family so the same role (body / headline / label)
 	   can use different family values when needed in the future. */
-	--font-headline-xl: "Hanken Grotesk", system-ui, sans-serif;
-	--font-headline-lg: "Hanken Grotesk", system-ui, sans-serif;
-	--font-headline-lg-mobile: "Hanken Grotesk", system-ui, sans-serif;
-	--font-headline-md: "Hanken Grotesk", system-ui, sans-serif;
-	--font-body-lg: "Hanken Grotesk", system-ui, sans-serif;
-	--font-body-md: "Hanken Grotesk", system-ui, sans-serif;
-	--font-label-lg: "Manrope", system-ui, sans-serif;
-	--font-label-md: "Manrope", system-ui, sans-serif;
+	--font-headline-xl: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-headline-lg: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-headline-lg-mobile: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-headline-md: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-body-lg: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-body-md: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-label-lg: "Plus Jakarta Sans", system-ui, sans-serif;
+	--font-label-md: "Plus Jakarta Sans", system-ui, sans-serif;
+	--animate-cursor-blink: cursor-blink 0.75s steps(1, end) infinite;
 
 	/* Stitch font-size tokens (lifted verbatim from tmp/index.html's
 	   tailwind.config.js). Each compound value maps to a Tailwind v4
@@ -189,6 +190,12 @@
 	--breakpoint-mobile: 40rem;
 	--breakpoint-tablet: 48rem;
 	--breakpoint-desktop: 64rem;
+}
+
+@keyframes cursor-blink {
+	50% {
+		opacity: 0;
+	}
 }
 
 @layer base {

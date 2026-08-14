@@ -10,7 +10,7 @@
 	let { current = "" }: { current?: "events" | "" } = $props();
 	const user = $derived(page.data.user);
 	const accountHref = $derived(user ? "/myprofile" : "/login");
-	const accountLabel = $derived(user ? "Profil saya" : "Log in");
+	const accountLabel = $derived(user ? "Dashboard" : "Login / Sign Up");
 	let mobileMenuOpen = $state(false);
 	let keyword = $state("");
 
@@ -34,7 +34,7 @@
 			>
 			<span class="grid leading-none"
 				><b>PKUBersua</b><small class="mt-1 text-[9px] font-medium text-white/70"
-					>Komunitas. Event. Bersua.</small
+					>Komunitas, Event, Cerita</small
 				></span
 			>
 		</a>
@@ -69,12 +69,8 @@
 				><MapPin size={15} />Pekanbaru<ChevronDown size={13} /></button
 			>
 			<a
-				class="hidden min-h-10 items-center rounded-xl border border-white/35 bg-slate-950/20 px-4 text-xs font-semibold sm:flex"
+				class="hidden min-h-10 items-center rounded-xl bg-[#f7b91d] px-4 text-xs font-semibold text-ink sm:flex"
 				href={accountHref}>{accountLabel}</a
-			>
-			<a
-				class="grid min-h-10 place-items-center rounded-xl bg-[#f7b91d] px-4 text-xs font-extrabold text-[#102126]"
-				href={accountHref}>Sign up</a
 			>
 			<button
 				class="grid h-10 w-10 place-items-center rounded-xl border border-white/35 bg-slate-950/20 lg:hidden"
@@ -89,7 +85,7 @@
 			class="absolute left-3 right-3 top-[68px] z-50 grid gap-1 rounded-2xl border border-white/15 bg-[#073d3d] p-4 shadow-2xl lg:hidden"
 		>
 			<form
-				class="mb-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-[#102126]"
+				class="mb-2 flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-ink"
 				onsubmit={submitSearch}
 			>
 				<Search size={16} /><input
@@ -104,7 +100,7 @@
 				href="/#communities">Communities</a
 			><a class="rounded-xl px-3 py-2.5 text-sm font-semibold" href="/#articles">To Dos</a><a
 				class="rounded-xl px-3 py-2.5 text-sm font-semibold"
-				href={accountHref}>Log in</a
+				href={accountHref}>{accountLabel}</a
 			>
 		</div>
 	{/if}
