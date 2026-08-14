@@ -145,20 +145,20 @@ with `caddyku status`.
 
 ### 9. Make the image pullable
 
-The GHCR package is private by default. Simplest: make it **public** (it holds
-no secrets — DB/OIDC creds are injected at runtime, only `PUBLIC_*` values are
-baked in):
+The GHCR package is private by default. The deploy workflows (`deploy.yml`,
+`deploy-staging.yml`) log the server into GHCR themselves before every
+`docker compose pull`, using the run's own `GITHUB_TOKEN` piped over SSH as an
+`envs:`-scoped var (never embedded in the script string, so it never lands in
+shell history or a log line on the box). Nothing to configure on the server —
+there's no long-lived credential to expire or lose on a host rebuild.
+
+If you'd rather not log in on every deploy, make the package **public**
+instead (it holds no secrets — DB/OIDC creds are injected at runtime, only
+`PUBLIC_*` values are baked in):
 
 > GitHub ▸ organization `pekanbaru-dev` ▸ **Packages** ▸ `pkuremote` ▸ Package
 > settings ▸ Change visibility ▸ Public. (Org-owned packages are under
 > `github.com/orgs/pekanbaru-dev/packages` if the repo sidebar shows none.)
-
-To keep it private, log the server in once with a read-only token (classic PAT,
-`read:packages` only):
-
-```bash
-echo <PAT_with_read:packages> | docker login ghcr.io -u <github-user> --password-stdin
-```
 
 ---
 
@@ -320,6 +320,6 @@ only destroying that volume requires re-running migrate + seed.
 | App 500s on first request                      | migrations not applied to the in-stack Postgres yet (see above)              |
 | Login fails / `oauth_callback` error           | `OIDC_REDIRECT_URI` doesn't match Google's Authorized redirect URI           |
 | `/admin` locks everyone out                    | `ADMIN_EMAILS` missing/empty in the server `.env`                            |
-| `docker compose pull` denied                   | image still private and server not `docker login`'d to GHCR                  |
+| `docker compose pull` denied: denied            | `GITHUB_TOKEN` didn't reach the SSH step's login — check `envs:`/`env:` wiring in the workflow, not the server (it self-logs in every run) |
 | Deploy job stuck "Waiting"                     | required reviewer enabled — approve it in the run                            |
 | Empty OG/canonical URLs                        | `PUBLIC_SITE_URL` Variable not set when the image was built                  |
