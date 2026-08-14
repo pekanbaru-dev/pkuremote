@@ -3,6 +3,7 @@
 	import type { PageData } from "./$types.js";
 	import { EventList } from "$lib/features/events";
 	import { EmptyState } from "$lib/components/ui/empty-state";
+	import SiteHeader from "$lib/components/site-header.svelte";
 
 	let { data }: { data: PageData } = $props();
 	const upcoming = $derived(data.upcoming);
@@ -41,23 +42,12 @@
 	<meta name="twitter:image" content={ogImage} />
 </svelte:head>
 
-<header class="sticky top-0 z-10 border-b border-hairline bg-canvas/90 backdrop-blur">
-	<div class="container-page flex items-center justify-between py-4">
-		<a
-			href="/"
-			class="font-display text-lg font-bold tracking-tight text-ink"
-			aria-label="PKUBersua — beranda"
-		>
-			PKUBersua
-		</a>
-		<a class="link-quiet text-label-lg text-on-surface-variant" href="/">Kembali ke beranda</a>
-	</div>
-</header>
+<SiteHeader current="events" />
 
-<main class="container-page py-[clamp(3rem,7vw,5rem)]">
+<main class="container-page font-body py-[clamp(3rem,7vw,5rem)]">
 	<div class="mb-xl flex flex-col gap-3">
 		<h1
-			class="font-headline-md tablet:font-headline-lg text-headline-md tablet:text-headline-lg text-primary"
+			class="font-display text-[clamp(2rem,5vw,3.5rem)] font-black leading-[1.05] tracking-[-.04em] text-primary"
 		>
 			{filter ? `Event ${filter.name}` : "Semua Event"}
 		</h1>
@@ -83,7 +73,7 @@
 		class="scroll-mt-20 mb-xl flex flex-col gap-md"
 		aria-labelledby="upcoming-heading"
 	>
-		<h2 id="upcoming-heading" class="font-headline-md text-headline-md text-ink">
+		<h2 id="upcoming-heading" class="font-display text-2xl font-black tracking-[-.03em] text-ink">
 			Event Akan Datang
 		</h2>
 		{#if upcoming.length > 0}
@@ -95,12 +85,14 @@
 
 	{#if past.length > 0}
 		<section id="past" class="scroll-mt-20 flex flex-col gap-md" aria-labelledby="past-heading">
-			<h2 id="past-heading" class="font-headline-md text-headline-md text-ink">Event Sebelumnya</h2>
+			<h2 id="past-heading" class="font-display text-2xl font-black tracking-[-.03em] text-ink">
+				Event Sebelumnya
+			</h2>
 			<EventList events={past} />
 		</section>
 	{/if}
 </main>
 
-<footer class="container-page py-12">
-	<p class="label-meta">© 2026 PKUBersua</p>
+<footer class="mt-12 bg-[#073d3d] py-12 text-white">
+	<div class="container-page"><p class="label-meta text-white/60">© 2026 PKUBersua</p></div>
 </footer>

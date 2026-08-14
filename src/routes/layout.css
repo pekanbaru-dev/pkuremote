@@ -6,37 +6,36 @@
    are not generated. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Design tokens. OKLCH values are canonical here. The palette is the Stitch
-   Material-3 golden palette: cream canvas (`#fefae0`) and deep-amber primary
-   (`#765a05`). Brand names (canvas, ink, primary, primary-container, etc.) and
+/* Design tokens. The public product palette follows ref.html: teal brand,
+   sun-yellow actions, white surfaces, and cool gray structure. Brand names and
    shadcn names (background, foreground, primary, etc.) carry the same value
    where they map to the same color; both sets live in @theme so Tailwind v4
    generates utilities for both naming families (bg-canvas / bg-background,
    text-ink / text-foreground, etc.). */
 @theme {
-	--color-canvas: oklch(0.981 0.034 100);
-	--color-surface: oklch(0.981 0.034 100);
+	--color-canvas: oklch(1 0 0);
+	--color-surface: oklch(1 0 0);
 	--color-surface-container-lowest: oklch(1 0 0);
-	--color-surface-container-low: oklch(0.964 0.033 100);
-	--color-surface-container: oklch(0.948 0.034 102);
-	--color-surface-container-high: oklch(0.93 0.035 100);
-	--color-surface-container-highest: oklch(0.912 0.033 100);
-	--color-surface-bright: oklch(0.981 0.034 100);
-	--color-surface-dim: oklch(0.887 0.034 101);
-	--color-surface-variant: oklch(0.912 0.033 100);
-	--color-ink: oklch(0.223 0.027 105);
-	--color-muted: oklch(0.397 0.024 85);
-	--color-hairline: oklch(0.827 0.029 81);
-	--color-primary: oklch(0.483 0.097 87);
-	--color-primary-hover: oklch(0.445 0.091 88);
-	--color-primary-container: oklch(0.834 0.117 87);
-	--color-on-primary-container: oklch(0.445 0.091 88);
-	--color-secondary: oklch(0.48 0.095 99);
-	--color-secondary-container: oklch(0.902 0.115 99);
-	--color-on-secondary-container: oklch(0.498 0.096 99);
-	--color-tertiary: oklch(0.488 0.088 64);
-	--color-tertiary-container: oklch(0.838 0.102 64);
-	--color-on-tertiary-container: oklch(0.449 0.085 65);
+	--color-surface-container-low: oklch(0.975 0.008 190);
+	--color-surface-container: oklch(0.955 0.012 190);
+	--color-surface-container-high: oklch(0.925 0.014 190);
+	--color-surface-container-highest: oklch(0.89 0.016 190);
+	--color-surface-bright: oklch(1 0 0);
+	--color-surface-dim: oklch(0.88 0.016 190);
+	--color-surface-variant: oklch(0.89 0.016 190);
+	--color-ink: oklch(0.22 0.035 205);
+	--color-muted: oklch(0.49 0.025 205);
+	--color-hairline: oklch(0.92 0.012 190);
+	--color-primary: oklch(0.29 0.07 190);
+	--color-primary-hover: oklch(0.37 0.07 190);
+	--color-primary-container: oklch(0.82 0.16 88);
+	--color-on-primary-container: oklch(0.22 0.035 205);
+	--color-secondary: oklch(0.78 0.16 88);
+	--color-secondary-container: oklch(0.93 0.08 88);
+	--color-on-secondary-container: oklch(0.35 0.07 88);
+	--color-tertiary: oklch(0.55 0.14 45);
+	--color-tertiary-container: oklch(0.9 0.08 75);
+	--color-on-tertiary-container: oklch(0.3 0.06 45);
 	--color-danger: oklch(0.506 0.193 28);
 	--color-on-danger: oklch(1 0 0);
 	--color-danger-container: oklch(0.91 0.05 28);
@@ -55,23 +54,23 @@
 	--color-on-info-container: oklch(0.42 0.08 240);
 	--color-outline: oklch(0.569 0.026 82);
 	--color-outline-variant: oklch(0.827 0.029 81);
-	--color-on-surface: oklch(0.223 0.027 105);
-	--color-on-surface-variant: oklch(0.397 0.024 85);
-	--color-inverse-surface: oklch(0.309 0.029 105);
-	--color-inverse-on-surface: oklch(0.955 0.033 100);
-	--color-inverse-primary: oklch(0.828 0.117 87);
-	--color-surface-tint: oklch(0.483 0.097 87);
+	--color-on-surface: oklch(0.22 0.035 205);
+	--color-on-surface-variant: oklch(0.49 0.025 205);
+	--color-inverse-surface: oklch(0.29 0.07 190);
+	--color-inverse-on-surface: oklch(1 0 0);
+	--color-inverse-primary: oklch(0.82 0.16 88);
+	--color-surface-tint: oklch(0.29 0.07 190);
 
-	--color-background: oklch(0.981 0.034 100);
-	--color-foreground: oklch(0.223 0.027 105);
+	--color-background: oklch(1 0 0);
+	--color-foreground: oklch(0.22 0.035 205);
 	--color-primary-foreground: oklch(1 0 0);
 	--color-secondary-foreground: oklch(0.223 0.027 105);
-	--color-muted-foreground: oklch(0.397 0.024 85);
-	--color-border: oklch(0.827 0.029 81);
-	--color-input: oklch(0.827 0.029 81);
-	--color-ring: oklch(0.483 0.097 87);
-	--color-accent: oklch(0.948 0.034 102);
-	--color-accent-foreground: oklch(0.223 0.027 105);
+	--color-muted-foreground: oklch(0.49 0.025 205);
+	--color-border: oklch(0.92 0.012 190);
+	--color-input: oklch(0.82 0.02 190);
+	--color-ring: oklch(0.29 0.07 190);
+	--color-accent: oklch(0.975 0.008 190);
+	--color-accent-foreground: oklch(0.22 0.035 205);
 	--color-destructive: oklch(0.506 0.193 28);
 	--color-destructive-foreground: oklch(1 0 0);
 	--color-popover: oklch(0.981 0.034 100);
@@ -176,14 +175,13 @@
 	--radius-pill: 9999px;
 	--radius-md: 0.5rem;
 
-	/* Remove Tailwind v4 default breakpoints so only semantic names are
-	   valid. Setting to `initial` excludes the token from the generated
-	   utility set — `sm:`/`md:`/`lg:`/`xl:`/`2xl:` produce no CSS. */
-	--breakpoint-sm: initial;
-	--breakpoint-md: initial;
-	--breakpoint-lg: initial;
-	--breakpoint-xl: initial;
-	--breakpoint-2xl: initial;
+	/* Keep Tailwind's familiar responsive utilities available to match the
+	   reference landing page. */
+	--breakpoint-sm: 40rem;
+	--breakpoint-md: 48rem;
+	--breakpoint-lg: 64rem;
+	--breakpoint-xl: 80rem;
+	--breakpoint-2xl: 96rem;
 
 	/* Semantic device-tier breakpoints. Direct 1:1 mapping to the old
 	   defaults: mobile=sm (640px), tablet=md (768px), desktop=lg (1024px).

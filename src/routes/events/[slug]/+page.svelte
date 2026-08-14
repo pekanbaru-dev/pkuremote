@@ -8,6 +8,7 @@
 		EventQuotaMeter,
 		buildEventJsonLd
 	} from "$lib/features/events";
+	import SiteHeader from "$lib/components/site-header.svelte";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const event = $derived(data.event);
@@ -43,27 +44,20 @@
 	{@html jsonLdScript}
 </svelte:head>
 
-<header class="sticky top-0 z-10 border-b border-hairline bg-canvas/90 backdrop-blur">
-	<div class="container-page flex items-center justify-between py-4">
-		<a
-			href="/"
-			class="font-display text-lg font-bold tracking-tight text-ink"
-			aria-label="PKUBersua — beranda"
-		>
-			PKUBersua
-		</a>
-	</div>
-</header>
+<SiteHeader current="events" />
 
-<main class="container-page py-[clamp(3rem,7vw,5rem)]">
+<main class="container-page font-body py-[clamp(3rem,7vw,5rem)]">
 	<article class="flex flex-col gap-12">
-		<a class="link-quiet text-label-lg text-on-surface-variant self-start" href="/events"
-			>← Kembali ke semua event</a
+		<a
+			class="self-start text-label-lg text-[#0a5350] underline-offset-4 hover:underline"
+			href="/events">← Kembali ke semua event</a
 		>
 		<EventDetailHero {event} />
 
 		<div class="grid grid-cols-1 gap-12 desktop:grid-cols-3">
-			<div class="desktop:col-span-2">
+			<div
+				class="rounded-2xl border border-hairline bg-white p-5 shadow-md desktop:col-span-2 tablet:p-8"
+			>
 				<div class="measure-prose event-prose">
 					<!-- Sanitized on the server in load() via renderMarkdown() (DOMPurify). -->
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -71,7 +65,9 @@
 				</div>
 			</div>
 
-			<aside class="flex flex-col gap-6 desktop:sticky desktop:top-24 desktop:self-start">
+			<aside
+				class="flex flex-col gap-6 rounded-2xl border border-hairline bg-white p-5 shadow-md desktop:sticky desktop:top-24 desktop:self-start"
+			>
 				<EventPriceBlock {event} />
 				<EventQuotaMeter {event} />
 				{#if event.registrationClosesAt}
@@ -105,6 +101,6 @@
 	/>
 </main>
 
-<footer class="container-page py-12">
-	<p class="label-meta">© 2026 PKUBersua</p>
+<footer class="mt-12 bg-[#073d3d] py-12 text-white">
+	<div class="container-page"><p class="label-meta text-white/60">© 2026 PKUBersua</p></div>
 </footer>

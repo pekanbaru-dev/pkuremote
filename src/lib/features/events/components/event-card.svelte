@@ -38,11 +38,11 @@
   - The date row and CTA are plain <div>/<span> (decorative).
 -->
 <div
-	class="group flex flex-col bg-surface-container-lowest rounded-xl talam-shadow border-b-2 border-primary-container overflow-hidden transition-shadow hover:shadow-lg {className ??
+	class="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest shadow-md transition-shadow hover:-translate-y-1 hover:shadow-xl {className ??
 		''}"
 >
 	<a href="/events/{event.slug}" aria-label={event.title} class="flex flex-col flex-1">
-		<div class="h-48 overflow-hidden">
+		<div class="h-52 overflow-hidden bg-surface-container">
 			{#if event.bannerUrl}
 				<img
 					src={event.bannerUrl}
@@ -62,7 +62,7 @@
 			{/if}
 		</div>
 
-		<div class="p-md flex-1 flex flex-col gap-3">
+		<div class="flex flex-1 flex-col gap-3 p-4">
 			<h3 class="font-display text-headline-md font-semibold leading-tight text-ink">
 				{event.title}
 			</h3>
@@ -85,7 +85,7 @@
 		</div>
 	{/if}
 
-	<div class="px-md pb-md flex items-center justify-between mt-auto">
+	<div class="mt-auto flex items-center justify-between px-4 pb-4">
 		<div class="flex items-center text-on-surface-variant font-label text-label-md">
 			<span class="material-symbols-outlined text-base mr-1">calendar_today</span>
 			<span>{dateLabel}</span>
