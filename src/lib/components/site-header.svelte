@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/no-restricted-html-elements */
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 	import Search from "@lucide/svelte/icons/search";
