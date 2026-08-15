@@ -3,7 +3,6 @@ import {
 	getArticleById,
 	updateArticle,
 	submitForReview,
-	updateSlugWithRedirect,
 	generateUniqueSlug
 } from "$lib/server/articles";
 import { uploadArticleCover, deleteArticleCover, MediaUploadError } from "$lib/server/storage";
@@ -22,6 +21,14 @@ export const actions: Actions = {
 		if (!article) error(404, "Artikel tidak ditemukan.");
 		if (article.authorId !== locals.user!.id) error(403, "Akses ditolak.");
 
+		// Only draft articles can be edited. Once submitted for review or
+		// published, content changes must go through the review workflow.
+		if (article.status !== "draft") {
+			return fail(403, {
+				error: "Artikel ini tidak bisa diedit karena sudah dikirim untuk review atau sudah tayang."
+			});
+		}
+
 		const formData = await request.formData();
 		const title = (formData.get("title") as string | null)?.trim() ?? "";
 		const slugRaw = (formData.get("slug") as string | null)?.trim() ?? "";
@@ -33,13 +40,17 @@ export const actions: Actions = {
 		if (!excerpt) return fail(400, { error: "Ringkasan tidak boleh kosong." });
 		if (!body) return fail(400, { error: "Isi artikel tidak boleh kosong." });
 
-		// Handle cover image upload
+		// Handle cover image upload — upload the new file first, then delete
+		// the old one only after the replacement succeeds.
 		let coverImageUrl = article.coverImageUrl;
 		if (coverFile && coverFile.size > 0) {
 			try {
-				// Delete old cover if exists
-				if (coverImageUrl) await deleteArticleCover(coverImageUrl);
-				coverImageUrl = await uploadArticleCover(coverFile);
+				const newCoverUrl = await uploadArticleCover(coverFile);
+				// Delete old cover only after the new upload is committed.
+				if (coverImageUrl) {
+					await deleteArticleCover(coverImageUrl);
+				}
+				coverImageUrl = newCoverUrl;
 			} catch (err) {
 				if (err instanceof MediaUploadError) {
 					return fail(400, { error: err.message });
@@ -48,14 +59,9 @@ export const actions: Actions = {
 			}
 		}
 
-		// Handle slug change — use updateSlugWithRedirect for published posts
-		let newSlug = slugRaw || (await generateUniqueSlug(title, params.id));
-		if (newSlug !== article.slug) {
-			if (article.status === "published") {
-				await updateSlugWithRedirect(params.id, newSlug);
-				newSlug = article.slug; // already handled
-			}
-		}
+		// Handle slug change. Since only draft articles can be edited here,
+		// the old slug is not yet public, so no redirect needs to be recorded.
+		const newSlug = slugRaw || (await generateUniqueSlug(title, params.id));
 
 		await updateArticle(params.id, {
 			title,
@@ -101,9 +107,11 @@ export const actions: Actions = {
 		}
 
 		try {
-			if (article.coverImageUrl) await deleteArticleCover(article.coverImageUrl);
-			const coverImageUrl = await uploadArticleCover(coverFile);
-			await updateArticle(params.id, { coverImageUrl });
+			const newCoverUrl = await uploadArticleCover(coverFile);
+			if (article.coverImageUrl) {
+				await deleteArticleCover(article.coverImageUrl);
+			}
+			await updateArticle(params.id, { coverImageUrl: newCoverUrl });
 		} catch (err) {
 			if (err instanceof MediaUploadError) {
 				return fail(400, { error: err.message });

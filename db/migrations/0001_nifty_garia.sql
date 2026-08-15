@@ -23,3 +23,8 @@ CREATE INDEX "posts_status_idx" ON "posts" USING btree ("status");--> statement-
 -- Backfill: existing posts were published before this migration, so mark them published.
 -- published_at was previously notNull with a value, so it is already set on all existing rows.
 UPDATE "posts" SET "status" = 'published' WHERE "published_at" IS NOT NULL;
+-- Backfill admin roles: the legacy ADMIN_EMAILS env allow-list is still
+-- checked as a fallback in isAdmin() so existing admins keep access after
+-- this migration. To complete the migration, run a one-time backfill to set
+-- profiles.role = 'admin' for every existing admin email, then remove the
+-- ADMIN_EMAILS fallback (see openspec/changes/blog-articles/design.md).

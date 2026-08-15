@@ -92,9 +92,15 @@ export async function getArticleBySlug(slug: string): Promise<ArticleWithAuthor 
 
 /**
  * Return published articles, paginated, newest first.
+ *
+ * Pass `limit` to override the default page size (used by the RSS feed
+ * which needs more than the default 10 rows in a single response).
  */
-export async function getPublishedArticles(page = 1): Promise<PaginatedArticles> {
-	const offset = (page - 1) * PAGE_SIZE;
+export async function getPublishedArticles(
+	page = 1,
+	limit = PAGE_SIZE
+): Promise<PaginatedArticles> {
+	const offset = (page - 1) * limit;
 
 	const [rows, [countRow]] = await Promise.all([
 		db
@@ -107,7 +113,7 @@ export async function getPublishedArticles(page = 1): Promise<PaginatedArticles>
 			.leftJoin(profiles, eq(profiles.id, posts.authorId))
 			.where(eq(posts.status, "published"))
 			.orderBy(desc(posts.publishedAt))
-			.limit(PAGE_SIZE)
+			.limit(limit)
 			.offset(offset),
 		db.select({ total: count() }).from(posts).where(eq(posts.status, "published"))
 	]);
@@ -117,8 +123,8 @@ export async function getPublishedArticles(page = 1): Promise<PaginatedArticles>
 		articles: rows as ArticleWithAuthor[],
 		total,
 		page,
-		pageSize: PAGE_SIZE,
-		totalPages: Math.ceil(total / PAGE_SIZE)
+		pageSize: limit,
+		totalPages: Math.ceil(total / limit)
 	};
 }
 

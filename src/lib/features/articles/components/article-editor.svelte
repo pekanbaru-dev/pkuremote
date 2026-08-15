@@ -38,6 +38,8 @@
 
 	const isEdit = $derived(!!article?.id);
 	const isSubmittable = $derived(!article || article.status === "draft");
+	/** Named form action: `create` for new articles, `update` for edits. */
+	const saveAction = $derived(isEdit ? "?/update" : "?/create");
 
 	let title = $state(article?.title ?? "");
 	let slug = $state(article?.slug ?? "");
@@ -73,20 +75,23 @@
 		</div>
 	{/if}
 
-	<form method="POST" action="?/update" enctype="multipart/form-data" class="flex flex-col gap-5">
+	<form method="POST" action={saveAction} enctype="multipart/form-data" class="flex flex-col gap-5">
 		{#if isEdit}
 			<Input type="hidden" name="id" value={article?.id} />
 		{/if}
 
 		<!-- Title -->
-		<Input
-			name="title"
-			type="text"
-			required
-			label="Judul"
-			bind:value={title}
-			placeholder="Judul artikel..."
-		/>
+		<div class="flex flex-col gap-1.5">
+			<label for="title-input" class="mb-1 block text-sm font-medium text-ink">Judul</label>
+			<Input
+				id="title-input"
+				name="title"
+				type="text"
+				required
+				bind:value={title}
+				placeholder="Judul artikel..."
+			/>
+		</div>
 
 		<!-- Slug -->
 		<div class="flex flex-col gap-1.5">
@@ -164,9 +169,7 @@
 			<Button type="submit" variant="outline">Simpan Draft</Button>
 
 			{#if isSubmittable}
-				<Button type="submit" formaction="?/submitReview" intent="primary">
-					Kirim untuk Review
-				</Button>
+				<Button type="submit" formaction="?/submitReview">Kirim untuk Review</Button>
 			{/if}
 		</div>
 	</form>

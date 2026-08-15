@@ -1,6 +1,6 @@
 import { eq, and, not } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
-import { posts } from "../../../../db/schema";
+import { posts, postSlugRedirects } from "../../../../db/schema";
 
 /**
  * Convert a title string to a URL-safe slug.
@@ -22,6 +22,11 @@ export function generateSlug(title: string): string {
  * Generate a unique slug for a post title, checking the DB for conflicts.
  * If the base slug already exists, appends `-2`, `-3`, etc. until a free
  * slot is found.
+ *
+ * Conflicts are checked against both `posts.slug` and
+ * `post_slug_redirects.old_slug` so that a redirect slug is never
+ * reassigned to a new article (which would break the 301 redirect
+ * chain from the old article).
  *
  * @param title   The post title to slugify.
  * @param excludeId  Optional post ID to exclude from conflict check (for edits —
@@ -45,12 +50,24 @@ export async function generateUniqueSlug(title: string, excludeId?: string): Pro
 	}
 }
 
-/** Returns the conflicting row (truthy) or undefined (falsy = slot is free). */
+/**
+ * Returns the conflicting row (truthy) or undefined (falsy = slot is free).
+ * Checks both the `posts.slug` column and the `post_slug_redirects.old_slug`
+ * column so that redirect slugs are reserved and never reused.
+ */
 async function findConflict(slug: string, excludeId?: string) {
-	const conditions = excludeId
+	const postConditions = excludeId
 		? and(eq(posts.slug, slug), not(eq(posts.id, excludeId)))
 		: eq(posts.slug, slug);
 
-	const [row] = await db.select({ id: posts.id }).from(posts).where(conditions).limit(1);
-	return row;
+	const [postRow, redirectRow] = await Promise.all([
+		db.select({ id: posts.id }).from(posts).where(postConditions).limit(1),
+		db
+			.select({ id: postSlugRedirects.id })
+			.from(postSlugRedirects)
+			.where(eq(postSlugRedirects.oldSlug, slug))
+			.limit(1)
+	]);
+
+	return postRow[0] ?? redirectRow[0];
 }
