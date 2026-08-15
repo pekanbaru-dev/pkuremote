@@ -7,6 +7,7 @@
 
 <script lang="ts">
 	import { Button } from "$lib/components/ui/button";
+	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
 
 	let { articleId, isAdmin = false }: ArticleReviewFormProps = $props();
@@ -35,7 +36,7 @@
 		<form method="POST" action="?/approve" class="contents">
 			<Input type="hidden" name="id" value={articleId} />
 			<Input type="hidden" name="reviewNote" value={reviewNote} />
-			<Button type="submit" intent="primary">Setujui &amp; Publish</Button>
+			<Button type="submit">Setujui &amp; Publish</Button>
 		</form>
 
 		<!-- Reject -->

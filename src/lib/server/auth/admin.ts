@@ -1,4 +1,5 @@
 import { redirect } from "@sveltejs/kit";
+import { env } from "$env/dynamic/private";
 
 /**
  * Whether the request's validated user is an administrator.
@@ -6,11 +7,19 @@ import { redirect } from "@sveltejs/kit";
  * Reads `locals.user.role` which is loaded from `profiles.role` in
  * `resolveSessionUser` — no extra DB query per request.
  *
- * Previously this checked the `ADMIN_EMAILS` env allow-list. That seam has
- * now been fulfilled: role is the single source of truth in the DB.
+ * **Migration fallback:** until all existing admins have been backfilled
+ * into `profiles.role = 'admin'`, the legacy `ADMIN_EMAILS` env allow-list
+ * is still checked as a safety net so existing deployments don't lose
+ * admin access on upgrade. Once the backfill is complete, remove the
+ * fallback and the `ADMIN_EMAILS` env var (see design.md).
  */
 export function isAdmin(locals: App.Locals): boolean {
-	return locals.user?.role === "admin";
+	if (locals.user?.role === "admin") return true;
+	// Legacy fallback: email-based admin allow-list for pre-migration deployments.
+	if (locals.user?.email) {
+		return isEmailAdmin(locals.user.email, parseAdminEmails(env.ADMIN_EMAILS));
+	}
+	return false;
 }
 
 /**
@@ -18,7 +27,12 @@ export function isAdmin(locals: App.Locals): boolean {
  * Editors can review and publish articles; admins have full access.
  */
 export function isEditor(locals: App.Locals): boolean {
-	return locals.user?.role === "editor" || locals.user?.role === "admin";
+	if (locals.user?.role === "editor" || locals.user?.role === "admin") return true;
+	// Legacy fallback: ADMIN_EMAILS members are treated as admins (who are editors).
+	if (locals.user?.email) {
+		return isEmailAdmin(locals.user.email, parseAdminEmails(env.ADMIN_EMAILS));
+	}
+	return false;
 }
 
 /**
@@ -45,12 +59,16 @@ export function requireEditor(locals: App.Locals): void {
 }
 
 // ---------------------------------------------------------------------------
-// Legacy helpers retained for existing tests. No longer used by runtime code.
-// Will be removed in a follow-up cleanup change once tests are updated.
+// Legacy helpers — retained as the implementation of the ADMIN_EMAILS
+// fallback during the role migration. Will be removed once all deployments
+// have backfilled profiles.role and ADMIN_EMAILS is dropped.
 // ---------------------------------------------------------------------------
 
 /**
- * @deprecated Use `isAdmin(locals)` instead. Kept for test compatibility.
+ * Parse the `ADMIN_EMAILS` allow-list into a set of normalized (trimmed,
+ * lowercased, non-empty) email addresses. The value is comma-separated and
+ * supports any number of admins. An unset, blank, or separators-only value
+ * yields an empty set — i.e. no admins (fail closed).
  */
 export function parseAdminEmails(raw: string | null | undefined): Set<string> {
 	if (!raw) return new Set();
@@ -63,7 +81,8 @@ export function parseAdminEmails(raw: string | null | undefined): Set<string> {
 }
 
 /**
- * @deprecated Use `isAdmin(locals)` instead. Kept for test compatibility.
+ * True iff `email` is a member of the admin allow-list, compared
+ * case-insensitively. A null/blank email is never an admin.
  */
 export function isEmailAdmin(email: string | null | undefined, adminEmails: Set<string>): boolean {
 	if (!email) return false;

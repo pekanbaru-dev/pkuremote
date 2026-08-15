@@ -3,8 +3,8 @@ import { PUBLIC_SITE_URL } from "$env/static/public";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async () => {
-	const { articles } = await getPublishedArticles(1);
-	// RSS 2.0 spec allows up to any number; we serve the 20 most recent (already sorted desc)
+	// Request up to 20 articles for the feed (the default page size is 10).
+	const { articles } = await getPublishedArticles(1, 20);
 	const items = articles.slice(0, 20);
 
 	const rssItems = items

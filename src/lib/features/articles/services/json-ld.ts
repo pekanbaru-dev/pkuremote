@@ -1,6 +1,16 @@
 import type { ArticleWithAuthor, ArticleCardData } from "../types.ts";
 
 /**
+ * Escape JSON for safe embedding inside a `<script>` tag. `JSON.stringify`
+ * leaves `</script>` intact, which the HTML parser interprets as the end of
+ * the script element — allowing injected markup to run. We replace `<` with
+ * its Unicode escape so the sequence `</script` can never appear in the output.
+ */
+function safeJson(value: unknown): string {
+	return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+/**
  * Build the JSON-LD Article schema string for a blog post detail page.
  * Inserted via `{@html ...}` in `<svelte:head>`.
  */
@@ -25,8 +35,7 @@ export function articleJsonLd(article: ArticleWithAuthor, siteUrl: string): stri
 			url: siteUrl
 		}
 	};
-	const json = JSON.stringify(payload);
-	return `<script type="application/ld+json">${json}</script>`;
+	return `<script type="application/ld+json">${safeJson(payload)}</script>`;
 }
 
 /**
@@ -58,8 +67,7 @@ export function breadcrumbJsonLd(article: ArticleWithAuthor, siteUrl: string): s
 			}
 		]
 	};
-	const json = JSON.stringify(payload);
-	return `<script type="application/ld+json">${json}</script>`;
+	return `<script type="application/ld+json">${safeJson(payload)}</script>`;
 }
 
 /**
@@ -77,6 +85,5 @@ export function articleListJsonLd(articles: ArticleCardData[], siteUrl: string):
 			name: article.title
 		}))
 	};
-	const json = JSON.stringify(payload);
-	return `<script type="application/ld+json">${json}</script>`;
+	return `<script type="application/ld+json">${safeJson(payload)}</script>`;
 }
