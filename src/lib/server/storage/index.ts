@@ -1,29 +1,22 @@
-import { env } from "$env/dynamic/private";
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { r2Delete, r2KeyFromUrl, r2PublicUrl, r2Put } from "./r2.js";
 
-/** Public URL prefix under which stored banners are served (see the
- * `/uploads/[file]` route). Stored `bannerUrl` values look like
- * `/uploads/{uuid}.{ext}`. */
-export const UPLOADS_URL_PREFIX = "/uploads";
-
-/** Max accepted banner size (2 MiB). */
+/** Max accepted banner/cover size (2 MiB). */
 export const MAX_BANNER_BYTES = 2 * 1024 * 1024;
 
 /** Allowed image MIME types → canonical file extension. */
 const ALLOWED_TYPES: Record<string, string> = {
 	"image/png": "png",
 	"image/jpeg": "jpg",
-	"image/webp": "webp"
+	"image/webp": "webp",
 };
 
-/** Extension → Content-Type for the serving route. */
+/** Extension → Content-Type (used by callers that need to resolve content type by name). */
 const CONTENT_TYPES: Record<string, string> = {
 	".png": "image/png",
 	".jpg": "image/jpeg",
 	".jpeg": "image/jpeg",
-	".webp": "image/webp"
+	".webp": "image/webp",
 };
 
 export type MediaUploadErrorCode = "INVALID_TYPE" | "FILE_TOO_LARGE" | "EMPTY_FILE";
@@ -37,15 +30,8 @@ export class MediaUploadError extends Error {
 	}
 }
 
-/** The absolute uploads directory, resolved from `UPLOAD_DIR` (dev default
- * `./uploads`). Kept outside the SvelteKit build so runtime writes survive. */
-export function resolveUploadDir(): string {
-	const configured = env.UPLOAD_DIR?.trim();
-	return path.resolve(configured && configured.length > 0 ? configured : "./uploads");
-}
-
 /**
- * Validate a banner file's type and size, returning its canonical extension.
+ * Validate a banner/cover file's type and size, returning its canonical extension.
  * Throws a typed {@link MediaUploadError} on invalid input. Pure (no I/O).
  */
 export function validateBannerFile(file: { type: string; size: number }): string {
@@ -66,107 +52,66 @@ export function validateBannerFile(file: { type: string; size: number }): string
 }
 
 /**
- * Reduce a stored path/URL (or bare filename) to a safe basename that lives
- * directly under the uploads dir. Returns `null` for anything containing a
- * path separator, `..`, or an absolute path — never letting a caller escape
- * the uploads directory. Pure (no I/O).
+ * Reduce a stored URL or bare filename to a safe basename (no path separators,
+ * no `..`). Returns `null` for anything containing `..`, `\`, or an empty string.
+ * Pure (no I/O). Still used by callers that store bare filenames.
  */
 export function safeBasename(pathOrUrl: string): string | null {
-	// A legitimate stored value is always `/uploads/{uuid}.{ext}` — it never
-	// contains `..` or a backslash. Reject those outright, then take the final
-	// path segment (which is separator-free by construction).
 	if (!pathOrUrl || pathOrUrl.includes("..") || pathOrUrl.includes("\\")) return null;
 	const name = pathOrUrl.split("/").pop() ?? "";
 	return name.length > 0 ? name : null;
 }
 
-/** Content-Type for a stored file name, or a generic binary fallback. */
+/** Content-Type for a filename by extension, or a generic binary fallback. */
 export function contentTypeFor(name: string): string {
-	return CONTENT_TYPES[path.extname(name).toLowerCase()] ?? "application/octet-stream";
+	const ext = name.slice(name.lastIndexOf(".")).toLowerCase();
+	return CONTENT_TYPES[ext] ?? "application/octet-stream";
 }
 
 /**
- * Validate, store, and return the public path for an event banner image.
+ * Validate, upload to R2, and return the public CDN URL for an event banner image.
+ * Key: `banners/events/{uuid}.{ext}`
  * Server-only; callers MUST have enforced `requireAdmin(locals)` first.
  */
 export async function uploadEventBanner(file: File): Promise<string> {
 	const ext = validateBannerFile(file);
-	const dir = resolveUploadDir();
-	await mkdir(dir, { recursive: true });
-	const filename = `${randomUUID()}.${ext}`;
+	const key = `banners/events/${randomUUID()}.${ext}`;
 	const bytes = new Uint8Array(await file.arrayBuffer());
-	await writeFile(path.join(dir, filename), bytes);
-	return `${UPLOADS_URL_PREFIX}/${filename}`;
+	await r2Put(key, bytes, file.type);
+	return r2PublicUrl(key);
 }
 
 /**
- * Best-effort removal of a previously stored banner (used on replace-on-edit).
- * Path-safe: rejects anything that escapes the uploads dir. A failure (e.g.
- * the file is already gone) is logged and swallowed so it never corrupts the
- * caller's already-committed state.
+ * Best-effort removal of a previously stored event banner from R2.
+ * Accepts either a full CDN URL or a bare R2 key. Failures are logged and
+ * swallowed so they never corrupt the caller's already-committed state.
  */
-export async function deleteEventBanner(pathOrUrl: string): Promise<void> {
-	const name = safeBasename(pathOrUrl);
-	if (!name) return;
-	const dir = resolveUploadDir();
-	const target = path.join(dir, name);
-	if (!target.startsWith(dir + path.sep)) return;
-	try {
-		await unlink(target);
-	} catch (err) {
-		console.error(`deleteEventBanner: failed to remove ${name}:`, err);
-	}
+export async function deleteEventBanner(urlOrKey: string): Promise<void> {
+	const key = r2KeyFromUrl(urlOrKey) ?? urlOrKey;
+	if (!key) return;
+	await r2Delete(key);
 }
 
 /**
- * Read a stored upload for the serving route. Returns the bytes + Content-Type,
- * or `null` when the name is unsafe or the file does not exist (→ 404).
- */
-export async function readUpload(
-	name: string
-): Promise<{ body: Uint8Array; contentType: string } | null> {
-	const safe = safeBasename(name);
-	if (!safe) return null;
-	const dir = resolveUploadDir();
-	const target = path.join(dir, safe);
-	if (!target.startsWith(dir + path.sep)) return null;
-	try {
-		const body = new Uint8Array(await readFile(target));
-		return { body, contentType: contentTypeFor(safe) };
-	} catch {
-		return null;
-	}
-}
-
-/**
- * Validate, store, and return the public path for an article cover image.
- * Same constraints as event banners: PNG/JPEG/WebP, max 2 MiB.
+ * Validate, upload to R2, and return the public CDN URL for an article cover image.
+ * Key: `banners/articles/{uuid}.{ext}`
  * Server-only; callers MUST have verified the user is authenticated first.
  */
 export async function uploadArticleCover(file: File): Promise<string> {
 	const ext = validateBannerFile(file);
-	const dir = resolveUploadDir();
-	await mkdir(dir, { recursive: true });
-	const filename = `${randomUUID()}.${ext}`;
+	const key = `banners/articles/${randomUUID()}.${ext}`;
 	const bytes = new Uint8Array(await file.arrayBuffer());
-	await writeFile(path.join(dir, filename), bytes);
-	return `${UPLOADS_URL_PREFIX}/${filename}`;
+	await r2Put(key, bytes, file.type);
+	return r2PublicUrl(key);
 }
 
 /**
- * Best-effort removal of a previously stored article cover image.
- * Path-safe: rejects anything that escapes the uploads dir. Failures are
- * logged and swallowed so they never corrupt the caller's committed state.
+ * Best-effort removal of a previously stored article cover image from R2.
+ * Accepts either a full CDN URL or a bare R2 key. Failures are logged and
+ * swallowed so they never corrupt the caller's already-committed state.
  */
-export async function deleteArticleCover(pathOrUrl: string): Promise<void> {
-	const name = safeBasename(pathOrUrl);
-	if (!name) return;
-	const dir = resolveUploadDir();
-	const target = path.join(dir, name);
-	if (!target.startsWith(dir + path.sep)) return;
-	try {
-		await unlink(target);
-	} catch (err) {
-		console.error(`deleteArticleCover: failed to remove ${name}:`, err);
-	}
+export async function deleteArticleCover(urlOrKey: string): Promise<void> {
+	const key = r2KeyFromUrl(urlOrKey) ?? urlOrKey;
+	if (!key) return;
+	await r2Delete(key);
 }

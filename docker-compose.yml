@@ -67,8 +67,12 @@ services:
       OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI:-http://localhost:5175/auth/callback}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-admin@pkubersua.local}
       DEV_ADMIN_EMAIL: ${DEV_ADMIN_EMAIL:-}
-      # Uploads land under the bind-mounted repo (→ host ./uploads, gitignored).
-      UPLOAD_DIR: /app/uploads
+      # R2_* vars are read at runtime from .env for file storage (see .env.example).
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-}
     depends_on:
       postgres:
         condition: service_healthy
