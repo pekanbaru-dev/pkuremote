@@ -33,16 +33,15 @@
 	{#each categories as [label, Icon, tone] (label)}
 		<a
 			href="#events"
-			class={[
-				"group grid min-h-[88px] place-items-center gap-1.5 border-b border-r border-slate-100 p-3 text-center text-xs font-semibold text-ink transition",
-				tone === "emerald" ? "border-b-2 border-b-[#073d3d] bg-[#f7fbfa]" : "hover:bg-[#fffdf5]"
-			]}
+			class="group grid min-h-[88px] place-items-center gap-1.5 border-b border-r border-slate-100 p-3 text-center text-xs font-semibold text-ink transition {tone ===
+			'emerald'
+				? 'border-b-2 border-b-[#073d3d] bg-[#f7fbfa]'
+				: 'hover:bg-[#fffdf5]'}"
 		>
 			<span
-				class={[
-					"grid h-9 w-9 place-items-center rounded-xl transition duration-200 group-hover:scale-105",
-					categoryStyles[tone]
-				]}><Icon size={20} /></span
+				class="grid h-9 w-9 place-items-center rounded-xl transition duration-200 group-hover:scale-105 {categoryStyles[
+					tone
+				]}"><Icon size={20} /></span
 			>
 			{label}
 		</a>
