@@ -10,7 +10,7 @@
 
 <div
 	id="partners"
-	class="relative my-11 overflow-hidden rounded-[28px] border border-[#32267a] bg-gradient-to-r from-[#142a61] to-[#4c188b] px-5 py-7 text-white sm:px-8 sm:py-9"
+	class="relative my-11 overflow-hidden rounded-[28px] border border-[#32267a] bg-linear-to-r from-[#142a61] to-[#4c188b] px-5 py-7 text-white sm:px-8 sm:py-9"
 >
 	<div
 		class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#f7b91d]/10 blur-2xl"
@@ -19,7 +19,7 @@
 		src="/images/hero/rebung.svg"
 		alt=""
 		aria-hidden="true"
-		class="pointer-events-none absolute -right-8 top-[42%] h-[310px] w-[310px] -translate-y-1/2 -rotate-12 object-contain opacity-[0.12]"
+		class="pointer-events-none absolute -right-8 top-[42%] h-77.5 w-77.5 -translate-y-1/2 -rotate-12 object-contain opacity-[0.12]"
 	/>
 	<div class="relative z-10 grid items-start gap-6 lg:grid-cols-[1fr_auto]">
 		<div class="max-w-3xl">
@@ -46,7 +46,7 @@
 	<div class="relative z-10 mt-7 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
 		{#each ["IDCLOUDHOST", "gojek", "BCA", "OVO", "ruangguru", "wondr"] as partner (partner)}
 			<div
-				class="grid min-h-[58px] place-items-center rounded-xl border border-white/15 bg-white/95 px-3 text-sm font-bold text-[#24383c] transition hover:-translate-y-0.5 hover:bg-white motion-reduce:transform-none"
+				class="grid min-h-14.5 place-items-center rounded-xl border border-white/15 bg-white/95 px-3 text-sm font-bold text-[#24383c] transition hover:-translate-y-0.5 hover:bg-white motion-reduce:transform-none"
 			>
 				{partner}
 			</div>

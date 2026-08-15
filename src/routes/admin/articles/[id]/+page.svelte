@@ -7,7 +7,9 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let slugEditMode = $state(false);
-	let slugValue = $state(data.article.slug);
+	// Snapshot initial slug into local state — intentional one-time capture for the edit form.
+	const _initialSlug = data.article.slug;
+	let slugValue = $state(_initialSlug);
 </script>
 
 <svelte:head>

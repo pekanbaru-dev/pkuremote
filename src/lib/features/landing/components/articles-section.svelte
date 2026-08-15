@@ -27,8 +27,8 @@
 	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 		{#each articles as article (article)}
 			<article class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-				<div class="h-40 bg-gradient-to-br from-[#2e3230] to-[#315c53]"></div>
-				<div class="flex min-h-[138px] flex-col p-4">
+				<div class="h-40 bg-linear-to-br from-[#2e3230] to-[#315c53]"></div>
+				<div class="flex min-h-34.5 flex-col p-4">
 					<div class="flex items-center justify-between gap-3">
 						<span
 							class="rounded-md bg-violet-100 px-2 py-1 text-[10px] font-semibold text-violet-700"
