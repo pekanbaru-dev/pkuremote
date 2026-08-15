@@ -9,8 +9,8 @@
 </script>
 
 <script lang="ts">
-	/* eslint-disable svelte/no-restricted-html-elements */
 	import Bookmark from "@lucide/svelte/icons/bookmark";
+	import { Button } from "$lib/components/ui/button";
 
 	let { events, pastEventsTotal = 0, showToast }: EventsSectionProps = $props();
 
@@ -50,7 +50,7 @@
 			<article class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
 				<a
 					href="/events/{event.slug}"
-					class="relative block h-[212px] overflow-hidden bg-gradient-to-br from-[#1d164d] to-[#315c53] text-white"
+					class="relative block h-53 overflow-hidden bg-linear-to-br from-[#1d164d] to-[#315c53] text-white"
 				>
 					{#if event.bannerUrl}
 						<img src={event.bannerUrl} alt="" class="h-full w-full object-cover" />
@@ -59,20 +59,18 @@
 							{event.title}
 						</div>
 					{/if}
-					<div
-						class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/90"
-					></div>
+					<div class="absolute inset-0 bg-linear-to-b from-black/50 via-black/20 to-black/90"></div>
 					<span
 						class="absolute left-3 top-3 rounded-md bg-violet-700 px-2 py-1 text-[9px] font-black"
 						>{event.categories[0]?.name ?? "KOMUNITAS"}</span
 					>
-					<button
+					<Button
 						class="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/35"
 						aria-label="Simpan event"
 						onclick={(e) => {
 							e.preventDefault();
 							showToast("Event disimpan");
-						}}><Bookmark size={16} /></button
+						}}><Bookmark size={16} /></Button
 					>
 					<div class="absolute inset-x-4 bottom-4">
 						<h3

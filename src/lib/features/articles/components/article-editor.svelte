@@ -41,11 +41,14 @@
 	/** Named form action: `create` for new articles, `update` for edits. */
 	const saveAction = $derived(isEdit ? "?/update" : "?/create");
 
-	let title = $state(article?.title ?? "");
-	let slug = $state(article?.slug ?? "");
-	let excerpt = $state(article?.excerpt ?? "");
-	let body = $state(article?.body ?? "");
-	let slugManuallyEdited = $state(!!article?.id);
+	// Snapshot initial prop values into local state. These are intentionally
+	// one-time captures — the form fields are controlled by the user after mount.
+	const _initial = article;
+	let title = $state(_initial?.title ?? "");
+	let slug = $state(_initial?.slug ?? "");
+	let excerpt = $state(_initial?.excerpt ?? "");
+	let body = $state(_initial?.body ?? "");
+	let slugManuallyEdited = $state(!!_initial?.id);
 
 	$effect(() => {
 		if (!slugManuallyEdited && title) {

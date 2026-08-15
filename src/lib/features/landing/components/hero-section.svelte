@@ -5,11 +5,12 @@
 </script>
 
 <script lang="ts">
-	/* eslint-disable svelte/no-restricted-html-elements, svelte/no-at-html-tags */
 	import { onMount } from "svelte";
 	import { page } from "$app/state";
 	import Search from "@lucide/svelte/icons/search";
 	import Menu from "@lucide/svelte/icons/menu";
+	import { Button } from "$lib/components/ui/button";
+	import { Input } from "$lib/components/ui/input";
 
 	let { landingJsonLd }: HeroSectionProps = $props();
 
@@ -113,23 +114,23 @@
 <svelte:head>
 	<title>PKUBersua — Komunitas, Event, Bersua</title>
 	<meta name="description" content="Temukan event dan komunitas terbaik di Pekanbaru." />
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->{@html landingJsonLd}
+	<!-- eslint-disable svelte/no-at-html-tags -->{@html landingJsonLd}<!-- eslint-enable svelte/no-at-html-tags -->
 </svelte:head>
 
 <header
 	id="home"
-	class="relative min-h-[540px] overflow-visible bg-[#073d3d] bg-[linear-gradient(180deg,rgba(3,23,32,.32),rgba(3,23,32,.88)),url('/images/hero/header.svg')] bg-cover bg-center bg-no-repeat text-white"
+	class="relative min-h-135 overflow-visible bg-[#073d3d] bg-[linear-gradient(180deg,rgba(3,23,32,.32),rgba(3,23,32,.88)),url('/images/hero/header.svg')] bg-cover bg-center bg-no-repeat text-white"
 >
 	<nav
-		class={`fixed inset-x-0 top-0 z-50 h-[72px] w-full transition-colors duration-200 ${hasScrolled ? "border-b border-slate-200/70 bg-white/88 text-[#24383c] backdrop-blur-md" : "bg-transparent text-white"}`}
+		class={`fixed inset-x-0 top-0 z-50 h-18 w-full transition-colors duration-200 ${hasScrolled ? "border-b border-slate-200/70 bg-white/88 text-[#24383c] backdrop-blur-md" : "bg-transparent text-white"}`}
 		aria-label="Navigasi utama"
 	>
 		<div
-			class="mx-auto flex h-full w-full max-w-[1180px] items-center justify-between gap-4 px-3 md:px-4"
+			class="mx-auto flex h-full w-full max-w-295 items-center justify-between gap-4 px-3 md:px-4"
 		>
 			<a href="#home" class="flex items-center gap-2.5 font-extrabold"
 				><span
-					class="grid h-9 w-9 rotate-[30deg] place-items-center rounded-xl bg-gradient-to-br from-emerald-300 via-amber-300 to-white shadow-lg"
+					class="grid h-9 w-9 rotate-30 place-items-center rounded-xl bg-linear-to-br from-emerald-300 via-amber-300 to-white shadow-lg"
 					><span class="h-4 w-4 rounded border-2 border-[#073d3d]"></span></span
 				><span class="grid leading-none"
 					><b>PKUBersua</b><small
@@ -149,18 +150,18 @@
 				<a
 					class="hidden min-h-10 items-center rounded-xl bg-[#f7b91d] px-4 text-xs font-semibold text-ink sm:flex"
 					href={accountHref}>{accountLabel}</a
-				><button
+				><Button
 					class={`grid h-10 w-10 place-items-center rounded-xl border lg:hidden ${hasScrolled ? "border-slate-200 bg-slate-100 text-[#24383c]" : "border-white/35 bg-slate-950/20"}`}
 					aria-label="Buka menu"
 					aria-expanded={mobileMenuOpen}
-					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}><Menu size={19} /></button
+					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}><Menu size={19} /></Button
 				>
 			</div>
 		</div>
 	</nav>
 	{#if mobileMenuOpen}
 		<div
-			class="absolute left-3 right-3 top-[68px] z-30 grid gap-1 rounded-2xl border border-white/15 bg-[#073d3df5] p-4 shadow-2xl lg:hidden"
+			class="absolute left-3 right-3 top-17 z-30 grid gap-1 rounded-2xl border border-white/15 bg-[#073d3df5] p-4 shadow-2xl lg:hidden"
 		>
 			<a
 				class="rounded-xl px-3 py-2.5 text-sm font-semibold"
@@ -171,7 +172,7 @@
 				href="#articles">To Dos</a
 			><a class="rounded-xl px-3 py-2.5 text-sm font-semibold" href={accountHref}>{accountLabel}</a>
 		</div>{/if}
-	<div class="mx-auto w-full max-w-[1180px] px-3 pb-20 pt-28 text-center md:px-4">
+	<div class="mx-auto w-full max-w-295 px-3 pb-20 pt-28 text-center md:px-4">
 		<h1
 			class="mx-auto max-w-3xl text-[34px] font-bold leading-[1.15] tracking-[-.04em] text-white sm:text-[42px] lg:text-[52px]"
 		>
@@ -189,7 +190,7 @@
 			Pekanbaru.
 		</p>
 		<form
-			class="mx-auto mt-8 w-full max-w-[880px] rounded-2xl bg-white/95 p-4 text-left text-ink shadow-[0_18px_50px_rgba(3,23,32,0.22)] sm:p-5"
+			class="mx-auto mt-8 w-full max-w-220 rounded-2xl bg-white/95 p-4 text-left text-ink shadow-[0_18px_50px_rgba(3,23,32,0.22)] sm:p-5"
 			onsubmit={(event) => {
 				event.preventDefault();
 				showToast(keyword ? `Mencari "${keyword}" di Pekanbaru` : "Masukkan kata kunci pencarian");
@@ -200,27 +201,28 @@
 					class="flex min-h-14 items-center gap-4 rounded-xl border border-slate-300 bg-white px-5 transition focus-within:border-[#0a5350] focus-within:ring-2 focus-within:ring-[#0a5350]/10"
 				>
 					<Search size={17} class="text-slate-400" />
-					<input
+					<Input
 						bind:value={keyword}
 						type="search"
 						placeholder="Cari event, komunitas, atau topik"
 						class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
 					/>
 				</label>
-				<button
+				<Button
 					class="min-h-14 w-full rounded-xl bg-[#f7b91d] px-7 text-sm font-semibold md:w-44"
 					type="submit"
 				>
 					Temukan
-				</button>
+				</Button>
 			</div>
 			<div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-1 text-xs text-slate-500">
 				<b class="text-slate-700">Trending:</b>
 				{#each ["Teknologi", "Startup", "Desain", "Webinar", "Bisnis", "Gratis", "Weekend"] as trend (trend)}
-					<button
+					<Button
 						type="button"
+						variant="outline"
 						class="rounded-full border border-slate-200 bg-white px-3 py-1.5 transition hover:border-[#0a5350] hover:text-[#0a5350]"
-						onclick={() => (keyword = trend)}>{trend}</button
+						onclick={() => (keyword = trend)}>{trend}</Button
 					>{/each}
 			</div>
 		</form>
