@@ -15,6 +15,13 @@
 			"when": 1786728760197,
 			"tag": "0001_nifty_garia",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1786728760200,
+			"tag": "0002_article_metadata",
+			"breakpoints": true
 		}
 	]
 }

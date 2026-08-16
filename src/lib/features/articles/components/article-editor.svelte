@@ -14,7 +14,8 @@
 			reviewNote: string | null;
 		};
 		/** Form action error message, if any. */
-		error?: string;
+	error?: string;
+	categories?: { id: string; name: string }[];
 	};
 
 	/** Client-side slug preview from title (pure, no DB). */
@@ -30,11 +31,13 @@
 </script>
 
 <script lang="ts">
+	import { FileUpload } from "$lib/components/primitives";
 	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
 	import { Button } from "$lib/components/ui/button";
+	import TipTapEditor from "./tiptap-editor.svelte";
 
-	let { article, error }: ArticleEditorProps = $props();
+	let { article, error, categories = [] }: ArticleEditorProps = $props();
 
 	const isEdit = $derived(!!article?.id);
 	const isSubmittable = $derived(!article || article.status === "draft");
@@ -48,6 +51,7 @@
 	let slug = $state(_initial?.slug ?? "");
 	let excerpt = $state(_initial?.excerpt ?? "");
 	let body = $state(_initial?.body ?? "");
+	let coverImageUrl = $state(_initial?.coverImageUrl ?? "");
 	let slugManuallyEdited = $state(!!_initial?.id);
 
 	$effect(() => {
@@ -59,9 +63,19 @@
 	function onSlugInput() {
 		slugManuallyEdited = true;
 	}
+
+	async function getCoverPresignedUrl(file: { filename: string; contentType: string }) {
+		const response = await fetch("/my-articles/presign", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(file)
+		});
+		if (!response.ok) throw new Error("Gagal menyiapkan upload");
+		return response.json() as Promise<{ presignedUrl: string; publicUrl: string }>;
+	}
 </script>
 
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-7">
 	{#if error}
 		<div
 			class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-body-md text-red-700"
@@ -78,31 +92,35 @@
 		</div>
 	{/if}
 
-	<form method="POST" action={saveAction} enctype="multipart/form-data" class="flex flex-col gap-5">
+	<form method="POST" action={saveAction} enctype="multipart/form-data" class="flex flex-col gap-7">
 		{#if isEdit}
 			<Input type="hidden" name="id" value={article?.id} />
 		{/if}
 
 		<!-- Title -->
-		<div class="flex flex-col gap-1.5">
-			<label for="title-input" class="mb-1 block text-sm font-medium text-ink">Judul</label>
+		<div>
+			<label for="title-input" class="sr-only">Judul artikel</label>
 			<Input
 				id="title-input"
 				name="title"
 				type="text"
 				required
 				bind:value={title}
-				placeholder="Judul artikel..."
+				placeholder="Judul cerita Anda"
+				class="h-auto rounded-none border-0 border-b border-hairline bg-transparent px-0 py-3 text-[2.5rem] font-bold leading-[1.12] tracking-tight text-ink shadow-none placeholder:text-outline focus-visible:border-primary focus-visible:ring-0 tablet:text-[3rem]"
 			/>
 		</div>
 
-		<!-- Slug -->
-		<div class="flex flex-col gap-1.5">
-			<label for="slug-input" class="mb-1 block text-sm font-medium text-ink">
-				Slug URL <span class="text-muted-foreground font-normal">(bisa diubah manual)</span>
-			</label>
-			<div class="flex items-center gap-2">
-				<span class="text-body-sm text-muted-foreground font-label">/blog/</span>
+		<section class="rounded-xl border border-hairline bg-surface-container-low p-5 tablet:p-6">
+			<div class="mb-5 flex items-center justify-between">
+				<h2 class="text-label-md font-semibold text-ink">Detail artikel</h2>
+				<span class="text-label-md text-on-surface-variant">Lengkapi agar mudah ditemukan</span>
+			</div>
+			<div class="grid gap-5 tablet:grid-cols-2">
+				<div class="flex flex-col gap-1.5">
+				<label for="slug-input" class="text-label-md font-semibold text-ink">Alamat artikel</label>
+				<div class="flex items-center gap-2">
+					<span class="text-body-sm text-on-surface-variant">/blog/</span>
 				<Input
 					id="slug-input"
 					name="slug"
@@ -110,70 +128,67 @@
 					bind:value={slug}
 					oninput={onSlugInput}
 					placeholder="slug-artikel"
-					class="flex-1"
+					class="h-9 flex-1 bg-white"
 				/>
+				</div>
+				</div>
+				<div class="flex flex-col gap-1.5">
+					<span class="text-label-md font-semibold text-ink">Status artikel</span>
+					<div class="flex h-10 items-center rounded-md border border-hairline bg-white px-3 text-body-md text-on-surface-variant"><span class="mr-2 size-2 rounded-full bg-primary" aria-hidden="true"></span>Draft</div>
+				</div>
+				<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink">Kategori
+				<select name="categoryId" class="h-10 rounded-md border border-hairline bg-white px-3 text-body-md font-normal">
+					<option value="">Pilih kategori</option>
+					{#each categories as category (category.id)}<option value={category.id}>{category.name}</option>{/each}
+				</select>
+			</label>
+			<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink">Tags
+				<Input name="tags" placeholder="Mis. kuliner, komunitas" class="bg-white" />
+			</label>
+				<div class="flex flex-col gap-1.5 tablet:col-span-2">
+					<label for="excerpt-input" class="text-label-md font-semibold text-ink">Ringkasan</label>
+					<Textarea id="excerpt-input" name="excerpt" rows={3} required bind:value={excerpt} placeholder="Tulis ringkasan singkat yang membuat pembaca ingin melanjutkan..." class="min-h-28 resize-y bg-white" />
+				</div>
 			</div>
-		</div>
-
-		<!-- Excerpt -->
-		<div class="flex flex-col gap-1.5">
-			<label for="excerpt-input" class="mb-1 block text-sm font-medium text-ink">Ringkasan</label>
-			<Textarea
-				id="excerpt-input"
-				name="excerpt"
-				rows={2}
-				required
-				bind:value={excerpt}
-				placeholder="Ringkasan singkat artikel (tampil di listing dan meta description)..."
-			/>
-		</div>
+		</section>
 
 		<!-- Body -->
-		<div class="flex flex-col gap-1.5">
-			<label for="body-input" class="mb-1 block text-sm font-medium text-ink">
-				Isi Artikel <span class="text-muted-foreground font-normal">(Markdown)</span>
-			</label>
-			<Textarea
-				id="body-input"
-				name="body"
-				rows={20}
-				required
-				bind:value={body}
-				placeholder="Tulis artikel di sini menggunakan Markdown..."
-				class="font-mono"
-			/>
+		<div class="flex flex-col gap-2">
+			<div class="flex items-center justify-between">
+				<label class="text-label-md font-semibold text-ink">Mulai menulis</label>
+				<span class="text-label-md text-on-surface-variant">Gunakan toolbar untuk format</span>
+			</div>
+			<TipTapEditor bind:value={body} placeholder="Tulis cerita Anda..." />
+			<!-- Serialized HTML body submitted with the form -->
+			<Input type="hidden" name="body" value={body} />
 		</div>
 
 		<!-- Cover image -->
-		<div class="flex flex-col gap-1.5">
-			<label for="coverImage" class="mb-1 block text-sm font-medium text-ink">
-				Cover Image <span class="text-muted-foreground font-normal">(opsional, maks 2MB)</span>
+		<div class="flex flex-col gap-2 border-t border-hairline pt-7">
+			<label for="coverImage" class="text-label-md font-semibold text-ink">
+				Gambar sampul <span class="font-normal text-on-surface-variant">(opsional, maks. 2 MB)</span>
 			</label>
-			{#if article?.coverImageUrl}
-				<img
-					src={article.coverImageUrl}
-					alt="Cover saat ini"
-					width="400"
-					height="210"
-					class="rounded-lg object-cover w-full max-w-sm h-40 border border-hairline"
-				/>
-			{/if}
-			<Input
-				id="coverImage"
-				name="coverImage"
-				type="file"
-				accept="image/png,image/jpeg,image/webp"
-				class="text-body-md text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-label-sm file:font-label file:font-medium file:text-primary hover:file:bg-primary/20"
+			<FileUpload
+				value={coverImageUrl}
+				onChange={(url) => (coverImageUrl = url)}
+				onRemove={() => (coverImageUrl = "")}
+				getPresignedUrl={getCoverPresignedUrl}
+				accept="image/png,image/jpeg,image/webp,image/avif"
+				label="Tarik gambar sampul ke sini, atau klik untuk memilih"
 			/>
+			<Input type="hidden" name="coverImageUrl" value={coverImageUrl} />
 		</div>
 
 		<!-- Actions -->
-		<div class="flex gap-3 flex-wrap pt-2">
-			<Button type="submit" variant="outline">Simpan Draft</Button>
+		<div class="sticky bottom-4 z-10 -mx-2 flex flex-wrap items-center justify-between gap-3 border border-hairline bg-white/95 px-3 py-3 shadow-sm backdrop-blur">
+			<span class="text-label-md text-on-surface-variant">Simpan draf kapan saja.</span>
+			<div class="flex flex-wrap gap-2">
+				<Button type="submit" variant="outline">Simpan Draft</Button>
 
-			{#if isSubmittable}
-				<Button type="submit" formaction="?/submitReview">Kirim untuk Review</Button>
-			{/if}
+				{#if isSubmittable}
+					<Button type="submit" formaction="?/submitReview">Kirim untuk Review</Button>
+				{/if}
+			</div>
 		</div>
 	</form>
 </div>

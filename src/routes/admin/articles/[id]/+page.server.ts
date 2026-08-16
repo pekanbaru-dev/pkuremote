@@ -8,14 +8,14 @@ import {
 	generateUniqueSlug
 } from "$lib/server/articles";
 import { requireEditor, isAdmin } from "$lib/server/auth/admin";
-import { renderMarkdown } from "$lib/server/markdown";
+import { sanitizeArticleHtml } from "$lib/server/markdown";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	requireEditor(locals);
 	const article = await getArticleById(params.id);
 	if (!article) error(404, "Artikel tidak ditemukan.");
-	const bodyHtml = renderMarkdown(article.body);
+	const bodyHtml = sanitizeArticleHtml(article.body);
 	return { article, bodyHtml, isAdmin: isAdmin(locals) };
 };
 

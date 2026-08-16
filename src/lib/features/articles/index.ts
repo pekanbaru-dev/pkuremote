@@ -13,5 +13,6 @@ export { articleJsonLd, breadcrumbJsonLd, articleListJsonLd } from "./services/j
 
 export { default as ArticleCard } from "./components/article-card.svelte";
 export { default as ArticleEditor } from "./components/article-editor.svelte";
+export { default as TipTapEditor } from "./components/tiptap-editor.svelte";
 export { default as ArticleStatusBadge } from "./components/article-status-badge.svelte";
 export { default as ArticleReviewForm } from "./components/article-review-form.svelte";

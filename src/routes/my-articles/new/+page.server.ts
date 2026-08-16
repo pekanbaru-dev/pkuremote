@@ -6,10 +6,11 @@ import {
 	generateUniqueSlug
 } from "$lib/server/articles";
 import { uploadArticleCover, MediaUploadError } from "$lib/server/storage";
+import { getAllCategories } from "$lib/server/events";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async () => {
-	return {};
+	return { categories: await getAllCategories() };
 };
 
 export const actions: Actions = {
@@ -22,6 +23,7 @@ export const actions: Actions = {
 		const body = (formData.get("body") as string | null)?.trim() ?? "";
 		const slugOverride = (formData.get("slug") as string | null)?.trim() || undefined;
 		const coverFile = formData.get("coverImage") as File | null;
+		const uploadedCoverImageUrl = (formData.get("coverImageUrl") as string | null)?.trim() || null;
 
 		if (!title) return fail(400, { error: "Judul tidak boleh kosong." });
 		if (!excerpt) return fail(400, { error: "Ringkasan tidak boleh kosong." });
@@ -40,7 +42,7 @@ export const actions: Actions = {
 			validatedSlug = await generateUniqueSlug(sanitized);
 		}
 
-		let coverImageUrl: string | null = null;
+		let coverImageUrl: string | null = uploadedCoverImageUrl;
 		if (coverFile && coverFile.size > 0) {
 			try {
 				coverImageUrl = await uploadArticleCover(coverFile);

@@ -1,6 +1,6 @@
 import { error, redirect } from "@sveltejs/kit";
 import { getArticleBySlug, findRedirectForSlug } from "$lib/server/articles";
-import { renderMarkdown } from "$lib/server/markdown";
+import { sanitizeArticleHtml } from "$lib/server/markdown";
 import { articleJsonLd, breadcrumbJsonLd } from "$lib/features/articles";
 import { PUBLIC_SITE_URL } from "$env/static/public";
 import type { PageServerLoad } from "./$types";
@@ -17,7 +17,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, "Artikel tidak ditemukan.");
 	}
 
-	const bodyHtml = renderMarkdown(article.body);
+	// Article body is HTML (produced by the TipTap editor) — sanitize, don't markdown-render.
+	const bodyHtml = sanitizeArticleHtml(article.body);
 	const jsonLdArticle = articleJsonLd(article, PUBLIC_SITE_URL);
 	const jsonLdBreadcrumb = breadcrumbJsonLd(article, PUBLIC_SITE_URL);
 
