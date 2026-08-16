@@ -35,11 +35,13 @@ services:
       # Admin allow-list read at runtime by requireAdmin ($env/dynamic/private).
       # Without it the /admin panel fails closed (no admins) in production.
       ADMIN_EMAILS: ${ADMIN_EMAILS}
-      # Uploaded event banners live here, backed by the named volume below so
-      # they persist across redeploys. Matches the dir created in the Dockerfile.
-      UPLOAD_DIR: /data/uploads
+      # Cloudflare R2 object storage — replaces the old UPLOAD_DIR/uploads_data volume.
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
     volumes:
-      - uploads_data:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -79,5 +81,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
-  uploads_data:
   postgres_data:
