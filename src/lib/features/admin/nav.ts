@@ -3,6 +3,7 @@ import LayoutDashboard from "@lucide/svelte/icons/layout-dashboard";
 import CalendarDays from "@lucide/svelte/icons/calendar-days";
 import Tags from "@lucide/svelte/icons/tags";
 import FileText from "@lucide/svelte/icons/file-text";
+import Settings from "@lucide/svelte/icons/settings";
 
 /**
  * A single admin navigation entry. `icon` is a Lucide icon component.
@@ -22,7 +23,8 @@ export const NAV_ITEMS: NavItem[] = [
 	{ label: "Dashboard", href: "/admin", icon: LayoutDashboard },
 	{ label: "Events", href: "/admin/events", icon: CalendarDays },
 	{ label: "Kategori", href: "/admin/categories", icon: Tags },
-	{ label: "Artikel", href: "/admin/articles", icon: FileText }
+	{ label: "Artikel", href: "/admin/articles", icon: FileText },
+	{ label: "Pengaturan", href: "/admin/settings", icon: Settings }
 ];
 
 /**

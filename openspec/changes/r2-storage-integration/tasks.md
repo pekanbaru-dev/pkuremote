@@ -43,3 +43,18 @@
 - [x] 7.3 Annotasi `UPLOAD_DIR` di `.env.example` sebagai deprecated/tidak lagi dipakai
 - [x] 7.4 Jalankan DB cleanup query: `UPDATE events SET banner_url = NULL WHERE banner_url LIKE '/uploads/%'` dan equivalent untuk artikel cover
 - [x] 7.5 (Opsional) Hapus volume mount `/data/uploads` dari `docker-compose.yml` dan `docker-compose.prod.yml`
+
+## 8. Presigned Upload Primitif
+
+- [x] 8.1 Tambah `r2PresignPut(key, contentType, expiresIn?)` di `r2.ts` menggunakan `getSignedUrl` + `PutObjectCommand` dari `@aws-sdk/s3-request-presigner`, default TTL 300 detik, `signableHeaders` mengunci Content-Type
+- [x] 8.2 Tambah `r2ListKeys(prefix)` di `r2.ts` menggunakan `ListObjectsV2Command` untuk mendaftar object di bawah prefix (dipakai oleh admin settings)
+- [x] 8.3 Tambah unit test untuk `r2PresignPut` (mock `getSignedUrl`) di `storage.test.ts`
+
+## 9. Admin Storage Settings
+
+- [x] 9.1 Tambah primitive server `getR2ConfigStatus()` (atau sejenis) yang mengembalikan status set/tidak-set setiap env var R2 + endpoint yang dipakai (tanpa membocorkan secret value)
+- [x] 9.2 Buat route `src/routes/admin/settings/+page.server.ts` — `requireAdmin(locals)`, load status konfigurasi + list `test/*` objects, action `presign` (buat presigned PUT URL untuk key `test/{uuid}.{ext}`) dan action `delete` (hapus object via `r2Delete`)
+- [x] 9.3 Buat endpoint server `src/routes/admin/settings/presign/+server.ts` (atau pakai form action) yang mengembalikan presigned PUT URL + public URL yang sesuai
+- [x] 9.4 Buat `src/routes/admin/settings/+page.svelte` — tampilkan status konfigurasi read-only, form pilih file → upload via presigned PUT ke R2 → tampilkan public URL, list object `test/*` dengan preview image, dan tombol hapus per object
+- [x] 9.5 Tambah item menu "Settings" (icon `Settings` dari `@lucide/svelte`) ke `NAV_ITEMS` di `src/lib/features/admin/nav.ts`
+- [x] 9.6 Pastikan bucket CORS mengizinkan PUT dari origin app (dokumentasikan di `.env.example`/README jika perlu) agar presigned upload dari browser berfungsi

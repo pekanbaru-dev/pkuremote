@@ -59,3 +59,22 @@ The system SHALL export a pure `r2PublicUrl(key)` function that returns an absol
 
 - **WHEN** `r2PublicUrl` is called without `R2_PUBLIC_URL` set
 - **THEN** a descriptive `Error` is thrown
+
+### Requirement: r2PresignPut creates a short-lived presigned PUT URL for direct browser upload
+
+The system SHALL export a server-only `r2PresignPut(key, contentType, expiresIn?)` function that returns a presigned PUT URL allowing a client (e.g. browser) to upload bytes directly to R2 at the given key, without the bytes passing through the server. The URL SHALL expire after a short default TTL (300 seconds / 5 minutes) and SHALL be scoped to the single given key and Content-Type (via `signableHeaders`).
+
+#### Scenario: A presigned PUT URL is generated for a given key
+
+- **WHEN** `r2PresignPut("test/abc.png", "image/png")` is called with valid credentials
+- **THEN** a string presigned PUT URL is returned that can be used with `fetch(url, { method: "PUT", body, headers: { "Content-Type": "image/png" } })`
+
+#### Scenario: The URL expires after the TTL
+
+- **WHEN** more than the configured TTL elapses after generation
+- **THEN** using the presigned URL to PUT returns an access-denied error from R2
+
+#### Scenario: Missing credentials throws
+
+- **WHEN** `r2PresignPut` is called and the R2 client cannot be constructed (env vars missing)
+- **THEN** a descriptive `Error` is thrown

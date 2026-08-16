@@ -14,12 +14,15 @@ Penyimpanan file saat ini menggunakan local filesystem (`UPLOAD_DIR`) yang tidak
 - Refactor `src/lib/server/storage/index.ts` — swap implementasi fs → R2, pertahankan signature publik (`uploadEventBanner`, `deleteEventBanner`, `uploadArticleCover`, `deleteArticleCover`, `validateBannerFile`, `safeBasename`, `contentTypeFor`, `MediaUploadError`).
 - Tambah `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL` ke `.env.example`.
 - Install `@aws-sdk/client-s3` dan `@aws-sdk/s3-request-presigner` sebagai dependencies.
+- Tambah menu **Settings → Storage** di admin (`/admin/settings`): halaman read-only yang menampilkan status konfigurasi R2 dari env vars, plus area test upload (via presigned PUT URL), list/preview file, dan hapus file.
+- Tambah primitive presigned URL `r2PresignPut()` di `r2.ts` — membuat presigned PUT URL untuk upload langsung dari browser ke R2 tanpa lewat server.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `storage/r2`: Reusable R2 object storage primitives (`r2Put`, `r2Delete`, `r2PublicUrl`, `createR2Client`) dengan key-path convention `banners/events/{uuid}.{ext}` dan `banners/articles/{uuid}.{ext}`.
+- `storage/r2`: Reusable R2 object storage primitives (`r2Put`, `r2Delete`, `r2PublicUrl`, `r2PresignPut`, `createR2Client`) dengan key-path convention `banners/events/{uuid}.{ext}` dan `banners/articles/{uuid}.{ext}`.
+- `admin-storage-settings`: Halaman admin `/admin/settings` untuk memverifikasi konfigurasi R2 (read-only dari env), test upload via presigned URL, list/preview file yang terupload, dan hapus file.
 
 ### Modified Capabilities
 
@@ -27,9 +30,9 @@ Penyimpanan file saat ini menggunakan local filesystem (`UPLOAD_DIR`) yang tidak
 
 ## Impact
 
-- **Code**: `src/lib/server/storage/` (refactor total), `src/routes/uploads/[file]/+server.ts` (hapus)
+- **Code**: `src/lib/server/storage/` (refactor total + tambah presigned), `src/routes/uploads/[file]/+server.ts` (hapus), `src/routes/admin/settings/` (baru), `src/lib/features/admin/nav.ts` (tambah menu)
 - **Dependencies**: tambah `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`
 - **Env vars**: hapus `UPLOAD_DIR`, tambah `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL`
 - **Database**: nilai `bannerUrl` dan `coverUrl` lama di DB perlu di-clear atau diabaikan (one-shot migration — tidak ada backward compat)
 - **Docker**: volume mount untuk `/data/uploads` di `docker-compose.yml` dan `docker-compose.prod.yml` dapat dihapus
-- **Tests**: `storage.test.ts` perlu diupdate — mock R2 bukan fs
+- **Tests**: `storage.test.ts` perlu diupdate (mock R2 bukan fs) + test baru untuk presigned dan admin settings
