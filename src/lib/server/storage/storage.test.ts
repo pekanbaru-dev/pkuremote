@@ -7,8 +7,8 @@ vi.mock("$env/dynamic/private", () => ({
 		R2_ACCESS_KEY_ID: "test-access-key",
 		R2_SECRET_ACCESS_KEY: "test-secret-key",
 		R2_BUCKET: "test-bucket",
-		R2_PUBLIC_URL: "https://cdn.example.com",
-	},
+		R2_PUBLIC_URL: "https://cdn.example.com"
+	}
 }));
 
 // Track which Command instances were sent via a shared spy on the prototype
@@ -24,10 +24,21 @@ vi.mock("@aws-sdk/client-s3", () => {
 	class DeleteObjectCommand {
 		constructor(public input: Record<string, unknown>) {}
 	}
-	return { S3Client, PutObjectCommand, DeleteObjectCommand };
+	class ListObjectsV2Command {
+		constructor(public input: Record<string, unknown>) {}
+	}
+	return { S3Client, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command };
 });
 
-import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+// Mock the S3 request presigner — no real signing in unit tests
+const { mockGetSignedUrl } = vi.hoisted(() => ({
+	mockGetSignedUrl: vi.fn().mockResolvedValue("https://presigned.example.com/upload")
+}));
+vi.mock("@aws-sdk/s3-request-presigner", () => ({
+	getSignedUrl: (...args: unknown[]) => mockGetSignedUrl(...args)
+}));
+
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { _resetR2Client } from "./r2-client";
 import {
 	MAX_BANNER_BYTES,
@@ -35,16 +46,19 @@ import {
 	contentTypeFor,
 	deleteArticleCover,
 	deleteEventBanner,
+	r2PresignPut,
 	safeBasename,
 	uploadArticleCover,
 	uploadEventBanner,
-	validateBannerFile,
+	validateBannerFile
 } from "./index";
 
 beforeEach(() => {
 	_resetR2Client();
 	mockSend.mockClear();
 	mockSend.mockResolvedValue({});
+	mockGetSignedUrl.mockClear();
+	mockGetSignedUrl.mockResolvedValue("https://presigned.example.com/upload");
 });
 
 // ---------------------------------------------------------------------------
@@ -212,5 +226,30 @@ describe("deleteArticleCover", () => {
 		const cmd = mockSend.mock.calls[0][0] as InstanceType<typeof DeleteObjectCommand>;
 		expect(cmd).toBeInstanceOf(DeleteObjectCommand);
 		expect(cmd.input.Key).toBe("banners/articles/xyz-456.webp");
+	});
+});
+
+describe("r2PresignPut", () => {
+	it("returns a presigned PUT URL via getSignedUrl with the given key and contentType", async () => {
+		mockGetSignedUrl.mockResolvedValueOnce("https://presigned.example.com/put?X-Amz-Signature=abc");
+		const url = await r2PresignPut("test/abc.png", "image/png");
+
+		expect(url).toMatch(/^https:\/\/presigned\.example\.com\/put/);
+		// getSignedUrl was invoked with a PutObjectCommand scoped to the key + bucket
+		const [client, command, options] = mockGetSignedUrl.mock.calls[0];
+		expect(client).toBeDefined();
+		expect(command).toBeInstanceOf(PutObjectCommand);
+		expect((command as InstanceType<typeof PutObjectCommand>).input).toMatchObject({
+			Bucket: "test-bucket",
+			Key: "test/abc.png",
+			ContentType: "image/png"
+		});
+		expect(options).toMatchObject({ expiresIn: 300 });
+	});
+
+	it("uses a custom expiresIn when provided", async () => {
+		await r2PresignPut("test/abc.png", "image/png", 60);
+		const [, , options] = mockGetSignedUrl.mock.calls[0];
+		expect(options).toMatchObject({ expiresIn: 60 });
 	});
 });

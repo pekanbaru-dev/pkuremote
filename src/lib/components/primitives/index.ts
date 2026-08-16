@@ -45,3 +45,9 @@ export {
 	type CheckboxIntent,
 	type CheckboxSize
 } from "./checkbox/index.js";
+export {
+	FileUpload,
+	dropZoneVariants,
+	type FileUploadProps,
+	type PresignedResult
+} from "./file-upload/index.js";

@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { r2Delete, r2KeyFromUrl, r2PublicUrl, r2Put } from "./r2.js";
 
+export { getR2ConfigStatus, r2Delete, r2ListKeys, r2PresignPut, r2PublicUrl } from "./r2.js";
+
 /** Max accepted banner/cover size (2 MiB). */
 export const MAX_BANNER_BYTES = 2 * 1024 * 1024;
 
@@ -8,7 +10,7 @@ export const MAX_BANNER_BYTES = 2 * 1024 * 1024;
 const ALLOWED_TYPES: Record<string, string> = {
 	"image/png": "png",
 	"image/jpeg": "jpg",
-	"image/webp": "webp",
+	"image/webp": "webp"
 };
 
 /** Extension → Content-Type (used by callers that need to resolve content type by name). */
@@ -16,7 +18,7 @@ const CONTENT_TYPES: Record<string, string> = {
 	".png": "image/png",
 	".jpg": "image/jpeg",
 	".jpeg": "image/jpeg",
-	".webp": "image/webp",
+	".webp": "image/webp"
 };
 
 export type MediaUploadErrorCode = "INVALID_TYPE" | "FILE_TOO_LARGE" | "EMPTY_FILE";
