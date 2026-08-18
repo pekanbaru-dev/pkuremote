@@ -1,8 +1,24 @@
 <script lang="ts">
+	import { onMount } from "svelte";
+
 	/**
 	 * Site-wide footer. Lives in `src/lib/components/` alongside
 	 * `site-header.svelte` — both are domain-agnostic, shared across routes.
 	 */
+	const EMAIL_CODES = [
+		99, 111, 110, 116, 97, 99, 116, 64, 112, 107, 117, 98, 101, 114, 115, 117, 97, 46, 99, 111, 109
+	];
+	const EMAIL_PLACEHOLDER = "[email protected]";
+
+	function decodeEmail(): string {
+		return String.fromCharCode(...EMAIL_CODES);
+	}
+
+	let email = $state(EMAIL_PLACEHOLDER);
+
+	onMount(() => {
+		email = decodeEmail();
+	});
 </script>
 
 <footer class="bg-[#032f2f] pb-5 pt-9 text-white">
@@ -16,10 +32,13 @@
 				bersama.
 			</p>
 			<a
-				href="mailto:contact@pkubersua.com"
+				href={email === EMAIL_PLACEHOLDER ? "#" : `mailto:${email}`}
+				onclick={(event) => {
+					if (email === EMAIL_PLACEHOLDER) event.preventDefault();
+				}}
 				class="mt-4 inline-flex text-xs font-semibold text-[#ffd66f] underline decoration-white/30 underline-offset-4 transition hover:text-white focus-visible:outline focus-visible:ring-2 focus-visible:ring-[#f7b91d] focus-visible:ring-offset-2 focus-visible:ring-offset-[#032f2f]"
 			>
-				contact@pkubersua.com
+				{email}
 			</a>
 		</div>
 		{#each [["Jelajahi", "Event · Community · Blog"], ["Untuk Organizer", "Buat Event · Kelola Event · Bantuan"], ["Perusahaan", "Tentang Kami · Mitra · Kontak"], ["Legal", "Syarat & Ketentuan · Privasi"]] as column (column[0])}
