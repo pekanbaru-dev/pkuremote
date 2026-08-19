@@ -6,7 +6,7 @@
 	 * `site-header.svelte` — both are domain-agnostic, shared across routes.
 	 */
 	const EMAIL_CODES = [
-		99, 111, 110, 116, 97, 99, 116, 64, 112, 107, 117, 98, 101, 114, 115, 117, 97, 46, 99, 111, 109
+		107, 111, 110, 116, 97, 107, 64, 112, 107, 117, 98, 101, 114, 115, 117, 97, 46, 99, 111, 109
 	];
 	const EMAIL_PLACEHOLDER = "[email protected]";
 
