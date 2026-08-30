@@ -335,10 +335,19 @@
 	></div>
 
 	{#if slashMenuOpen}
-		<div class="absolute left-4 top-14 z-20 w-56 rounded-xl border border-hairline bg-white p-1.5 shadow-lg" role="menu">
+		<div
+			class="absolute left-4 top-14 z-20 w-56 rounded-xl border border-hairline bg-white p-1.5 shadow-lg"
+			role="menu"
+		>
 			<p class="px-2 py-1 text-label-md text-on-surface-variant">Tambah blok</p>
-			{#each [["heading", "Subjudul"], ["quote", "Kutipan"], ["bullet", "Daftar"], ["ordered", "Daftar bernomor"], ["image", "Gambar"]] as [type, label]}
-				<button type="button" class="w-full rounded-md px-2 py-2 text-left text-body-sm text-ink hover:bg-surface-container-high" onclick={() => insertBlock(type as "heading" | "quote" | "bullet" | "ordered" | "image")}>{label}</button>
+			{#each [["heading", "Subjudul"], ["quote", "Kutipan"], ["bullet", "Daftar"], ["ordered", "Daftar bernomor"], ["image", "Gambar"]] as [type, label] (type)}
+				<Button
+					variant="ghost"
+					type="button"
+					class="w-full rounded-md px-2 py-2 text-left text-body-sm text-ink hover:bg-surface-container-high"
+					onclick={() => insertBlock(type as "heading" | "quote" | "bullet" | "ordered" | "image")}
+					>{label}</Button
+				>
 			{/each}
 		</div>
 	{/if}

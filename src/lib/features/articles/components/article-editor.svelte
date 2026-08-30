@@ -14,8 +14,8 @@
 			reviewNote: string | null;
 		};
 		/** Form action error message, if any. */
-	error?: string;
-	categories?: { id: string; name: string }[];
+		error?: string;
+		categories?: { id: string; name: string }[];
 	};
 
 	/** Client-side slug preview from title (pure, no DB). */
@@ -35,6 +35,7 @@
 	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
 	import { Button } from "$lib/components/ui/button";
+	import * as Select from "$lib/components/ui/select";
 	import TipTapEditor from "./tiptap-editor.svelte";
 
 	let { article, error, categories = [] }: ArticleEditorProps = $props();
@@ -43,6 +44,11 @@
 	const isSubmittable = $derived(!article || article.status === "draft");
 	/** Named form action: `create` for new articles, `update` for edits. */
 	const saveAction = $derived(isEdit ? "?/update" : "?/create");
+
+	let categoryId = $state("");
+	const categoryLabel = $derived(
+		categories.find((category) => category.id === categoryId)?.name ?? "Pilih kategori"
+	);
 
 	// Snapshot initial prop values into local state. These are intentionally
 	// one-time captures — the form fields are controlled by the user after mount.
@@ -118,36 +124,58 @@
 			</div>
 			<div class="grid gap-5 tablet:grid-cols-2">
 				<div class="flex flex-col gap-1.5">
-				<label for="slug-input" class="text-label-md font-semibold text-ink">Alamat artikel</label>
-				<div class="flex items-center gap-2">
-					<span class="text-body-sm text-on-surface-variant">/blog/</span>
-				<Input
-					id="slug-input"
-					name="slug"
-					type="text"
-					bind:value={slug}
-					oninput={onSlugInput}
-					placeholder="slug-artikel"
-					class="h-9 flex-1 bg-white"
-				/>
-				</div>
+					<label for="slug-input" class="text-label-md font-semibold text-ink">Alamat artikel</label
+					>
+					<div class="flex items-center gap-2">
+						<span class="text-body-sm text-on-surface-variant">/blog/</span>
+						<Input
+							id="slug-input"
+							name="slug"
+							type="text"
+							bind:value={slug}
+							oninput={onSlugInput}
+							placeholder="slug-artikel"
+							class="h-9 flex-1 bg-white"
+						/>
+					</div>
 				</div>
 				<div class="flex flex-col gap-1.5">
 					<span class="text-label-md font-semibold text-ink">Status artikel</span>
-					<div class="flex h-10 items-center rounded-md border border-hairline bg-white px-3 text-body-md text-on-surface-variant"><span class="mr-2 size-2 rounded-full bg-primary" aria-hidden="true"></span>Draft</div>
+					<div
+						class="flex h-10 items-center rounded-md border border-hairline bg-white px-3 text-body-md text-on-surface-variant"
+					>
+						<span class="mr-2 size-2 rounded-full bg-primary" aria-hidden="true"></span>Draft
+					</div>
 				</div>
-				<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink">Kategori
-				<select name="categoryId" class="h-10 rounded-md border border-hairline bg-white px-3 text-body-md font-normal">
-					<option value="">Pilih kategori</option>
-					{#each categories as category (category.id)}<option value={category.id}>{category.name}</option>{/each}
-				</select>
-			</label>
-			<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink">Tags
-				<Input name="tags" placeholder="Mis. kuliner, komunitas" class="bg-white" />
-			</label>
+				<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink">
+					Kategori
+					<Select.Root type="single" name="categoryId" bind:value={categoryId}>
+						<Select.Trigger class="h-10 w-full bg-white font-normal">
+							{categoryLabel}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="" label="Pilih kategori" />
+							{#each categories as category (category.id)}
+								<Select.Item value={category.id} label={category.name} />
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</label>
+				<label class="flex flex-col gap-1.5 text-label-md font-semibold text-ink"
+					>Tags
+					<Input name="tags" placeholder="Mis. kuliner, komunitas" class="bg-white" />
+				</label>
 				<div class="flex flex-col gap-1.5 tablet:col-span-2">
 					<label for="excerpt-input" class="text-label-md font-semibold text-ink">Ringkasan</label>
-					<Textarea id="excerpt-input" name="excerpt" rows={3} required bind:value={excerpt} placeholder="Tulis ringkasan singkat yang membuat pembaca ingin melanjutkan..." class="min-h-28 resize-y bg-white" />
+					<Textarea
+						id="excerpt-input"
+						name="excerpt"
+						rows={3}
+						required
+						bind:value={excerpt}
+						placeholder="Tulis ringkasan singkat yang membuat pembaca ingin melanjutkan..."
+						class="min-h-28 resize-y bg-white"
+					/>
 				</div>
 			</div>
 		</section>
@@ -155,7 +183,7 @@
 		<!-- Body -->
 		<div class="flex flex-col gap-2">
 			<div class="flex items-center justify-between">
-				<label class="text-label-md font-semibold text-ink">Mulai menulis</label>
+				<span class="text-label-md font-semibold text-ink">Mulai menulis</span>
 				<span class="text-label-md text-on-surface-variant">Gunakan toolbar untuk format</span>
 			</div>
 			<TipTapEditor bind:value={body} placeholder="Tulis cerita Anda..." />
@@ -166,7 +194,8 @@
 		<!-- Cover image -->
 		<div class="flex flex-col gap-2 border-t border-hairline pt-7">
 			<label for="coverImage" class="text-label-md font-semibold text-ink">
-				Gambar sampul <span class="font-normal text-on-surface-variant">(opsional, maks. 2 MB)</span>
+				Gambar sampul <span class="font-normal text-on-surface-variant">(opsional, maks. 2 MB)</span
+				>
 			</label>
 			<FileUpload
 				value={coverImageUrl}
@@ -180,7 +209,9 @@
 		</div>
 
 		<!-- Actions -->
-		<div class="sticky bottom-4 z-10 -mx-2 flex flex-wrap items-center justify-between gap-3 border border-hairline bg-white/95 px-3 py-3 shadow-sm backdrop-blur">
+		<div
+			class="sticky bottom-4 z-10 -mx-2 flex flex-wrap items-center justify-between gap-3 border border-hairline bg-white/95 px-3 py-3 shadow-sm backdrop-blur"
+		>
 			<span class="text-label-md text-on-surface-variant">Simpan draf kapan saja.</span>
 			<div class="flex flex-wrap gap-2">
 				<Button type="submit" variant="outline">Simpan Draft</Button>
