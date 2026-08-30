@@ -57,8 +57,20 @@ export function sanitizeArticleHtml(html: string): string {
 	});
 }
 
-function sanitizeArticleBlocks(document: { content?: Array<{ type?: string; content?: unknown[]; text?: string; attrs?: Record<string, string> }> }): string {
-	const render = (node: { type?: string; content?: unknown[]; text?: string; attrs?: Record<string, string> }): string => {
+function sanitizeArticleBlocks(document: {
+	content?: Array<{
+		type?: string;
+		content?: unknown[];
+		text?: string;
+		attrs?: Record<string, string>;
+	}>;
+}): string {
+	const render = (node: {
+		type?: string;
+		content?: unknown[];
+		text?: string;
+		attrs?: Record<string, string>;
+	}): string => {
 		const children = (node.content ?? []).map((child) => render(child as typeof node)).join("");
 		if (node.type === "text") return node.text ?? "";
 		if (node.type === "paragraph") return `<p>${children}</p>`;
@@ -67,8 +79,12 @@ function sanitizeArticleBlocks(document: { content?: Array<{ type?: string; cont
 		if (node.type === "bulletList") return `<ul>${children}</ul>`;
 		if (node.type === "orderedList") return `<ol>${children}</ol>`;
 		if (node.type === "listItem") return `<li>${children}</li>`;
-		if (node.type === "image") return `<img src="${node.attrs?.src ?? ""}" alt="${node.attrs?.alt ?? ""}">`;
+		if (node.type === "image")
+			return `<img src="${node.attrs?.src ?? ""}" alt="${node.attrs?.alt ?? ""}">`;
 		return children;
 	};
-	return DOMPurify.sanitize(render(document), { ALLOWED_TAGS: ["p", "h2", "blockquote", "ul", "ol", "li", "img"], ALLOWED_ATTR: ["src", "alt"] });
+	return DOMPurify.sanitize(render(document), {
+		ALLOWED_TAGS: ["p", "h2", "blockquote", "ul", "ol", "li", "img"],
+		ALLOWED_ATTR: ["src", "alt"]
+	});
 }

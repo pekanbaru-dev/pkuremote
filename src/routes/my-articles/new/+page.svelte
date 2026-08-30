@@ -9,7 +9,6 @@
 	<title>Tulis Artikel Baru</title>
 </svelte:head>
 
-
 <div class="mx-auto w-full max-w-[52rem] px-5 py-10 tablet:px-8 tablet:py-14">
 	<div class="mb-10 flex items-center gap-3">
 		<a
