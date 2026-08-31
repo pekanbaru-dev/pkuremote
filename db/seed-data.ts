@@ -200,14 +200,14 @@ export const EVENTS: {
 		endsAt: "2026-08-31T20:00:00+07:00",
 		location: "Sekretariat PKUBersua, Jl. Riau, Pekanbaru",
 		excerpt: "Drop in, meet the organisers, and find out what the community actually does.",
-		body: "Sedang berlangsung hari ini. Sekretariat dibuka untuk siapa pun yang penasaran dengan PKUBersua — tidak ada agenda formal, tidak ada presentasi.\n\nDatang, ngobrol dengan pengurus dan anggota, lihat dokumentasi kegiatan tahun ini, dan kalau tertarik bisa langsung daftar jadi anggota di tempat. Kopi gratis.",
+		body: "Sekretariat dibuka untuk siapa pun yang penasaran dengan PKUBersua — tidak ada agenda formal, tidak ada presentasi.\n\nDatang, ngobrol dengan pengurus dan anggota, lihat dokumentasi kegiatan tahun ini, dan kalau tertarik bisa langsung daftar jadi anggota di tempat. Kopi gratis.",
 		bannerUrl:
 			"https://lh3.googleusercontent.com/aida-public/AB6AXuDUoNiIe9HhntGTFesHtJDseicn_N6aDhToMbKjrPbu4GG2CWGz8yte_3r3LjExbara-8vF1PFmc_tx6KlNTYrIFpARUK6SpVtSjdqwJYBuuPsKAAzmN3tztchNRV9xU30W0SJFdwCqSOQ0PmnOncyDlc1tfmBwPTp9RW9CdAnwInxC8FSmNxgd4IF1bwmYXwMvyfhcYJwVbbflMe3FWnRkUR0IONsYMzs1Z-mED8VzXi5futJ04YoGV2Aidg30w7bMk_eOIdfc_BmK",
 		quota: 100,
 		remainingSlots: 63,
 		priceNormal: null,
 		category: "meetup",
-		status: "live",
+		status: "upcoming",
 		categorySlugs: ["networking"]
 	},
 	{
