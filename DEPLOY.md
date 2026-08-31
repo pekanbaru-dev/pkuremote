@@ -309,17 +309,59 @@ DATABASE_URL=postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<PO
 The `postgres_data` named volume persists the database across image redeploys;
 only destroying that volume requires re-running migrate + seed.
 
+### Verifying the schema matches the running build
+
+Because the deploy does not migrate, an image can ship code that expects columns
+the database does not have. On 2026-08-31 this took the site down for hours: prod
+sat at `0000` while the image needed `0001`+`0002`, so `profiles.role` was
+missing and **every request carrying a session cookie 500'd on every route,
+including `/login`** (issues #60 / #61).
+
+Two things now make that state visible:
+
+- **`/healthz`** compares the live `drizzle.__drizzle_migrations` table against
+  the journal bundled into the build. `200 {"status":"ok"}` when they agree,
+  `503 {"status":"degraded"}` with a pending count when they do not. The app also
+  logs `[migrations] FATAL: …` once at boot. It deliberately keeps serving —
+  `up -d` replaces the container, so refusing to start would turn a partial
+  degradation into a total outage.
+- **`scripts/smoke-test.sh`** runs automatically after both deploy workflows and
+  can be run by hand: `scripts/smoke-test.sh https://pkubersua.com`. Note it
+  probes with a **bogus session cookie** on purpose — an anonymous homepage ping
+  stays `200` throughout this kind of outage, so it proves nothing.
+
+### Seeding a real deployment
+
+`pnpm db:seed` needs a live connection, and it TRUNCATEs (cascading to
+`registrations`). For a deployment, emit SQL instead and apply it on the server,
+where the credentials already are:
+
+```bash
+# --events-only: no demo author/announcement/placeholder post (they'd be public)
+# --no-truncate: INSERTs only; aborts if any event already exists
+pnpm db:seed:sql --events-only --no-truncate > /tmp/seed.sql
+scp /tmp/seed.sql <user>@<server>:/tmp/
+ssh <user>@<server> 'docker exec -i pkuremote-postgres-1 \
+  psql -U <POSTGRES_USER> -d <POSTGRES_DB> -v ON_ERROR_STOP=1 \
+  --single-transaction < /tmp/seed.sql'
+```
+
+Take a backup first: `docker exec pkuremote-postgres-1 pg_dump -U <user> -d <db> | gzip > backup.sql.gz`.
+
 ## Troubleshooting
 
-| Symptom                                        | Likely cause                                                                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Caddy can't get a cert                         | DNS not pointing at the server yet, or 80/443 blocked                                                                                      |
-| `stat docker-compose.deploy.yml: no such file` | `DEPLOY_DIR` doesn't match where the compose file was copied                                                                               |
-| `caddyku status` shows "not running"           | app container isn't up — `docker compose -f docker-compose.deploy.yml up -d`                                                               |
-| `caddyku status` shows "not on caddy-net"      | compose file wasn't patched by `caddyku init-app` — re-run it                                                                              |
-| App 500s on first request                      | migrations not applied to the in-stack Postgres yet (see above)                                                                            |
-| Login fails / `oauth_callback` error           | `OIDC_REDIRECT_URI` doesn't match Google's Authorized redirect URI                                                                         |
-| `/admin` locks everyone out                    | `ADMIN_EMAILS` missing/empty in the server `.env`                                                                                          |
-| `docker compose pull` denied: denied           | `GITHUB_TOKEN` didn't reach the SSH step's login — check `envs:`/`env:` wiring in the workflow, not the server (it self-logs in every run) |
-| Deploy job stuck "Waiting"                     | required reviewer enabled — approve it in the run                                                                                          |
-| Empty OG/canonical URLs                        | `PUBLIC_SITE_URL` Variable not set when the image was built                                                                                |
+| Symptom                                        | Likely cause                                                                                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Caddy can't get a cert                         | DNS not pointing at the server yet, or 80/443 blocked                                                                                                   |
+| `stat docker-compose.deploy.yml: no such file` | `DEPLOY_DIR` doesn't match where the compose file was copied                                                                                            |
+| `caddyku status` shows "not running"           | app container isn't up — `docker compose -f docker-compose.deploy.yml up -d`                                                                            |
+| `caddyku status` shows "not on caddy-net"      | compose file wasn't patched by `caddyku init-app` — re-run it                                                                                           |
+| App 500s on first request                      | migrations not applied to the in-stack Postgres yet (see above)                                                                                         |
+| Every page 500s, but only when logged in       | migrations not applied — the session lookup joins `profiles`, which anonymous requests skip. Check `/healthz`; probe with `curl -H 'Cookie: session=x'` |
+| `/healthz` returns 503 `degraded`              | pending migrations; the running build expects a newer schema than the DB has (see "Verifying the schema matches the running build")                     |
+| Smoke test fails after a green deploy          | the deploy IS live but broken; read the step's output for which check failed, then `/healthz` and `docker logs pkuremote_app`                           |
+| Login fails / `oauth_callback` error           | `OIDC_REDIRECT_URI` doesn't match Google's Authorized redirect URI                                                                                      |
+| `/admin` locks everyone out                    | `ADMIN_EMAILS` missing/empty in the server `.env`                                                                                                       |
+| `docker compose pull` denied: denied           | `GITHUB_TOKEN` didn't reach the SSH step's login — check `envs:`/`env:` wiring in the workflow, not the server (it self-logs in every run)              |
+| Deploy job stuck "Waiting"                     | required reviewer enabled — approve it in the run                                                                                                       |
+| Empty OG/canonical URLs                        | `PUBLIC_SITE_URL` Variable not set when the image was built                                                                                             |

@@ -21,6 +21,7 @@
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
 		"db:seed": "tsx db/seed.ts",
+		"db:seed:sql": "tsx scripts/emit-seed-sql.ts",
 		"db:seed-dev-admin": "tsx db/seed-dev-admin.ts"
 	},
 	"devDependencies": {
