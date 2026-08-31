@@ -78,3 +78,9 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
+
+      # This workflow is UNGATED and targets the production domain/database, so
+      # a broken push goes live with no human in the loop. The smoke test is the
+      # only automated signal that it actually works (issues #60 / #61).
+      - name: Smoke test
+        run: bash scripts/smoke-test.sh "${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}"
