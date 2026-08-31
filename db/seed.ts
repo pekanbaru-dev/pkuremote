@@ -2,12 +2,25 @@
  * Seed script — populates the app's Postgres with one row per content table
  * so Drizzle Studio and the FE have something to show.
  *
- * Idempotent: re-running does not error or duplicate rows (uses
- * `onConflictDoNothing` and a deterministic seed user).
+ * Re-running does not duplicate rows: content tables with no natural unique key
+ * are TRUNCATEd first, the rest use `onConflictDoNothing` and a deterministic
+ * seed user.
  *
  * Prerequisites:
  *   - `.env` is filled in (single `DATABASE_URL`)
  *   - `pnpm db:migrate` has been run
+ *
+ * Flags:
+ *   --events-only  Seed only categories, events, and their join rows. Skips the
+ *                  demo author, announcement, and placeholder blog post — use
+ *                  this against a real deployment, where that demo content
+ *                  would be publicly visible.
+ *   --force        Proceed even though registrations exist. See the warning
+ *                  below before using it.
+ *
+ * WARNING: the TRUNCATE cascades to `registrations`. Seeding an environment
+ * with real sign-ups destroys them, so the script refuses to run when any
+ * registration exists unless `--force` is passed.
  *
  * The seed user is a direct insert into the app-owned `users` table (no
  * external auth admin API, no service-role key).
@@ -17,6 +30,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { sql } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { CATEGORIES, EVENTS } from "./seed-data";
 import {
 	users,
 	profiles,
@@ -27,84 +41,15 @@ import {
 	eventCategories
 } from "./schema";
 
+// `--events-only` seeds just categories/events/join rows: no demo author,
+// announcement, or placeholder blog post. Used when seeding a real deployment,
+// where that demo content would be publicly visible.
+const EVENTS_ONLY = process.argv.includes("--events-only");
+// `--force` allows the TRUNCATE below to proceed when registrations exist.
+const FORCE = process.argv.includes("--force");
+
 const SEED_USER_ID = "00000000-0000-0000-0000-000000000001";
 const SEED_USER_EMAIL = "seed-author@pkubersua.local";
-
-const CATEGORIES: { name: string; slug: string }[] = [
-	{ name: "Workshop", slug: "workshop" },
-	{ name: "Hands-on", slug: "hands-on" },
-	{ name: "Culture", slug: "culture" },
-	{ name: "Festival", slug: "festival" },
-	{ name: "Business", slug: "business" },
-	{ name: "Networking", slug: "networking" }
-];
-
-const EVENTS: {
-	slug: string;
-	title: string;
-	startsAt: string;
-	endsAt: string;
-	location: string;
-	excerpt: string;
-	body: string;
-	bannerUrl: string;
-	quota: number;
-	remainingSlots: number;
-	priceNormal: number | null;
-	category: "workshop" | "talk" | "meetup" | "social" | "other";
-	categorySlugs: string[];
-}[] = [
-	{
-		slug: "traditional-talam-masterclass",
-		title: "Traditional Talam Masterclass",
-		startsAt: "2026-10-24T19:00:00+07:00",
-		endsAt: "2026-10-24T21:00:00+07:00",
-		location: "Kopi Tiam, Jl. Hang Tuah, Pekanbaru",
-		excerpt:
-			"Learn the secrets of crafting the perfect layered durian cake from local culinary masters.",
-		body: "Workshop 2 jam dengan tiga chef lokal. Kita akan bedah tiga varian kue tradisional Pekanbaru — Talam Durian, Bolu Kemojo, dan Kue Bangkit — dari teknik mencampur adonan, mengukus dengan api kecil, sampai plating modern. Setiap peserta membawa pulang satu set lengkap kue yang sudah dimasak. \n\nTermasuk: bahan, apron, dan notes digital. Peserta diharapkan datang 15 menit lebih awal untuk registrasi.",
-		bannerUrl:
-			"https://lh3.googleusercontent.com/aida-public/AB6AXuDUoNiIe9HhntGTFesHtJDseicn_N6aDhToMbKjrPbu4GG2CWGz8yte_3r3LjExbara-8vF1PFmc_tx6KlNTYrIFpARUK6SpVtSjdqwJYBuuPsKAAzmN3tztchNRV9xU30W0SJFdwCqSOQ0PmnOncyDlc1tfmBwPTp9RW9CdAnwInxC8FSmNxgd4IF1bwmYXwMvyfhcYJwVbbflMe3FWnRkUR0IONsYMzs1Z-mED8VzXi5futJ04YoGV2Aidg30w7bMk_eOIdfc_BmK",
-		quota: 30,
-		remainingSlots: 12,
-		priceNormal: null,
-		category: "workshop",
-		categorySlugs: ["workshop", "hands-on"]
-	},
-	{
-		slug: "riau-heritage-night",
-		title: "Riau Heritage Night",
-		startsAt: "2026-11-02T19:00:00+07:00",
-		endsAt: "2026-11-02T22:00:00+07:00",
-		location: "Taman Budaya Riau, Pekanbaru",
-		excerpt:
-			"A celebration of Zapin dance, traditional music, and storytelling under the moonlight.",
-		body: "Malam budaya dengan tiga penampil: Zapin Melayu, gambus, dan storytelling tentang legenda Bukit Suharto. Setiap segmen 30 menit, diselingi workshop singkat untuk anak-anak. \n\nPintu dibuka pukul 19:00. Snack dan teh gratis. Tidak perlu registrasi untuk penonton umum, tapi peserta workshop perlu daftar karena kuota terbatas.",
-		bannerUrl:
-			"https://lh3.googleusercontent.com/aida-public/AB6AXuCGP3k-BPnJNzGuJhv0C1w9NZjsyE0lH0QgRec6C5v9rmtfay4zNN34qKVGpngtIek3jFTOgRCx6Qlny5EUsKb82TUhAXGMrcmldBba95J27muA8YV23-LXRf0eyf4J4NF6FUt4fhjyC1d1nB47NECSUKpaMaM0PYnjm-1ziU-4VxGBfIultucN7v3T8uWpRz9gjh3_8mM4Rx68KHtSG_WAJRQldJRNwaiUmkByon5FIbzWK5DNzLypf0guEvXt5jdyUNZJgfZEpV-s",
-		quota: 60,
-		remainingSlots: 24,
-		priceNormal: null,
-		category: "meetup",
-		categorySlugs: ["culture", "festival"]
-	},
-	{
-		slug: "local-business-mixer",
-		title: "Local Business Mixer",
-		startsAt: "2026-11-15T18:00:00+07:00",
-		endsAt: "2026-11-15T20:30:00+07:00",
-		location: "Co-working space Hive, Pekanbaru",
-		excerpt: "Connect with entrepreneurs and creators driving the modern economy of Pekanbaru.",
-		body: "Networking event untuk 50 pebisnis lokal: 5 menit lightning pitch dari 8 founder, 30 menit open networking dengan kartu nama bertema Riau, dan 30 menit Q&A panel tentang 'Membangun brand lokal di era digital'. \n\nTermasuk: appetizer, 2 drink voucher, dan direktori peserta digital.",
-		bannerUrl:
-			"https://lh3.googleusercontent.com/aida-public/AB6AXuBC20E2R0F_20RxEXLT12_jAOPuLd50_xVz5WogGhyYT4BoXyGEnRvTi9eQ7C_248zO-5lLLUPv-XRGGOUgSz1VEtqvpiPFE9UknDl4G3HJzSlft4etC_rMw7CCOxHxuGd3QJzizE3OxhyKMzd-p1mtxVmXMHTARBbbqIqNyr-7uItEuKKvEdsmBpA97cEIZU_YOXVTct8zY-U6Egsv1_DKyaT9M7n9DajZPaeX66IZOFaU_F34XhH7_u6Avm4D4K92C9ptnXa_IE-B",
-		quota: 50,
-		remainingSlots: 17,
-		priceNormal: null,
-		category: "meetup",
-		categorySlugs: ["business", "networking"]
-	}
-];
 
 async function seedContent(): Promise<void> {
 	const url = process.env.DATABASE_URL;
@@ -115,25 +60,48 @@ async function seedContent(): Promise<void> {
 	const client = postgres(url, { prepare: false });
 	const db = drizzle(client, { schema });
 
-	console.log("  · inserting seed user + profile");
-	await db
-		.insert(users)
-		.values({ id: SEED_USER_ID, email: SEED_USER_EMAIL, emailVerified: true })
-		.onConflictDoNothing();
-	await db
-		.insert(profiles)
-		.values({ id: SEED_USER_ID, displayName: "Seed Author", role: "admin" })
-		.onConflictDoNothing();
+	if (!EVENTS_ONLY) {
+		console.log("  · inserting seed user + profile");
+		await db
+			.insert(users)
+			.values({ id: SEED_USER_ID, email: SEED_USER_EMAIL, emailVerified: true })
+			.onConflictDoNothing();
+		await db
+			.insert(profiles)
+			.values({ id: SEED_USER_ID, displayName: "Seed Author", role: "admin" })
+			.onConflictDoNothing();
+	}
 
-	console.log("  · truncating events, announcements, event_categories (no natural unique key)");
-	await client`TRUNCATE TABLE events, announcements, event_categories RESTART IDENTITY CASCADE`;
+	// The TRUNCATE below cascades to `registrations` (registrations.event_id
+	// references events), so re-seeding an environment that has real sign-ups
+	// would silently destroy them. Refuse unless explicitly forced.
+	const regRows = (await db.execute(
+		sql`select count(*)::int as n from registrations`
+	)) as unknown as { n: number }[];
+	const registrationCount = regRows[0]?.n ?? 0;
+	if (registrationCount > 0 && !FORCE) {
+		throw new Error(
+			`Refusing to seed: ${registrationCount} registration(s) exist, and TRUNCATE … CASCADE ` +
+				`would delete them along with the events. Re-run with --force if that is intended.`
+		);
+	}
 
-	console.log("  · inserting 6 categories");
+	const truncated = EVENTS_ONLY
+		? "events, event_categories"
+		: "events, announcements, event_categories";
+	console.log(`  · truncating ${truncated} (no natural unique key)`);
+	if (EVENTS_ONLY) {
+		await client`TRUNCATE TABLE events, event_categories RESTART IDENTITY CASCADE`;
+	} else {
+		await client`TRUNCATE TABLE events, announcements, event_categories RESTART IDENTITY CASCADE`;
+	}
+
+	console.log(`  · inserting ${CATEGORIES.length} categories`);
 	for (const c of CATEGORIES) {
 		await db.insert(categories).values(c).onConflictDoNothing();
 	}
 
-	console.log("  · inserting 3 events");
+	console.log(`  · inserting ${EVENTS.length} events`);
 	const insertedEvents: { id: string; slug: string }[] = [];
 	for (const e of EVENTS) {
 		const [row] = await db
@@ -147,7 +115,7 @@ async function seedContent(): Promise<void> {
 				excerpt: e.excerpt,
 				body: e.body,
 				bannerUrl: e.bannerUrl,
-				status: "upcoming",
+				status: e.status,
 				quota: e.quota,
 				remainingSlots: e.remainingSlots,
 				priceNormal: e.priceNormal,
@@ -173,26 +141,31 @@ async function seedContent(): Promise<void> {
 		}
 	}
 
-	console.log("  · inserting announcement");
-	await db.insert(announcements).values({
-		title: "Welcome to PKUBersua",
-		body: "This is a test announcement inserted by the seed script."
-	});
+	if (!EVENTS_ONLY) {
+		console.log("  · inserting announcement");
+		await db.insert(announcements).values({
+			title: "Welcome to PKUBersua",
+			body: "This is a test announcement inserted by the seed script."
+		});
+	}
 
-	console.log("  · inserting post");
-	await db
-		.insert(posts)
-		.values({
-			title: "Hello from the seed script",
-			slug: "hello-from-the-seed-script",
-			authorId: SEED_USER_ID,
-			excerpt: "A placeholder post inserted by the seed script so the table has at least one row.",
-			body: "## Halo dari Seed Script\n\nIni adalah artikel contoh yang dimasukkan oleh seed script agar tabel `posts` tidak kosong saat development.",
-			status: "published",
-			publishedAt: new Date(),
-			updatedAt: new Date()
-		})
-		.onConflictDoNothing();
+	if (!EVENTS_ONLY) {
+		console.log("  · inserting post");
+		await db
+			.insert(posts)
+			.values({
+				title: "Hello from the seed script",
+				slug: "hello-from-the-seed-script",
+				authorId: SEED_USER_ID,
+				excerpt:
+					"A placeholder post inserted by the seed script so the table has at least one row.",
+				body: "## Halo dari Seed Script\n\nIni adalah artikel contoh yang dimasukkan oleh seed script agar tabel `posts` tidak kosong saat development.",
+				status: "published",
+				publishedAt: new Date(),
+				updatedAt: new Date()
+			})
+			.onConflictDoNothing();
+	}
 
 	// Sanity check: confirm rows landed
 	const eventCount = await db.execute(sql`select count(*)::int as n from events`);
