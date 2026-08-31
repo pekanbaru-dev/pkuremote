@@ -49,7 +49,6 @@ jobs:
           fi
 
       - uses: actions/checkout@v4
-        if: steps.ver.outputs.build == 'true'
 
       - uses: docker/setup-buildx-action@v3
         if: steps.ver.outputs.build == 'true'
@@ -100,3 +99,9 @@ jobs:
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GHCR_ACTOR: ${{ github.actor }}
+
+      # The deploy is already live here, so this does not prevent a bad release
+      # -- it makes one VISIBLE. See the script header for why an anonymous
+      # homepage ping is not enough (issues #60 / #61).
+      - name: Smoke test
+        run: bash scripts/smoke-test.sh "${{ vars.PUBLIC_SITE_URL || 'https://pkubersua.com' }}"
