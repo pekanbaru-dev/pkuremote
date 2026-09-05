@@ -21,11 +21,11 @@
 	type Filter = ArticleStatus | "all";
 
 	const filters: { value: Filter; label: string }[] = [
-		{ value: "all", label: "Semua" },
+		{ value: "all", label: "All" },
 		{ value: "draft", label: "Draft" },
 		{ value: "in_review", label: "On Review" },
 		{ value: "published", label: "Published" },
-		{ value: "rejected", label: "Ditolak" },
+		{ value: "rejected", label: "Rejected" },
 		{ value: "archived", label: "Trash" }
 	];
 
