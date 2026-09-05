@@ -101,7 +101,7 @@
 									src={obj.url}
 									alt={obj.key}
 									class="h-14 w-14 rounded object-cover"
-									loading="lazy"
+									loading="eager"
 								/>
 							{:else}
 								<div

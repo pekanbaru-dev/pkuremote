@@ -1,4 +1,4 @@
-export const DEFAULT_REDIRECT = "/myprofile";
+export const DEFAULT_REDIRECT = "/auth/myprofile";
 
 /**
  * Validate a `?redirect=` query string. Accepts only same-origin paths that

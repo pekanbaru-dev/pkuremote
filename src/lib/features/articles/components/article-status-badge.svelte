@@ -8,16 +8,18 @@
 
 	const STATUS_LABELS: Record<ArticleStatus, string> = {
 		draft: "Draft",
-		in_review: "Menunggu Review",
+		in_review: "On Review",
 		published: "Published",
-		archived: "Arsip"
+		archived: "Trash",
+		rejected: "Ditolak"
 	};
 
 	const STATUS_CLASSES: Record<ArticleStatus, string> = {
-		draft: "bg-surface-container text-muted-foreground border-hairline",
-		in_review: "bg-primary/10 text-primary border-primary/20",
-		published: "bg-green-50 text-green-700 border-green-200",
-		archived: "bg-surface-container text-muted-foreground border-hairline opacity-60"
+		draft: "bg-slate-500 text-white",
+		in_review: "bg-amber-500 text-white",
+		published: "bg-green-600 text-white",
+		archived: "bg-red-500 text-white",
+		rejected: "bg-rose-700 text-white"
 	};
 </script>
 
@@ -29,7 +31,7 @@
 </script>
 
 <span
-	class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label font-medium border {cls} {className ??
+	class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold {cls} {className ??
 		''}"
 >
 	{label}

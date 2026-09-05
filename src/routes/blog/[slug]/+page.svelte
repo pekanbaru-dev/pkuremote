@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { PUBLIC_SITE_URL } from "$env/static/public";
+	import SiteHeader from "$lib/components/site-header.svelte";
 	import type { PageData } from "./$types";
 
 	let { data }: { data: PageData } = $props();
@@ -32,10 +33,12 @@
 	{@html data.jsonLdBreadcrumb}
 </svelte:head>
 
-<article class="container-page py-12">
+<SiteHeader variant="light" />
+
+<article class="container-page pt-6 pb-12">
 	<!-- Breadcrumb -->
-	<nav aria-label="Breadcrumb" class="mb-8">
-		<ol class="flex items-center gap-2 text-label-sm font-label text-muted-foreground">
+	<nav aria-label="Breadcrumb" class="mb-8 max-w-3xl mx-auto">
+		<ol class="flex items-center gap-2 text-[14px] font-label text-muted-foreground">
 			<li><a href="/" class="hover:text-ink transition-colors">Beranda</a></li>
 			<li aria-hidden="true">/</li>
 			<li><a href="/blog" class="hover:text-ink transition-colors">Blog</a></li>
@@ -44,60 +47,88 @@
 		</ol>
 	</nav>
 
-	<!-- Cover image -->
-	{#if data.article.coverImageUrl}
-		<div class="mb-8 rounded-2xl overflow-hidden border border-hairline">
-			<img
-				src={data.article.coverImageUrl}
-				alt=""
-				width="1200"
-				height="630"
-				class="w-full object-cover max-h-80"
-			/>
-		</div>
-	{/if}
+	<div class="max-w-3xl mx-auto">
+		<!-- Header -->
+		<header class="mb-8">
+			<h1 class="font-display text-[2.125rem] tablet:text-[2.625rem] font-black text-ink leading-[1.18] tracking-[-0.016em] mb-3">
+				{data.article.title}
+			</h1>
 
-	<!-- Header -->
-	<header class="mb-8 max-w-3xl">
-		<h1 class="font-display text-display-sm font-bold text-ink leading-tight mb-4">
-			{data.article.title}
-		</h1>
-		<p class="text-body-lg text-muted-foreground measure-prose mb-6">{data.article.excerpt}</p>
-
-		<div class="flex items-center gap-3">
-			{#if data.article.authorAvatarUrl}
-				<img
-					src={data.article.authorAvatarUrl}
-					alt=""
-					width="36"
-					height="36"
-					class="w-9 h-9 rounded-full object-cover"
-				/>
-			{:else}
-				<div
-					class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold"
+			<!-- Kategori -->
+			{#if data.article.categoryName}
+				<a
+					href="/blog?category={data.article.categoryName}"
+					class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary mb-4 hover:bg-primary/20 transition-colors"
 				>
-					{(data.article.authorDisplayName ?? "A")[0].toUpperCase()}
+					{data.article.categoryName}
+				</a>
+			{/if}
+
+			<!-- Cover image / Thumbnail -->
+			{#if data.article.coverImageUrl}
+				<div class="mb-6 rounded-2xl overflow-hidden border border-hairline">
+					<img
+						src={data.article.coverImageUrl}
+						alt=""
+						width="1200"
+						height="630"
+						class="w-full object-cover max-h-[28rem]"
+					/>
 				</div>
 			{/if}
-			<div class="flex flex-col">
-				<span class="text-label-md font-label font-medium text-ink">
-					{data.article.authorDisplayName ?? "PKUBersua"}
-				</span>
-				{#if data.article.publishedAt}
-					<time datetime={publishedIso} class="text-label-sm font-label text-muted-foreground">
-						{data.article.publishedAt.toLocaleDateString("id-ID", {
-							day: "numeric",
-							month: "long",
-							year: "numeric"
-						})}
-					</time>
-				{/if}
-			</div>
-		</div>
-	</header>
 
-	<!-- Body — DOMPurify-sanitized markdown output, safe to inject -->
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	<div class="prose prose-stone max-w-3xl text-body-md text-ink">{@html data.bodyHtml}</div>
+			<div class="flex items-center gap-3">
+				{#if data.article.authorAvatarUrl}
+					<img
+						src={data.article.authorAvatarUrl}
+						alt=""
+						width="36"
+						height="36"
+						referrerpolicy="no-referrer"
+						class="w-9 h-9 rounded-full object-cover"
+					/>
+				{:else}
+					<div
+						class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold shrink-0"
+					>
+						{(data.article.authorDisplayName ?? "A")[0].toUpperCase()}
+					</div>
+				{/if}
+				<div class="flex flex-col">
+					<span class="text-label-md font-label font-medium text-ink">
+						{data.article.authorDisplayName ?? "PKUBersua"}
+					</span>
+					{#if data.article.publishedAt}
+						<time datetime={publishedIso} class="text-label-sm font-label text-muted-foreground">
+							{data.article.publishedAt.toLocaleString("id-ID", {
+								day: "numeric",
+								month: "long",
+								year: "numeric",
+								hour: "2-digit",
+								minute: "2-digit",
+								timeZone: "Asia/Jakarta"
+							})}
+						</time>
+					{/if}
+				</div>
+			</div>
+		</header>
+
+		<!-- Body -->
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		<div class="prose prose-stone max-w-none article-body">{@html data.bodyHtml}</div>
+
+		<!-- Tags -->
+		{#if data.article.tags && data.article.tags.length > 0}
+			<footer class="mt-12 border-t border-hairline pt-6">
+				<div class="flex flex-wrap gap-2">
+					{#each data.article.tags as tag (tag)}
+						<span class="inline-flex items-center px-3 py-1.5 rounded-full border border-hairline bg-surface-container text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors">
+							#{tag}
+						</span>
+					{/each}
+				</div>
+			</footer>
+		{/if}
+	</div>
 </article>

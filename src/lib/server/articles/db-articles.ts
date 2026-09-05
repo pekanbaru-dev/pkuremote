@@ -3,15 +3,16 @@
  * `posts` table. All functions are server-only (import from $lib/server/).
  *
  * Workflow transitions:
- *   draft → in_review   (submitForReview — author)
- *   in_review → published (approveArticle — editor/admin)
- *   in_review → draft   (rejectArticle — editor/admin)
- *   published → archived (archiveArticle — admin only)
- *   published → draft   (unpublishArticle — editor/admin)
+ *   draft → in_review      (submitForReview — author)
+ *   rejected → in_review   (submitForReview — author, re-submit after rejection)
+ *   in_review → published  (approveArticle — editor/admin)
+ *   in_review → rejected   (rejectArticle — editor/admin)
+ *   published → archived   (archiveArticle — admin only)
+ *   published → draft      (unpublishArticle — editor/admin)
  */
-import { eq, desc, and, count } from "drizzle-orm";
+import { eq, desc, and, count, sql } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
-import { posts, postSlugRedirects, profiles } from "../../../../db/schema";
+import { posts, postSlugRedirects, profiles, categories } from "../../../../db/schema";
 import type { PostStatus } from "../../../../db/schema";
 import { generateUniqueSlug } from "./slug";
 
@@ -22,6 +23,7 @@ export type ArticleRow = typeof posts.$inferSelect;
 export type ArticleWithAuthor = ArticleRow & {
 	authorDisplayName: string | null;
 	authorAvatarUrl: string | null;
+	categoryName?: string | null;
 };
 
 export type PaginatedArticles = {
@@ -38,6 +40,8 @@ export type CreateArticleInput = {
 	body: string;
 	authorId: string;
 	coverImageUrl?: string | null;
+	categoryId?: string | null;
+	tags?: string[];
 };
 
 export type UpdateArticleInput = {
@@ -46,6 +50,8 @@ export type UpdateArticleInput = {
 	excerpt?: string;
 	body?: string;
 	coverImageUrl?: string | null;
+	categoryId?: string | null;
+	tags?: string[];
 };
 
 const PAGE_SIZE = 10;
@@ -81,10 +87,12 @@ export async function getArticleBySlug(slug: string): Promise<ArticleWithAuthor 
 		.select({
 			...articleColumns(),
 			authorDisplayName: profiles.displayName,
-			authorAvatarUrl: profiles.avatarUrl
+			authorAvatarUrl: profiles.avatarUrl,
+			categoryName: categories.name
 		})
 		.from(posts)
 		.leftJoin(profiles, eq(profiles.id, posts.authorId))
+		.leftJoin(categories, eq(categories.id, posts.categoryId))
 		.where(and(eq(posts.slug, slug), eq(posts.status, "published")))
 		.limit(1);
 	return row as ArticleWithAuthor | undefined;
@@ -107,10 +115,12 @@ export async function getPublishedArticles(
 			.select({
 				...articleColumns(),
 				authorDisplayName: profiles.displayName,
-				authorAvatarUrl: profiles.avatarUrl
+				authorAvatarUrl: profiles.avatarUrl,
+				categoryName: categories.name
 			})
 			.from(posts)
 			.leftJoin(profiles, eq(profiles.id, posts.authorId))
+			.leftJoin(categories, eq(categories.id, posts.categoryId))
 			.where(eq(posts.status, "published"))
 			.orderBy(desc(posts.publishedAt))
 			.limit(limit)
@@ -130,17 +140,36 @@ export async function getPublishedArticles(
 
 /**
  * Return all articles by a specific author, newest first.
+ * Optionally filter by status and/or search query (title, excerpt).
  */
-export async function getArticlesByAuthor(authorId: string): Promise<ArticleWithAuthor[]> {
+export async function getArticlesByAuthor(
+	authorId: string,
+	opts: { status?: PostStatus | null; q?: string | null } = {}
+): Promise<ArticleWithAuthor[]> {
+	const conditions = [eq(posts.authorId, authorId)];
+
+	if (opts.status) {
+		conditions.push(eq(posts.status, opts.status));
+	}
+
+	if (opts.q?.trim()) {
+		const term = `%${opts.q.trim().toLowerCase()}%`;
+		conditions.push(
+			sql`(lower(${posts.title}) like ${term} or lower(${posts.excerpt}) like ${term})`
+		);
+	}
+
 	const rows = await db
 		.select({
 			...articleColumns(),
 			authorDisplayName: profiles.displayName,
-			authorAvatarUrl: profiles.avatarUrl
+			authorAvatarUrl: profiles.avatarUrl,
+			categoryName: categories.name
 		})
 		.from(posts)
 		.leftJoin(profiles, eq(profiles.id, posts.authorId))
-		.where(eq(posts.authorId, authorId))
+		.leftJoin(categories, eq(categories.id, posts.categoryId))
+		.where(and(...conditions))
 		.orderBy(desc(posts.createdAt));
 	return rows as ArticleWithAuthor[];
 }
@@ -200,6 +229,8 @@ export async function createArticle(input: CreateArticleInput): Promise<ArticleR
 			excerpt: input.excerpt,
 			body: input.body,
 			coverImageUrl: input.coverImageUrl ?? null,
+			categoryId: input.categoryId ?? null,
+			tags: input.tags ?? [],
 			status: "draft",
 			updatedAt: now
 		})
@@ -242,13 +273,18 @@ export async function updateSlugWithRedirect(id: string, newSlug: string): Promi
 }
 
 /**
- * Submit an article for editorial review (draft → in_review).
+ * Submit an article for editorial review (draft → in_review, rejected → in_review).
  */
 export async function submitForReview(id: string): Promise<ArticleRow> {
 	const [row] = await db
 		.update(posts)
 		.set({ status: "in_review", updatedAt: new Date() })
-		.where(and(eq(posts.id, id), eq(posts.status, "draft")))
+		.where(
+			and(
+				eq(posts.id, id),
+				sql`${posts.status} in ('draft', 'rejected')`
+			)
+		)
 		.returning();
 	return row;
 }
@@ -275,7 +311,7 @@ export async function approveArticle(id: string, reviewerId: string): Promise<Ar
 }
 
 /**
- * Reject an article back to draft with an optional review note (in_review → draft).
+ * Reject an article (in_review → rejected) with an optional review note.
  */
 export async function rejectArticle(
 	id: string,
@@ -286,7 +322,7 @@ export async function rejectArticle(
 	const [row] = await db
 		.update(posts)
 		.set({
-			status: "draft",
+			status: "rejected",
 			reviewedBy: reviewerId,
 			reviewedAt: now,
 			reviewNote: reviewNote ?? null,
@@ -335,6 +371,8 @@ function articleColumns() {
 		excerpt: posts.excerpt,
 		body: posts.body,
 		coverImageUrl: posts.coverImageUrl,
+		categoryId: posts.categoryId,
+		tags: posts.tags,
 		status: posts.status,
 		publishedAt: posts.publishedAt,
 		updatedAt: posts.updatedAt,

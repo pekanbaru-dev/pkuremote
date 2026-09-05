@@ -146,7 +146,7 @@
 				required
 				type="email"
 				placeholder="Masukkan email kamu"
-				class="min-h-11 min-w-0 flex-1 rounded-lg px-3 text-sm text-ink outline-none"
+				class="min-h-11 min-w-0 flex-1 rounded-lg border-0 px-3 text-sm text-ink outline-none focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
 			/><Button
 				type="submit"
 				class="min-h-11 rounded-lg bg-[#f7b91d] px-6 text-xs font-semibold text-ink"

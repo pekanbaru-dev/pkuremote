@@ -33,7 +33,7 @@
 				<img
 					src={article.coverImageUrl}
 					alt=""
-					loading="lazy"
+					loading="eager"
 					decoding="async"
 					width="1200"
 					height="630"

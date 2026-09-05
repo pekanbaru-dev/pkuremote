@@ -16,6 +16,7 @@
 		{ value: "in_review", label: "Menunggu Review" },
 		{ value: "draft", label: "Draft" },
 		{ value: "published", label: "Published" },
+		{ value: "rejected", label: "Ditolak" },
 		{ value: "archived", label: "Arsip" }
 	] as const;
 </script>

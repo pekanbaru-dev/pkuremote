@@ -4,7 +4,16 @@
  * decoupled from it so the feature slice stays portable.
  */
 
-export type ArticleStatus = "draft" | "in_review" | "published" | "archived";
+export type ArticleStatus = "draft" | "in_review" | "published" | "archived" | "rejected";
+
+export type ArticleImageAlignment = "left" | "center" | "right";
+
+export type ArticleImageAttributes = {
+	width: number | null;
+	alt: string;
+	title: string;
+	alignment: ArticleImageAlignment;
+};
 
 export type Article = {
 	id: string;
@@ -14,6 +23,8 @@ export type Article = {
 	excerpt: string;
 	body: string;
 	coverImageUrl: string | null;
+	categoryId: string | null;
+	tags: string[];
 	status: ArticleStatus;
 	publishedAt: Date | null;
 	updatedAt: Date;

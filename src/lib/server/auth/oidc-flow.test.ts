@@ -18,7 +18,7 @@ function baseParams(overrides: Partial<OidcCallbackParams> = {}): OidcCallbackPa
 		storedState: "state-abc",
 		storedCodeVerifier: "verifier-xyz",
 		storedNonce: "nonce-1",
-		storedTarget: "/myprofile",
+		storedTarget: "/auth/myprofile",
 		...overrides
 	};
 }
@@ -27,7 +27,7 @@ describe("resolveOidcCallback", () => {
 	it("returns the verified claims and target on success", async () => {
 		const verifyClaims = vi.fn(async () => VERIFIED);
 		const result = await resolveOidcCallback(baseParams(), { verifyClaims });
-		expect(result).toEqual({ ok: true, claims: VERIFIED, target: "/myprofile" });
+		expect(result).toEqual({ ok: true, claims: VERIFIED, target: "/auth/myprofile" });
 		expect(verifyClaims).toHaveBeenCalledWith("code-123", "verifier-xyz", "nonce-1");
 	});
 
@@ -90,15 +90,15 @@ describe("resolveOidcCallback", () => {
 		expect(result).toEqual({ ok: true, claims: VERIFIED, target: "/admin" });
 	});
 
-	it("falls back to /myprofile for unsafe stored targets (// and backslash forms)", async () => {
+	it("falls back to /auth/myprofile for unsafe stored targets (// and backslash forms)", async () => {
 		const verifyClaims = vi.fn(async () => VERIFIED);
 		const proto = await resolveOidcCallback(baseParams({ storedTarget: "//evil.com/pwn" }), {
 			verifyClaims
 		});
-		expect(proto).toEqual({ ok: true, claims: VERIFIED, target: "/myprofile" });
+		expect(proto).toEqual({ ok: true, claims: VERIFIED, target: "/auth/myprofile" });
 		const backslash = await resolveOidcCallback(baseParams({ storedTarget: "/\\evil.com/pwn" }), {
 			verifyClaims
 		});
-		expect(backslash).toEqual({ ok: true, claims: VERIFIED, target: "/myprofile" });
+		expect(backslash).toEqual({ ok: true, claims: VERIFIED, target: "/auth/myprofile" });
 	});
 });
