@@ -10,7 +10,9 @@
 	<title>Tulis Artikel Baru</title>
 </svelte:head>
 
-<div class="relative mx-auto w-full max-w-7xl px-2 pt-2 pb-4 tablet:px-[0.8rem] tablet:pt-2 tablet:pb-[1.4rem]">
+<div
+	class="relative mx-auto w-full max-w-7xl px-2 pt-2 pb-4 tablet:px-[0.8rem] tablet:pt-2 tablet:pb-[1.4rem]"
+>
 	<!-- Back button — floating left -->
 	<a
 		href="/auth/my-articles"

@@ -25,16 +25,20 @@
 
 	function registrationStatusLabel(status: RegStatus): string {
 		switch (status) {
-			case "confirmed": return "Dikonfirmasi";
-			case "cancelled": return "Dibatalkan";
-			case "attended": return "Hadir";
-			case "no_show": return "Tidak Hadir";
+			case "confirmed":
+				return "Dikonfirmasi";
+			case "cancelled":
+				return "Dibatalkan";
+			case "attended":
+				return "Hadir";
+			case "no_show":
+				return "Tidak Hadir";
 		}
 	}
 
 	const EVENT_STATUS_CLASSES: Record<EventStatus, string> = {
 		"Akan Datang": "bg-primary text-white",
-		"Selesai": "bg-slate-500 text-white"
+		Selesai: "bg-slate-500 text-white"
 	};
 
 	const REG_STATUS_CLASSES: Record<RegStatus, string> = {
@@ -54,7 +58,9 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-6">
 		<div class="flex flex-col gap-1">
-			<h1 class="font-title-lg tablet:font-headline-md text-title-lg tablet:text-headline-md text-primary">
+			<h1
+				class="font-title-lg tablet:font-headline-md text-title-lg tablet:text-headline-md text-primary"
+			>
 				Registrasi Saya
 			</h1>
 			<p class="text-sm text-on-surface-variant">Daftar event yang telah kamu booking.</p>
@@ -78,9 +84,14 @@
 			</a>
 		</div>
 	{:else}
-		<div class="grid gap-5 mobile:grid-cols-2 desktop:grid-cols-3" data-testid="myregistrations-list">
+		<div
+			class="grid gap-5 mobile:grid-cols-2 desktop:grid-cols-3"
+			data-testid="myregistrations-list"
+		>
 			{#each registrations as reg (reg.id)}
-				<div class="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest transition-all hover:-translate-y-1 hover:shadow-sm">
+				<div
+					class="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest transition-all hover:-translate-y-1 hover:shadow-sm"
+				>
 					<!-- Banner -->
 					<a href="/events/{reg.event.slug}" aria-label={reg.event.title} class="block">
 						<div class="h-44 overflow-hidden bg-surface-container">
@@ -96,7 +107,10 @@
 								/>
 							{:else}
 								<div class="w-full h-full bg-surface-container flex items-center justify-center">
-									<span class="font-label text-[0.75rem] uppercase tracking-wide text-muted-foreground">Event</span>
+									<span
+										class="font-label text-[0.75rem] uppercase tracking-wide text-muted-foreground"
+										>Event</span
+									>
 								</div>
 							{/if}
 						</div>
@@ -112,10 +126,18 @@
 								{reg.event.title}
 							</a>
 							<div class="flex flex-col gap-1 items-end shrink-0">
-								<span class="inline-flex items-center px-2 py-0.5 rounded text-[0.65rem] font-semibold leading-none {EVENT_STATUS_CLASSES[eventStatusLabel(reg.event.startsAt)]}">
+								<span
+									class="inline-flex items-center px-2 py-0.5 rounded text-[0.65rem] font-semibold leading-none {EVENT_STATUS_CLASSES[
+										eventStatusLabel(reg.event.startsAt)
+									]}"
+								>
 									{eventStatusLabel(reg.event.startsAt)}
 								</span>
-								<span class="inline-flex items-center px-2 py-0.5 rounded text-[0.65rem] font-semibold leading-none {REG_STATUS_CLASSES[reg.status]}">
+								<span
+									class="inline-flex items-center px-2 py-0.5 rounded text-[0.65rem] font-semibold leading-none {REG_STATUS_CLASSES[
+										reg.status
+									]}"
+								>
 									{registrationStatusLabel(reg.status)}
 								</span>
 							</div>
@@ -129,7 +151,9 @@
 					</div>
 
 					<!-- Footer -->
-					<div class="flex items-center justify-end px-4 pb-4 pt-2 border-t border-hairline mt-auto">
+					<div
+						class="flex items-center justify-end px-4 pb-4 pt-2 border-t border-hairline mt-auto"
+					>
 						<a
 							href="/events/{reg.event.slug}/ticket/{reg.registrationNumber}"
 							class="inline-flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"

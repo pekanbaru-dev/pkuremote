@@ -95,7 +95,9 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-6">
 		<div class="flex flex-col gap-1">
-			<h1 class="font-title-lg tablet:font-headline-md text-title-lg tablet:text-headline-md text-primary">
+			<h1
+				class="font-title-lg tablet:font-headline-md text-title-lg tablet:text-headline-md text-primary"
+			>
 				Artikel Saya
 			</h1>
 			<p class="text-sm text-on-surface-variant">Kelola dan tulis artikel kamu di sini.</p>
@@ -111,7 +113,9 @@
 	<!-- Search -->
 	{#if data.articles.length > 0}
 		<div class="relative mb-4">
-			<Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant pointer-events-none" />
+			<Search
+				class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-on-surface-variant pointer-events-none"
+			/>
 			<Input
 				type="search"
 				value={inputValue}
@@ -151,12 +155,14 @@
 				>
 					{f.label}
 					{#if data.counts[f.value as keyof typeof data.counts] > 0}
-						<span class={[
-							"inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none",
-							activeFilter === f.value
-								? "bg-primary/10 text-primary"
-								: "bg-surface-container text-on-surface-variant"
-						].join(" ")}>
+						<span
+							class={[
+								"inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none",
+								activeFilter === f.value
+									? "bg-primary/10 text-primary"
+									: "bg-surface-container text-on-surface-variant"
+							].join(" ")}
+						>
 							{data.counts[f.value as keyof typeof data.counts]}
 						</span>
 					{/if}
@@ -179,11 +185,7 @@
 		<div class="rounded-xl border border-hairline bg-surface-container-lowest p-12 text-center">
 			<p class="text-body-md text-muted-foreground mb-4">Tidak ada artikel dengan status ini.</p>
 			<div class="flex flex-wrap justify-center gap-3">
-				<Button
-					type="button"
-					variant="outline"
-					onclick={() => setFilter("all")}
-				>
+				<Button type="button" variant="outline" onclick={() => setFilter("all")}>
 					Lihat semua artikel
 				</Button>
 				<a
@@ -197,10 +199,16 @@
 	{:else}
 		<div class="grid gap-5 mobile:grid-cols-2 desktop:grid-cols-3">
 			{#each data.articles as article (article.id)}
-				<div class="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest transition-all hover:-translate-y-1 hover:shadow-sm">
+				<div
+					class="group flex flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest transition-all hover:-translate-y-1 hover:shadow-sm"
+				>
 					<!-- Cover image with overlays -->
 					<div class="relative overflow-hidden bg-surface-container" style="height: 176px;">
-						<a href="/auth/my-articles/{article.id}" aria-label={article.title} class="absolute inset-0">
+						<a
+							href="/auth/my-articles/{article.id}"
+							aria-label={article.title}
+							class="absolute inset-0"
+						>
 							{#if article.coverImageUrl}
 								<img
 									src={article.coverImageUrl}
@@ -211,7 +219,10 @@
 								/>
 							{:else}
 								<div class="w-full h-full bg-surface-container flex items-center justify-center">
-									<span class="font-label text-[0.75rem] uppercase tracking-wide text-muted-foreground">Artikel</span>
+									<span
+										class="font-label text-[0.75rem] uppercase tracking-wide text-muted-foreground"
+										>Artikel</span
+									>
 								</div>
 							{/if}
 						</a>
@@ -264,7 +275,9 @@
 						<!-- Kategori — kiri bawah -->
 						{#if article.categoryName}
 							<div class="absolute bottom-2 left-2 pointer-events-none">
-								<span class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold bg-black/40 text-white backdrop-blur-sm">
+								<span
+									class="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-semibold bg-black/40 text-white backdrop-blur-sm"
+								>
 									{article.categoryName}
 								</span>
 							</div>
@@ -283,13 +296,21 @@
 					</div>
 
 					<!-- Footer -->
-					<div class="flex items-center justify-between px-4 pb-4 pt-2 border-t border-hairline mt-auto gap-2">
-						<span class="flex items-center gap-1 text-[0.7rem] text-muted-foreground" title="Created at">
+					<div
+						class="flex items-center justify-between px-4 pb-4 pt-2 border-t border-hairline mt-auto gap-2"
+					>
+						<span
+							class="flex items-center gap-1 text-[0.7rem] text-muted-foreground"
+							title="Created at"
+						>
 							<CalendarPlus class="size-3 shrink-0" />
 							Created: {formatDate(article.createdAt)}
 						</span>
 						{#if article.updatedAt}
-							<span class="flex items-center gap-1 text-[0.7rem] text-muted-foreground" title="Last updated">
+							<span
+								class="flex items-center gap-1 text-[0.7rem] text-muted-foreground"
+								title="Last updated"
+							>
 								<CalendarClock class="size-3 shrink-0" />
 								Last updated: {formatDate(article.updatedAt)}
 							</span>

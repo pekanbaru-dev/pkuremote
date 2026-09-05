@@ -114,7 +114,9 @@ export const actions: Actions = {
 		if (!article) error(404, "Artikel tidak ditemukan.");
 		if (article.authorId !== locals.user!.id) error(403, "Akses ditolak.");
 		if (article.status !== "draft" && article.status !== "rejected") {
-			return fail(400, { error: "Hanya artikel draft atau yang ditolak yang bisa dikirim untuk review." });
+			return fail(400, {
+				error: "Hanya artikel draft atau yang ditolak yang bisa dikirim untuk review."
+			});
 		}
 
 		const formData = await request.formData();
