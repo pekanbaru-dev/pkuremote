@@ -35,7 +35,7 @@
 	<CategoryTiles />
 	<EventsSection events={data.events} pastEventsTotal={data.pastEventsTotal} {showToast} />
 	<CommunitiesSection {showToast} />
-	<ArticlesSection />
+	<ArticlesSection articles={data.articles} />
 	<PartnersCta {showToast} />
 </main>
 

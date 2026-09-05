@@ -1,27 +1,34 @@
 {
-	"version": "7",
-	"dialect": "postgresql",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "7",
-			"when": 1783447286423,
-			"tag": "0000_natural_quasimodo",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1786728760197,
-			"tag": "0001_nifty_garia",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1786728760200,
-			"tag": "0002_article_metadata",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1783447286423,
+      "tag": "0000_natural_quasimodo",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786728760197,
+      "tag": "0001_nifty_garia",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786728760200,
+      "tag": "0002_article_metadata",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788604109814,
+      "tag": "0003_nasty_lord_hawal",
+      "breakpoints": true
+    }
+  ]
 }

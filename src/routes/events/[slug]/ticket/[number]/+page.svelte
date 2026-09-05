@@ -47,7 +47,7 @@
 		>
 			PKUBersua
 		</a>
-		<a class="link-quiet text-label-lg text-on-surface-variant" href="/myregistrations"
+		<a class="link-quiet text-label-lg text-on-surface-variant" href="/auth/myregistrations"
 			>← Registrasi Saya</a
 		>
 	</div>

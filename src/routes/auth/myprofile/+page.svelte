@@ -56,11 +56,11 @@
 		<nav class="mt-12 border-t border-hairline pt-8" aria-label="Tautan akun">
 			<ul class="flex flex-col gap-3">
 				<li>
-					<a
-						href="/myregistrations"
-						class="link-quiet text-label-lg text-primary"
-						data-testid="profile-myregistrations-link"
-					>
+				<a
+					href="/auth/myregistrations"
+					class="link-quiet text-label-lg text-primary"
+					data-testid="profile-myregistrations-link"
+				>
 						Registrasi Saya
 					</a>
 				</li>

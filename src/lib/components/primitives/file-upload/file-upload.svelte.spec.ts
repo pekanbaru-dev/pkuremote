@@ -49,6 +49,22 @@ describe("FileUpload validation", () => {
 });
 
 describe("FileUpload presigned upload", () => {
+	it("shows an existing image when the controlled value arrives after mount", async () => {
+		const view = render(FileUpload, {
+			accept: "image/png,image/jpeg,image/webp,image/avif",
+			value: ""
+		});
+		const existingUrl = "https://cdn.example.com/banners/articles/old-cover.webp";
+
+		await view.rerender({
+			accept: "image/png,image/jpeg,image/webp,image/avif",
+			value: existingUrl
+		});
+
+		const thumbnail = await page.getByRole("button", { name: "Perbesar file" }).element();
+		expect(thumbnail.querySelector("img")?.getAttribute("src")).toBe(existingUrl);
+	});
+
 	it("uploads via presigned PUT and calls onChange with publicUrl on success", async () => {
 		const getPresignedUrl = vi.fn().mockResolvedValue({
 			presignedUrl: "https://r2.example.com/put",

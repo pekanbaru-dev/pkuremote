@@ -7,12 +7,31 @@
  * Server-only data access is in `$lib/server/articles` — use that from
  * `+page.server.ts` and `+server.ts` files only.
  */
-export type { Article, ArticleStatus, ArticleWithAuthor, ArticleCardData } from "./types.ts";
+export type {
+	Article,
+	ArticleStatus,
+	ArticleWithAuthor,
+	ArticleCardData,
+	ArticleImageAlignment,
+	ArticleImageAttributes
+} from "./types.ts";
+
+export {
+	validateArticleForm,
+	firstArticleFormError,
+	parseArticleTags
+} from "./article-form-schema.ts";
+export type {
+	ArticleFormValues,
+	ArticleFormField,
+	ArticleFormErrors
+} from "./article-form-schema.ts";
 
 export { articleJsonLd, breadcrumbJsonLd, articleListJsonLd } from "./services/json-ld.ts";
 
 export { default as ArticleCard } from "./components/article-card.svelte";
 export { default as ArticleEditor } from "./components/article-editor.svelte";
 export { default as TipTapEditor } from "./components/tiptap-editor.svelte";
+export { default as ArticleImageProperties } from "./components/image-properties.svelte";
 export { default as ArticleStatusBadge } from "./components/article-status-badge.svelte";
 export { default as ArticleReviewForm } from "./components/article-review-form.svelte";

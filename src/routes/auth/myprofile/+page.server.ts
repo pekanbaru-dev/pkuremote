@@ -4,10 +4,8 @@ import { SESSION_COOKIE, deleteSession } from "$lib/server/auth/session";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) {
-		redirect(303, "/login?redirect=%2Fmyprofile");
-	}
-	return loadMyProfile(locals.user.id, locals.user.email);
+	// locals.user is guaranteed by /auth/+layout.server.ts
+	return loadMyProfile(locals.user!.id, locals.user!.email);
 };
 
 export const actions: Actions = {

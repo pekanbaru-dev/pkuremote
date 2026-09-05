@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArticleCard, articleListJsonLd } from "$lib/features/articles";
+	import SiteHeader from "$lib/components/site-header.svelte";
 	import { PUBLIC_SITE_URL } from "$env/static/public";
 	import type { PageData } from "./$types";
 
@@ -42,6 +43,8 @@
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html jsonLd}
 </svelte:head>
+
+<SiteHeader variant="light" />
 
 <div class="container-page py-12">
 	<div class="mb-10">

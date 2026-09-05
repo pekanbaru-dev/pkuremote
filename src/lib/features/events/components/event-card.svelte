@@ -47,7 +47,7 @@
 				<img
 					src={event.bannerUrl}
 					alt=""
-					loading="lazy"
+					loading="eager"
 					decoding="async"
 					width="1600"
 					height="900"

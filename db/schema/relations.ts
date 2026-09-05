@@ -22,7 +22,8 @@ export const eventCategoriesRelations = relations(eventCategories, ({ one }) => 
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
-	eventCategories: many(eventCategories)
+	eventCategories: many(eventCategories),
+	posts: many(posts)
 }));
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -35,6 +36,10 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 		fields: [posts.reviewedBy],
 		references: [profiles.id],
 		relationName: "reviewer"
+	}),
+	category: one(categories, {
+		fields: [posts.categoryId],
+		references: [categories.id]
 	}),
 	slugRedirects: many(postSlugRedirects)
 }));

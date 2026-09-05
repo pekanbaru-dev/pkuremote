@@ -15,7 +15,7 @@
 	let { landingJsonLd }: HeroSectionProps = $props();
 
 	const user = $derived(page.data.user);
-	const accountHref = $derived(user ? "/myprofile" : "/login");
+	const accountHref = $derived(user ? "/auth/myprofile" : "/login");
 	const accountLabel = $derived(user ? "Dashboard" : "Login / Sign Up");
 
 	let mobileMenuOpen = $state(false);
@@ -205,11 +205,11 @@
 						bind:value={keyword}
 						type="search"
 						placeholder="Cari event, komunitas, atau topik"
-						class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+						class="min-w-0 flex-1 border-0 bg-transparent px-0 text-sm outline-none placeholder:text-slate-400 focus-visible:border-0 focus-visible:outline-none focus-visible:ring-0"
 					/>
 				</label>
 				<Button
-					class="min-h-14 w-full rounded-xl bg-[#f7b91d] px-7 text-sm font-semibold md:w-44"
+					class="min-h-14 w-full rounded-xl bg-[#f7b91d] px-7 text-sm font-semibold text-ink md:w-44"
 					type="submit"
 				>
 					Temukan

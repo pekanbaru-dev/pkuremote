@@ -1,12 +1,14 @@
 import { pgTable, uuid, text, timestamp, index, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { profiles } from "./profiles";
+import { categories } from "./categories";
 
 export const postStatusEnum = pgEnum("post_status", [
 	"draft",
 	"in_review",
 	"published",
-	"archived"
+	"archived",
+	"rejected"
 ]);
 
 export const posts = pgTable(
@@ -23,6 +25,11 @@ export const posts = pgTable(
 		excerpt: text("excerpt").notNull(),
 		body: text("body").notNull(),
 		coverImageUrl: text("cover_image_url"),
+		categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
+		tags: text("tags")
+			.array()
+			.notNull()
+			.default(sql`'{}'::text[]`),
 		status: postStatusEnum("status").notNull().default("draft"),
 		publishedAt: timestamp("published_at", { withTimezone: true }),
 		updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
