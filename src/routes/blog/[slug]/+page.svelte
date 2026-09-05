@@ -50,7 +50,9 @@
 	<div class="max-w-3xl mx-auto">
 		<!-- Header -->
 		<header class="mb-8">
-			<h1 class="font-display text-[2.125rem] tablet:text-[2.625rem] font-black text-ink leading-[1.18] tracking-[-0.016em] mb-3">
+			<h1
+				class="font-display text-[2.125rem] tablet:text-[2.625rem] font-black text-ink leading-[1.18] tracking-[-0.016em] mb-3"
+			>
 				{data.article.title}
 			</h1>
 
@@ -123,7 +125,9 @@
 			<footer class="mt-12 border-t border-hairline pt-6">
 				<div class="flex flex-wrap gap-2">
 					{#each data.article.tags as tag (tag)}
-						<span class="inline-flex items-center px-3 py-1.5 rounded-full border border-hairline bg-surface-container text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors">
+						<span
+							class="inline-flex items-center px-3 py-1.5 rounded-full border border-hairline bg-surface-container text-sm text-on-surface-variant hover:bg-surface-container-high transition-colors"
+						>
 							#{tag}
 						</span>
 					{/each}

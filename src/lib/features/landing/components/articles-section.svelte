@@ -42,7 +42,10 @@
 	{:else}
 		<div class="grid gap-4 mobile:grid-cols-2 desktop:grid-cols-4">
 			{#each articles as article (article.id)}
-				<a href="/blog/{article.slug}" class="group overflow-hidden rounded-2xl border border-slate-200 bg-white flex flex-col">
+				<a
+					href="/blog/{article.slug}"
+					class="group overflow-hidden rounded-2xl border border-slate-200 bg-white flex flex-col"
+				>
 					<!-- Cover -->
 					<div class="h-40 overflow-hidden bg-linear-to-br from-[#2e3230] to-[#315c53] shrink-0">
 						{#if article.coverImageUrl}
@@ -59,13 +62,16 @@
 					<div class="flex min-h-34.5 flex-col p-4">
 						<div class="flex items-center justify-between gap-3">
 							{#if article.categoryName}
-								<span class="rounded-md bg-violet-100 px-2 py-1 text-[10px] font-semibold text-violet-700">
+								<span
+									class="rounded-md bg-violet-100 px-2 py-1 text-[10px] font-semibold text-violet-700"
+								>
 									{article.categoryName}
 								</span>
 							{:else}
 								<span></span>
 							{/if}
-							<span class="text-xs leading-5 text-[#66747a]">{formatDate(article.publishedAt)}</span>
+							<span class="text-xs leading-5 text-[#66747a]">{formatDate(article.publishedAt)}</span
+							>
 						</div>
 						<h3 class="mt-3 text-[15px] font-black leading-5 line-clamp-3">{article.title}</h3>
 						<div class="mt-auto flex items-center gap-2 text-xs leading-5 text-[#66747a]">

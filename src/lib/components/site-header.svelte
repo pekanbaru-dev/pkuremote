@@ -7,7 +7,8 @@
 	import Menu from "@lucide/svelte/icons/menu";
 	import ChevronDown from "@lucide/svelte/icons/chevron-down";
 
-	let { current = "", variant = "dark" }: { current?: "events" | ""; variant?: "dark" | "light" } = $props();
+	let { current = "", variant = "dark" }: { current?: "events" | ""; variant?: "dark" | "light" } =
+		$props();
 	const user = $derived(page.data.user);
 	const accountHref = $derived(user ? "/auth/myprofile" : "/login");
 	const accountLabel = $derived(user ? "Dashboard" : "Login / Sign Up");
@@ -37,17 +38,45 @@
 				><span class="h-4 w-4 rounded border-2 border-[#073d3d]"></span></span
 			>
 			<span class="grid leading-none"
-				><b>PKUBersua</b><small class={`mt-1 text-[9px] font-medium ${isLight ? "text-ink/50" : "text-white/70"}`}
+				><b>PKUBersua</b><small
+					class={`mt-1 text-[9px] font-medium ${isLight ? "text-ink/50" : "text-white/70"}`}
 					>Komunitas, Event, Cerita</small
 				></span
 			>
 		</a>
 		<div class="hidden items-center gap-6 text-sm font-semibold lg:flex">
-			<a class={current === "" ? (isLight ? "text-primary" : "text-[#ffd66f]") : (isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]")} href="/">Explore</a>
-			<a class={current === "events" ? (isLight ? "text-primary" : "text-[#ffd66f]") : (isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]")} href="/events">Events</a>
-			<a class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"} href="/#communities">Communities</a>
-			<a class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"} href="/#articles">To Dos <span class="text-pink-400">●</span></a>
-			<a class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"} href="/#partners">For Organizers</a>
+			<a
+				class={current === ""
+					? isLight
+						? "text-primary"
+						: "text-[#ffd66f]"
+					: isLight
+						? "text-ink/70 hover:text-primary"
+						: "text-white/85 hover:text-[#ffd66f]"}
+				href="/">Explore</a
+			>
+			<a
+				class={current === "events"
+					? isLight
+						? "text-primary"
+						: "text-[#ffd66f]"
+					: isLight
+						? "text-ink/70 hover:text-primary"
+						: "text-white/85 hover:text-[#ffd66f]"}
+				href="/events">Events</a
+			>
+			<a
+				class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"}
+				href="/#communities">Communities</a
+			>
+			<a
+				class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"}
+				href="/#articles">To Dos <span class="text-pink-400">●</span></a
+			>
+			<a
+				class={isLight ? "text-ink/70 hover:text-primary" : "text-white/85 hover:text-[#ffd66f]"}
+				href="/#partners">For Organizers</a
+			>
 		</div>
 		<div class="flex items-center gap-2">
 			<form
@@ -58,7 +87,9 @@
 			>
 				<Search size={15} class={isLight ? "text-ink/40" : "text-white/60"} /><input
 					bind:value={keyword}
-					class={isLight ? "w-40 bg-transparent text-xs outline-none placeholder:text-ink/40" : "w-40 bg-transparent text-xs outline-none placeholder:text-white/55"}
+					class={isLight
+						? "w-40 bg-transparent text-xs outline-none placeholder:text-ink/40"
+						: "w-40 bg-transparent text-xs outline-none placeholder:text-white/55"}
 					placeholder="Cari event..."
 					aria-label="Cari event"
 				/>
@@ -100,10 +131,22 @@
 					aria-label="Cari event"
 				/>
 			</form>
-			<a class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`} href="/events">Events</a>
-			<a class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`} href="/#communities">Communities</a>
-			<a class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`} href="/#articles">To Dos</a>
-			<a class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`} href={accountHref}>{accountLabel}</a>
+			<a
+				class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`}
+				href="/events">Events</a
+			>
+			<a
+				class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`}
+				href="/#communities">Communities</a
+			>
+			<a
+				class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`}
+				href="/#articles">To Dos</a
+			>
+			<a
+				class={`rounded-xl px-3 py-2.5 text-sm font-semibold ${isLight ? "text-ink" : "text-white"}`}
+				href={accountHref}>{accountLabel}</a
+			>
 		</div>
 	{/if}
 </header>

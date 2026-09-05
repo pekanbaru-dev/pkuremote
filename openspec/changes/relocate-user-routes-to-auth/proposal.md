@@ -16,6 +16,7 @@ Route-level struktur saat ini menempatkan `/myprofile`, `/my-articles`, dan `/my
 - `src/routes/auth/callback/` tetap di posisi sekarang
 
 Struktur module utama setelah perubahan:
+
 ```
 /:slug       ← halaman publik
 /auth        ← area user terautentikasi

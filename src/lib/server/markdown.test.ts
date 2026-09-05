@@ -247,7 +247,10 @@ describe("sanitizeArticleHtml", () => {
 						type: "orderedList",
 						attrs: { start: 3 },
 						content: [
-							{ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "tiga" }] }] }
+							{
+								type: "listItem",
+								content: [{ type: "paragraph", content: [{ type: "text", text: "tiga" }] }]
+							}
 						]
 					}
 				]
@@ -268,15 +271,27 @@ describe("sanitizeArticleHtml", () => {
 							{
 								type: "tableRow",
 								content: [
-									{ type: "tableHeader", content: [{ type: "paragraph", content: [{ type: "text", text: "Nama" }] }] },
-									{ type: "tableHeader", content: [{ type: "paragraph", content: [{ type: "text", text: "Nilai" }] }] }
+									{
+										type: "tableHeader",
+										content: [{ type: "paragraph", content: [{ type: "text", text: "Nama" }] }]
+									},
+									{
+										type: "tableHeader",
+										content: [{ type: "paragraph", content: [{ type: "text", text: "Nilai" }] }]
+									}
 								]
 							},
 							{
 								type: "tableRow",
 								content: [
-									{ type: "tableCell", content: [{ type: "paragraph", content: [{ type: "text", text: "Andi" }] }] },
-									{ type: "tableCell", content: [{ type: "paragraph", content: [{ type: "text", text: "90" }] }] }
+									{
+										type: "tableCell",
+										content: [{ type: "paragraph", content: [{ type: "text", text: "Andi" }] }]
+									},
+									{
+										type: "tableCell",
+										content: [{ type: "paragraph", content: [{ type: "text", text: "90" }] }]
+									}
 								]
 							}
 						]

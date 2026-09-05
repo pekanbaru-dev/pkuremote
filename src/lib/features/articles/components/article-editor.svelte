@@ -167,10 +167,10 @@
 			const { default: Toastify } = await import("toastify-js");
 			await import("toastify-js/src/toastify.css");
 
-		const data = await response.json().catch(() => null);
-		const isSuccess = response.ok && data?.type === "success";
+			const data = await response.json().catch(() => null);
+			const isSuccess = response.ok && data?.type === "success";
 
-		if (isSuccess) {
+			if (isSuccess) {
 				Toastify({
 					text: "Artikel berhasil dikirim untuk review!",
 					duration: 3000,
@@ -219,7 +219,11 @@
 		</div>
 	{/if}
 
-	<form method="POST" action={saveAction} enctype="multipart/form-data" class="flex flex-col gap-7"
+	<form
+		method="POST"
+		action={saveAction}
+		enctype="multipart/form-data"
+		class="flex flex-col gap-7"
 		use:enhance={() => {
 			return async ({ result, update }) => {
 				await update({ reset: false });
@@ -365,17 +369,17 @@
 					<Input name="tags" bind:value={tags} placeholder="Mis. kuliner, komunitas" />
 				</label>
 
-			{#if isEdit}
-				<Button
-					type="button"
-					onclick={handlePreview}
-					disabled={previewing}
-					variant="link"
-					class="self-start"
-				>
-					{previewing ? "Menyimpan…" : "Preview artikel"}
-				</Button>
-			{/if}
+				{#if isEdit}
+					<Button
+						type="button"
+						onclick={handlePreview}
+						disabled={previewing}
+						variant="link"
+						class="self-start"
+					>
+						{previewing ? "Menyimpan…" : "Preview artikel"}
+					</Button>
+				{/if}
 			</aside>
 		</div>
 
@@ -388,11 +392,7 @@
 				<Button type="submit" variant="outline">Simpan Draft</Button>
 
 				{#if isSubmittable}
-					<Button
-						type="button"
-						disabled={!canSubmitReview}
-						onclick={handleSubmitReview}
-					>
+					<Button type="button" disabled={!canSubmitReview} onclick={handleSubmitReview}>
 						Kirim untuk Review
 					</Button>
 				{/if}

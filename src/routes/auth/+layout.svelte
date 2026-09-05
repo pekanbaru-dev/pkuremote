@@ -21,7 +21,7 @@
 	// Editor routes — hide nav and footer for clean writing experience
 	const isEditorRoute = $derived(
 		currentPath === "/auth/my-articles/new" ||
-		(currentPath.startsWith("/auth/my-articles/") && currentPath !== "/auth/my-articles")
+			(currentPath.startsWith("/auth/my-articles/") && currentPath !== "/auth/my-articles")
 	);
 
 	function navClass(href: string) {
@@ -35,42 +35,45 @@
 <div class="flex min-h-screen flex-col">
 	{#if !isEditorRoute}
 		<header class="sticky top-0 z-40 border-b border-hairline bg-canvas/95 backdrop-blur">
-		<nav
-			class="container-page flex h-16 items-center gap-14"
-			aria-label="Navigasi area akun"
-		>
-			<!-- Left: logo -->
-			<a
-				href="/"
-				class="font-display text-base font-bold tracking-tight text-ink shrink-0"
-				aria-label="PKUBersua — beranda"
-			>
-				PKUBersua
-			</a>
+			<nav class="container-page flex h-16 items-center gap-14" aria-label="Navigasi area akun">
+				<!-- Left: logo -->
+				<a
+					href="/"
+					class="font-display text-base font-bold tracking-tight text-ink shrink-0"
+					aria-label="PKUBersua — beranda"
+				>
+					PKUBersua
+				</a>
 
-			<!-- Nav links -->
-			<ul class="flex items-center gap-10 flex-1" role="list">
-				<li>
-					<a href="/" class={"flex items-center gap-1.5 " + navClass("/")}>
-						<House class="size-4 shrink-0" />
-						Dashboard
-					</a>
-				</li>
-				<li>
-					<a href="/auth/myregistrations" class={"flex items-center gap-1.5 " + navClass("/auth/myregistrations")}>
-						<CalendarCheck class="size-4 shrink-0" />
-						My Registration
-					</a>
-				</li>
-				<li>
-					<a href="/auth/my-articles" class={"flex items-center gap-1.5 " + navClass("/auth/my-articles")}>
-						<FileText class="size-4 shrink-0" />
-						My Articles
-					</a>
-				</li>
-			</ul>
+				<!-- Nav links -->
+				<ul class="flex items-center gap-10 flex-1" role="list">
+					<li>
+						<a href="/" class={"flex items-center gap-1.5 " + navClass("/")}>
+							<House class="size-4 shrink-0" />
+							Dashboard
+						</a>
+					</li>
+					<li>
+						<a
+							href="/auth/myregistrations"
+							class={"flex items-center gap-1.5 " + navClass("/auth/myregistrations")}
+						>
+							<CalendarCheck class="size-4 shrink-0" />
+							My Registration
+						</a>
+					</li>
+					<li>
+						<a
+							href="/auth/my-articles"
+							class={"flex items-center gap-1.5 " + navClass("/auth/my-articles")}
+						>
+							<FileText class="size-4 shrink-0" />
+							My Articles
+						</a>
+					</li>
+				</ul>
 
-			<!-- Right: avatar dropdown -->
+				<!-- Right: avatar dropdown -->
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger
 						class="flex items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -97,34 +100,34 @@
 						align="end"
 						class="w-52 shadow-none border border-hairline bg-white rounded-lg"
 					>
-					<DropdownMenu.Label class="font-normal px-3 py-2">
-						<p class="text-sm font-semibold text-ink truncate">{displayName}</p>
-						<p class="text-xs text-on-surface-variant truncate">{user.email}</p>
-					</DropdownMenu.Label>
-					<DropdownMenu.Separator class="bg-hairline" />
-					<DropdownMenu.Item class="gap-2 px-3 py-2 cursor-pointer">
-						<a href="/auth/myprofile" class="flex w-full items-center gap-2">
-							<User class="size-4 text-on-surface-variant shrink-0" />
-							<span class="text-sm text-ink">My Profile</span>
-						</a>
-					</DropdownMenu.Item>
-					<DropdownMenu.Separator class="bg-hairline" />
-				<DropdownMenu.Item class="p-0 focus:bg-transparent">
-					<form method="POST" action="/auth/myprofile?/signOut" use:enhance class="w-full">
-						<Button
-							type="submit"
-							variant="ghost"
-							class="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 rounded-md"
-						>
-							<LogOut class="size-4 shrink-0" />
-							Logout
-						</Button>
-					</form>
-				</DropdownMenu.Item>
+						<DropdownMenu.Label class="font-normal px-3 py-2">
+							<p class="text-sm font-semibold text-ink truncate">{displayName}</p>
+							<p class="text-xs text-on-surface-variant truncate">{user.email}</p>
+						</DropdownMenu.Label>
+						<DropdownMenu.Separator class="bg-hairline" />
+						<DropdownMenu.Item class="gap-2 px-3 py-2 cursor-pointer">
+							<a href="/auth/myprofile" class="flex w-full items-center gap-2">
+								<User class="size-4 text-on-surface-variant shrink-0" />
+								<span class="text-sm text-ink">My Profile</span>
+							</a>
+						</DropdownMenu.Item>
+						<DropdownMenu.Separator class="bg-hairline" />
+						<DropdownMenu.Item class="p-0 focus:bg-transparent">
+							<form method="POST" action="/auth/myprofile?/signOut" use:enhance class="w-full">
+								<Button
+									type="submit"
+									variant="ghost"
+									class="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/5 rounded-md"
+								>
+									<LogOut class="size-4 shrink-0" />
+									Logout
+								</Button>
+							</form>
+						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
-		</nav>
-	</header>
+			</nav>
+		</header>
 	{/if}
 
 	<div class="flex flex-1 flex-col">
@@ -139,4 +142,3 @@
 		</footer>
 	{/if}
 </div>
-

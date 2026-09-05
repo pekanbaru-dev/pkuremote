@@ -5,6 +5,7 @@ Lihat proposal.md untuk motivasi perubahan ini.
 Route user-authenticated saat ini tersebar di root routes sejajar dengan halaman publik. Guard autentikasi diimplementasikan di dua tempat: `GUARDED_PREFIXES` di `hooks.server.ts` (untuk `/myprofile` dan `/my-articles`) dan guard manual di `+page.server.ts` (untuk `/myregistrations`). Default redirect post-login ditetapkan sebagai konstanta `DEFAULT_REDIRECT = "/myprofile"` di `src/lib/server/auth/redirect.ts` dan dipakai oleh `oidc-flow.ts` dan `auth/callback`.
 
 File yang mengandung referensi URL lama:
+
 - `src/hooks.server.ts` — `GUARDED_PREFIXES`
 - `src/lib/server/auth/redirect.ts` — `DEFAULT_REDIRECT`
 - `src/lib/components/site-header.svelte` — `accountHref`
@@ -17,6 +18,7 @@ File yang mengandung referensi URL lama:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Semua route user-authenticated berada di bawah `/auth/`
 - Single auth guard via `src/routes/auth/+layout.server.ts`
 - `GUARDED_PREFIXES` disederhanakan menjadi `["/auth", "/admin"]`
@@ -25,6 +27,7 @@ File yang mengandung referensi URL lama:
 - `DEFAULT_REDIRECT` diupdate ke `/auth/myprofile`
 
 **Non-Goals:**
+
 - Mengubah behavior autentikasi atau sesi
 - Mengubah tampilan UI halaman-halaman tersebut
 - Menambah redirect permanent (301) dari URL lama ke URL baru — ini bukan URL publik yang diindeks SEO
@@ -47,10 +50,11 @@ File yang mengandung referensi URL lama:
 Alasan: Pilihan C paling bersih. `hooks.server.ts` tidak perlu tahu tentang sub-path exclusion. `/auth/callback` otomatis tidak tersentuh karena ia tidak punya `+layout.server.ts` guard — layoutnya hanya berlaku pada route yang merender halaman, bukan server endpoint. `GUARDED_PREFIXES` di hooks cukup `["/admin"]` saja untuk kebutuhan hooks-level guard (admin butuh guard di hooks karena admin layout guard hanya mengecek otorisasi, bukan autentikasi). Route `/auth/*` dijaga oleh `+layout.server.ts`.
 
 Dengan Pilihan C:
+
 ```
 GUARDED_PREFIXES = ["/admin"]   ← hooks.server.ts hanya jaga admin
 /auth/+layout.server.ts         ← jaga semua /auth/* kecuali /auth/callback
-                                   (callback adalah +server.ts, bukan +page, 
+                                   (callback adalah +server.ts, bukan +page,
                                     layout tidak berlaku padanya)
 ```
 

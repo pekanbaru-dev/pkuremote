@@ -279,12 +279,7 @@ export async function submitForReview(id: string): Promise<ArticleRow> {
 	const [row] = await db
 		.update(posts)
 		.set({ status: "in_review", updatedAt: new Date() })
-		.where(
-			and(
-				eq(posts.id, id),
-				sql`${posts.status} in ('draft', 'rejected')`
-			)
-		)
+		.where(and(eq(posts.id, id), sql`${posts.status} in ('draft', 'rejected')`))
 		.returning();
 	return row;
 }

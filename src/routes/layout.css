@@ -545,15 +545,27 @@
 .article-body h4 + p {
 	margin-top: 0.55em;
 }
-.article-body h2 { font-size: 1.6rem; }
-.article-body h3 { font-size: 1.3rem; }
-.article-body h4 { font-size: 1.1rem; }
-.article-body strong { font-weight: 700; }
-.article-body em { font-style: italic; }
+.article-body h2 {
+	font-size: 1.6rem;
+}
+.article-body h3 {
+	font-size: 1.3rem;
+}
+.article-body h4 {
+	font-size: 1.1rem;
+}
+.article-body strong {
+	font-weight: 700;
+}
+.article-body em {
+	font-style: italic;
+}
 .article-body a {
 	color: var(--color-primary);
 	border-bottom: 1px solid var(--color-hairline);
-	transition: border-color 0.18s ease, color 0.18s ease;
+	transition:
+		border-color 0.18s ease,
+		color 0.18s ease;
 }
 .article-body a:hover {
 	border-color: var(--color-primary);
@@ -575,8 +587,12 @@
 	padding-left: 1.5rem;
 	margin-block: 1em;
 }
-.article-body li { margin-block: 0.3em; }
-.article-body li::marker { color: var(--color-muted); }
+.article-body li {
+	margin-block: 0.3em;
+}
+.article-body li::marker {
+	color: var(--color-muted);
+}
 .article-body img {
 	max-width: 100%;
 	height: auto;
@@ -653,7 +669,6 @@
 .article-body .math-node .katex-display {
 	margin-block: 1em;
 }
-
 
 .prose ul,
 .prose-stone ul {
@@ -754,21 +769,93 @@
 }
 
 /* Lowlight syntax highlight tokens */
-.hljs-comment, .hljs-quote { color: oklch(0.65 0.02 220); font-style: italic; }
-.hljs-keyword, .hljs-selector-tag, .hljs-addition { color: oklch(0.72 0.18 300); }
-.hljs-number, .hljs-string, .hljs-meta .hljs-meta-string, .hljs-literal, .hljs-doctag, .hljs-regexp { color: oklch(0.78 0.16 145); }
-.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class { color: oklch(0.75 0.18 220); }
-.hljs-attribute, .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-class .hljs-title, .hljs-type { color: oklch(0.82 0.14 55); }
-.hljs-symbol, .hljs-bullet, .hljs-subst, .hljs-meta, .hljs-meta .hljs-keyword, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-link { color: oklch(0.72 0.18 300); }
-.hljs-built_in, .hljs-deletion { color: oklch(0.72 0.18 25); }
-.hljs-emphasis { font-style: italic; }
-.hljs-strong { font-weight: bold; }
+.hljs-comment,
+.hljs-quote {
+	color: oklch(0.65 0.02 220);
+	font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-addition {
+	color: oklch(0.72 0.18 300);
+}
+.hljs-number,
+.hljs-string,
+.hljs-meta .hljs-meta-string,
+.hljs-literal,
+.hljs-doctag,
+.hljs-regexp {
+	color: oklch(0.78 0.16 145);
+}
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+	color: oklch(0.75 0.18 220);
+}
+.hljs-attribute,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-class .hljs-title,
+.hljs-type {
+	color: oklch(0.82 0.14 55);
+}
+.hljs-symbol,
+.hljs-bullet,
+.hljs-subst,
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-link {
+	color: oklch(0.72 0.18 300);
+}
+.hljs-built_in,
+.hljs-deletion {
+	color: oklch(0.72 0.18 25);
+}
+.hljs-emphasis {
+	font-style: italic;
+}
+.hljs-strong {
+	font-weight: bold;
+}
 
 /* Heading levels in prose editor */
-.prose h2, .prose-stone h2 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-top: 1.5rem; margin-bottom: 0.5rem; }
-.prose h3, .prose-stone h3 { font-size: 20px; font-weight: 700; line-height: 1.3; margin-top: 1.25rem; margin-bottom: 0.5rem; }
-.prose h4, .prose-stone h4 { font-size: 18px; font-weight: 700; line-height: 1.4; margin-top: 1rem; margin-bottom: 0.5rem; }
-.prose h5, .prose-stone h5 { font-size: 16px; font-weight: 700; line-height: 1.4; margin-top: 1rem; margin-bottom: 0.25rem; }
+.prose h2,
+.prose-stone h2 {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.3;
+	margin-top: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+.prose h3,
+.prose-stone h3 {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.3;
+	margin-top: 1.25rem;
+	margin-bottom: 0.5rem;
+}
+.prose h4,
+.prose-stone h4 {
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 1.4;
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+}
+.prose h5,
+.prose-stone h5 {
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.4;
+	margin-top: 1rem;
+	margin-bottom: 0.25rem;
+}
 
 /* TipTap table selected cell */
 .ProseMirror .selectedCell {

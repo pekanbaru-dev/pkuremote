@@ -57,7 +57,7 @@
 		{ label: "Ungu", value: "#9333ea" },
 		{ label: "Pink", value: "#db2777" },
 		{ label: "Abu", value: "#6b7280" },
-		{ label: "Hitam", value: "#111827" },
+		{ label: "Hitam", value: "#111827" }
 	];
 
 	type TipTapEditorProps = {
@@ -124,7 +124,7 @@
 
 		if (mode === "preview" && editorMode === "markdown") {
 			const { marked } = await import("marked");
-			previewHtml = await marked(markdownContent) as string;
+			previewHtml = (await marked(markdownContent)) as string;
 		}
 
 		editorMode = mode;
@@ -133,7 +133,7 @@
 	$effect(() => {
 		if (!mathPreviewEl || !mathFormula.trim()) return;
 		try {
-			const katex = (window as unknown as { katex: typeof import('katex') }).katex;
+			const katex = (window as unknown as { katex: typeof import("katex") }).katex;
 			if (katex) {
 				// eslint-disable-next-line svelte/no-dom-manipulating
 				mathPreviewEl.innerHTML = katex.renderToString(mathFormula, { throwOnError: false });
@@ -202,10 +202,10 @@
 				Link.configure({ openOnClick: false, autolink: true, linkOnPaste: true }),
 				Placeholder.configure({ placeholder }),
 				CodeBlockLowlight.configure({
-				lowlight,
-				enableTabIndentation: true,
-				tabSize: 2,
-			}),
+					lowlight,
+					enableTabIndentation: true,
+					tabSize: 2
+				}),
 				TableKit.configure({ table: { resizable: true } }),
 				TextAlign.configure({ types: ["heading", "paragraph"] }),
 				Mathematics,
@@ -533,7 +533,10 @@
 				{:else}H<ChevronDown class="size-3" />
 				{/if}
 			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="start" class="w-36 shadow-none border border-hairline bg-white rounded-lg">
+			<DropdownMenu.Content
+				align="start"
+				class="w-36 shadow-none border border-hairline bg-white rounded-lg"
+			>
 				<DropdownMenu.Item
 					class="cursor-pointer px-3 py-1.5"
 					onclick={() => run(() => editor?.chain().focus().toggleHeading({ level: 2 }).run())}
@@ -580,7 +583,10 @@
 				{/if}
 				<ChevronDown class="size-3" />
 			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="start" class="w-44 shadow-none border border-hairline bg-white rounded-lg">
+			<DropdownMenu.Content
+				align="start"
+				class="w-44 shadow-none border border-hairline bg-white rounded-lg"
+			>
 				<DropdownMenu.Item
 					class="cursor-pointer px-3 py-1.5 gap-2 text-sm flex items-center"
 					onclick={() => run(() => editor?.chain().focus().toggleBulletList().run())}
@@ -633,7 +639,10 @@
 			variant="ghost"
 			size="icon-sm"
 			type="button"
-			onclick={() => run(() => editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run())}
+			onclick={() =>
+				run(() =>
+					editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+				)}
 			class={btnClass(isActive("table"))}
 			aria-label="Sisipkan tabel"
 			title="Sisipkan tabel"
@@ -650,38 +659,77 @@
 				>
 					Tabel <ChevronDown class="size-3" />
 				</DropdownMenu.Trigger>
-				<DropdownMenu.Content align="start" class="w-48 shadow-none border border-hairline bg-white rounded-lg">
-					<DropdownMenu.Label class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide">Kolom</DropdownMenu.Label>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().addColumnBefore().run())}>
+				<DropdownMenu.Content
+					align="start"
+					class="w-48 shadow-none border border-hairline bg-white rounded-lg"
+				>
+					<DropdownMenu.Label
+						class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide"
+						>Kolom</DropdownMenu.Label
+					>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().addColumnBefore().run())}
+					>
 						Tambah kolom sebelum
 					</DropdownMenu.Item>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().addColumnAfter().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().addColumnAfter().run())}
+					>
 						Tambah kolom sesudah
 					</DropdownMenu.Item>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm text-destructive" onclick={() => run(() => editor?.chain().focus().deleteColumn().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm text-destructive"
+						onclick={() => run(() => editor?.chain().focus().deleteColumn().run())}
+					>
 						Hapus kolom
 					</DropdownMenu.Item>
 					<DropdownMenu.Separator class="bg-hairline" />
-					<DropdownMenu.Label class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide">Baris</DropdownMenu.Label>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().addRowBefore().run())}>
+					<DropdownMenu.Label
+						class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide"
+						>Baris</DropdownMenu.Label
+					>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().addRowBefore().run())}
+					>
 						Tambah baris sebelum
 					</DropdownMenu.Item>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().addRowAfter().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().addRowAfter().run())}
+					>
 						Tambah baris sesudah
 					</DropdownMenu.Item>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm text-destructive" onclick={() => run(() => editor?.chain().focus().deleteRow().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm text-destructive"
+						onclick={() => run(() => editor?.chain().focus().deleteRow().run())}
+					>
 						Hapus baris
 					</DropdownMenu.Item>
 					<DropdownMenu.Separator class="bg-hairline" />
-					<DropdownMenu.Label class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide">Sel</DropdownMenu.Label>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().mergeCells().run())}>
+					<DropdownMenu.Label
+						class="px-3 py-1.5 text-[10px] text-on-surface-variant uppercase tracking-wide"
+						>Sel</DropdownMenu.Label
+					>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().mergeCells().run())}
+					>
 						Gabung sel
 					</DropdownMenu.Item>
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm" onclick={() => run(() => editor?.chain().focus().splitCell().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm"
+						onclick={() => run(() => editor?.chain().focus().splitCell().run())}
+					>
 						Pisah sel
 					</DropdownMenu.Item>
 					<DropdownMenu.Separator class="bg-hairline" />
-					<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 text-sm text-destructive" onclick={() => run(() => editor?.chain().focus().deleteTable().run())}>
+					<DropdownMenu.Item
+						class="cursor-pointer px-3 py-1.5 text-sm text-destructive"
+						onclick={() => run(() => editor?.chain().focus().deleteTable().run())}
+					>
 						Hapus tabel
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
@@ -727,7 +775,9 @@
 			<DropdownMenu.Trigger
 				class={[
 					"inline-flex items-center gap-0.5 h-8 px-2 rounded text-xs font-semibold transition",
-					isActiveWithAttrs("textAlign", { textAlign: "center" }) || isActiveWithAttrs("textAlign", { textAlign: "right" }) || isActiveWithAttrs("textAlign", { textAlign: "justify" })
+					isActiveWithAttrs("textAlign", { textAlign: "center" }) ||
+					isActiveWithAttrs("textAlign", { textAlign: "right" }) ||
+					isActiveWithAttrs("textAlign", { textAlign: "justify" })
 						? "bg-primary/10 text-primary hover:bg-primary/15"
 						: "text-on-surface-variant hover:bg-surface-container-high hover:text-ink"
 				].join(" ")}
@@ -746,17 +796,32 @@
 				{/if}
 				<ChevronDown class="size-3" />
 			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="start" class="w-40 shadow-none border border-hairline bg-white rounded-lg">
-				<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 gap-2 text-sm" onclick={() => run(() => editor?.chain().focus().setTextAlign("left").run())}>
+			<DropdownMenu.Content
+				align="start"
+				class="w-40 shadow-none border border-hairline bg-white rounded-lg"
+			>
+				<DropdownMenu.Item
+					class="cursor-pointer px-3 py-1.5 gap-2 text-sm"
+					onclick={() => run(() => editor?.chain().focus().setTextAlign("left").run())}
+				>
 					<AlignLeft class="size-4 shrink-0" /> Rata kiri
 				</DropdownMenu.Item>
-				<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 gap-2 text-sm" onclick={() => run(() => editor?.chain().focus().setTextAlign("center").run())}>
+				<DropdownMenu.Item
+					class="cursor-pointer px-3 py-1.5 gap-2 text-sm"
+					onclick={() => run(() => editor?.chain().focus().setTextAlign("center").run())}
+				>
 					<AlignCenter class="size-4 shrink-0" /> Rata tengah
 				</DropdownMenu.Item>
-				<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 gap-2 text-sm" onclick={() => run(() => editor?.chain().focus().setTextAlign("right").run())}>
+				<DropdownMenu.Item
+					class="cursor-pointer px-3 py-1.5 gap-2 text-sm"
+					onclick={() => run(() => editor?.chain().focus().setTextAlign("right").run())}
+				>
 					<AlignRight class="size-4 shrink-0" /> Rata kanan
 				</DropdownMenu.Item>
-				<DropdownMenu.Item class="cursor-pointer px-3 py-1.5 gap-2 text-sm" onclick={() => run(() => editor?.chain().focus().setTextAlign("justify").run())}>
+				<DropdownMenu.Item
+					class="cursor-pointer px-3 py-1.5 gap-2 text-sm"
+					onclick={() => run(() => editor?.chain().focus().setTextAlign("justify").run())}
+				>
 					<AlignJustify class="size-4 shrink-0" /> Rata penuh
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
@@ -778,7 +843,10 @@
 				</span>
 				<ChevronDown class="size-3" />
 			</DropdownMenu.Trigger>
-			<DropdownMenu.Content align="start" class="w-44 shadow-none border border-hairline bg-white rounded-lg p-2">
+			<DropdownMenu.Content
+				align="start"
+				class="w-44 shadow-none border border-hairline bg-white rounded-lg p-2"
+			>
 				<div class="grid grid-cols-5 gap-1.5">
 					{#each COLOR_PALETTE as color (color.value)}
 						<Button
@@ -795,11 +863,13 @@
 							}}
 							class={[
 								"h-6 w-6 rounded-full border-2 transition hover:scale-110",
-								color.value === (editor?.getAttributes('textStyle').color || "")
+								color.value === (editor?.getAttributes("textStyle").color || "")
 									? "border-primary"
 									: "border-transparent hover:border-hairline"
 							].join(" ")}
-							style={color.value ? `background: ${color.value}` : "background: linear-gradient(135deg, #fff 45%, #f00 45%)"}
+							style={color.value
+								? `background: ${color.value}`
+								: "background: linear-gradient(135deg, #fff 45%, #f00 45%)"}
 						/>
 					{/each}
 				</div>
@@ -822,27 +892,27 @@
 				Mengunggah gambar…
 			</span>
 		{/if}
-	<!-- Mode toggle — ujung kanan -->
-	<div class="ml-auto flex items-center gap-0.5 border-l border-hairline pl-2">
-		<Button
-			type="button"
-			variant={editorMode === "editor" ? "default" : "ghost"}
-			size="sm"
-			onclick={() => switchMode("editor")}
-			class="text-xs"
-		>
-			Editor
-		</Button>
-		<Button
-			type="button"
-			variant={editorMode === "markdown" ? "default" : "ghost"}
-			size="sm"
-			onclick={() => switchMode("markdown")}
-			class="text-xs"
-		>
-			Markdown
-		</Button>
-	</div>
+		<!-- Mode toggle — ujung kanan -->
+		<div class="ml-auto flex items-center gap-0.5 border-l border-hairline pl-2">
+			<Button
+				type="button"
+				variant={editorMode === "editor" ? "default" : "ghost"}
+				size="sm"
+				onclick={() => switchMode("editor")}
+				class="text-xs"
+			>
+				Editor
+			</Button>
+			<Button
+				type="button"
+				variant={editorMode === "markdown" ? "default" : "ghost"}
+				size="sm"
+				onclick={() => switchMode("markdown")}
+				class="text-xs"
+			>
+				Markdown
+			</Button>
+		</div>
 	</div>
 
 	<!-- Editor host -->
@@ -871,7 +941,9 @@
 
 	<!-- Preview mode -->
 	{#if editorMode === "preview"}
-		<div class="prose prose-stone max-w-none rounded-b-xl border border-hairline bg-white px-4 py-4 min-h-[24rem]">
+		<div
+			class="prose prose-stone max-w-none rounded-b-xl border border-hairline bg-white px-4 py-4 min-h-[24rem]"
+		>
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html previewHtml}
 		</div>
@@ -916,7 +988,7 @@
 			<Dialog.Title>Tambah Tautan</Dialog.Title>
 			<Dialog.Description>Masukkan URL tautan yang ingin ditambahkan.</Dialog.Description>
 		</Dialog.Header>
-			<div class="py-2">
+		<div class="py-2">
 			<Input
 				type="url"
 				bind:value={linkUrl}
@@ -927,16 +999,19 @@
 		</div>
 		<Dialog.Footer class="gap-2 flex-row">
 			{#if isActive("link")}
-				<Button variant="outline" type="button" onclick={removeLinkAndClose} class="text-destructive border-destructive/30 hover:bg-destructive/5">
+				<Button
+					variant="outline"
+					type="button"
+					onclick={removeLinkAndClose}
+					class="text-destructive border-destructive/30 hover:bg-destructive/5"
+				>
 					Hapus tautan
 				</Button>
 			{/if}
 			<Button variant="outline" type="button" onclick={() => (linkDialogOpen = false)}>
 				Batal
 			</Button>
-			<Button type="button" onclick={submitLink}>
-				Simpan
-			</Button>
+			<Button type="button" onclick={submitLink}>Simpan</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
@@ -957,7 +1032,9 @@
 				onkeydown={(e) => e.key === "Enter" && submitMath()}
 			/>
 			{#if mathFormula.trim()}
-				<div class="rounded-lg border border-hairline bg-surface-container-low px-4 py-3 text-center">
+				<div
+					class="rounded-lg border border-hairline bg-surface-container-low px-4 py-3 text-center"
+				>
 					<p class="text-[10px] text-on-surface-variant mb-2 uppercase tracking-wide">Preview</p>
 					<div bind:this={mathPreviewEl} class="text-ink"></div>
 				</div>
@@ -967,9 +1044,7 @@
 			<Button variant="outline" type="button" onclick={() => (mathDialogOpen = false)}>
 				Batal
 			</Button>
-			<Button type="button" onclick={submitMath} disabled={!mathFormula.trim()}>
-				Sisipkan
-			</Button>
+			<Button type="button" onclick={submitMath} disabled={!mathFormula.trim()}>Sisipkan</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
