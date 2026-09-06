@@ -59,6 +59,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # No compose-file sync here on purpose. This workflow is UNGATED, so
+      # syncing would let any push to `staging-test` overwrite the production
+      # server's compose file with an unreviewed version. Only the gated
+      # production deploy is allowed to change it.
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
         with:
