@@ -16,6 +16,12 @@
 services:
   app:
     image: ghcr.io/pekanbaru-dev/pkuremote:${IMAGE_TAG:-latest}
+    # MUST stay `always`. The deploy passes an immutable IMAGE_TAG (sha-<commit>)
+    # the server has never seen, so it has to be fetched. Setting this to `never`
+    # makes `compose pull` report "Skipped" and `up -d` then fail with
+    # "No such image: …:sha-<commit>". The old container keeps serving, so the
+    # site looks healthy and only Actions goes red — see the 2026-08-31 and
+    # 2026-09-05 deploy failures.
     pull_policy: always
     container_name: pkuremote_app
     environment:
@@ -33,6 +39,13 @@ services:
       # Without it the /admin panel fails closed (no admins) in production.
       ADMIN_EMAILS: ${ADMIN_EMAILS}
       UPLOAD_DIR: /data/uploads
+      # Cloudflare R2 media storage. Read at runtime by $lib/server/storage;
+      # without these the admin upload / presigned-URL paths fail in production.
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
     volumes:
       - uploads_data:/data/uploads
     networks:
