@@ -76,6 +76,9 @@ services:
 networks:
   caddy-net:
     external: true
+    # Explicit name matches what `caddyku init-app` writes on the server, so
+    # this file can be shipped over the server's copy without changing it.
+    name: caddy-net
 
 volumes:
   uploads_data:

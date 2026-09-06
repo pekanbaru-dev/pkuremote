@@ -80,6 +80,22 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # Ship the repo's compose file to the server so it cannot drift. It used to
+      # be copied by hand, and a stray `pull_policy: never` edited straight onto
+      # the box broke every deploy from 2026-08-31 to 2026-09-06 while the old
+      # container kept serving, so only Actions went red. Uploaded beside the
+      # live file; the script below swaps it in and keeps a backup.
+      - name: Upload compose file
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: docker-compose.deploy.yml
+          target: ${{ secrets.DEPLOY_DIR }}/.incoming
+          overwrite: true
+
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -91,6 +107,25 @@ jobs:
           script: |
             set -euo pipefail
             cd "${{ secrets.DEPLOY_DIR }}"
+
+            # Adopt the repo's compose file. `.env` is NOT touched — secrets stay
+            # on the server. Any hand-edit on the box is reported and reverted:
+            # the repo is the source of truth for this file.
+            incoming=".incoming/docker-compose.deploy.yml"
+            if [ ! -f "$incoming" ]; then
+              echo "::error::compose file was not uploaded"; exit 1
+            fi
+            if ! cmp -s "$incoming" docker-compose.deploy.yml; then
+              echo "compose file differs from the repo — updating (previous kept as .bak-*):"
+              diff -u docker-compose.deploy.yml "$incoming" || true
+              cp -a docker-compose.deploy.yml "docker-compose.deploy.yml.bak-$(date +%Y%m%d-%H%M%S)"
+              mv "$incoming" docker-compose.deploy.yml
+            else
+              echo "compose file already matches the repo"
+              rm -f "$incoming"
+            fi
+            rmdir .incoming 2>/dev/null || true
+
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
             export IMAGE_TAG='${{ steps.ver.outputs.tag }}'
             docker compose -f docker-compose.deploy.yml pull

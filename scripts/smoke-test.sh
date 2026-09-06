@@ -71,7 +71,7 @@ check "/login with session cookie" 200 "$SITE/login" -H 'Cookie: session=smoke-t
 
 echo "== auth guards =="
 # Guarded route, no session -> redirect to login (302), not 500.
-check "/myprofile redirects" 302 "$SITE/myprofile"
+check "/auth/myprofile redirects" 302 "$SITE/auth/myprofile"
 # Callback with no code/state -> redirect to the login error page, not 500.
 check "/auth/callback guards" 303 "$SITE/auth/callback"
 
