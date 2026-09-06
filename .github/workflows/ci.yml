@@ -60,3 +60,78 @@ jobs:
 
       - name: Production build
         run: pnpm build
+
+  # Applies the migrations to a real, empty Postgres. This is the gate that was
+  # missing: `check`/`lint`/`test`/`build` all pass on a migration that cannot
+  # actually run, because nothing here ever executed the SQL. Migration 0003
+  # shipped to master duplicating columns 0002 had already added and failed with
+  # `column "category_id" of relation "posts" already exists` on every database
+  # — fresh or existing — blocking all deploys until it was found by hand.
+  migrations:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Catches journal/snapshot inconsistencies and colliding migration entries.
+      - name: Validate migration journal
+        run: pnpm exec drizzle-kit check
+
+      # The core check: every migration must apply, in order, to an empty database.
+      - name: Apply all migrations to an empty database
+        run: pnpm db:migrate
+
+      # A second run must be a clean no-op. Catches a migration that is recorded
+      # but not idempotent, which would break any re-run or partial deploy.
+      - name: Re-run migrations (must be a no-op)
+        run: pnpm db:migrate
+
+      # The seed is the only automated consumer of the resulting schema, so it
+      # doubles as a smoke test that the migrated schema matches db/schema/*.ts.
+      - name: Seed the migrated database
+        run: pnpm db:seed
+
+      # Drizzle must consider the schema fully expressed by the migrations. If
+      # this emits a new migration, someone changed db/schema/*.ts without
+      # running `pnpm db:generate` — the drift that produced the 0003 breakage.
+      - name: No un-generated schema changes
+        run: |
+          before=$(ls db/migrations/*.sql | wc -l)
+          pnpm db:generate
+          after=$(ls db/migrations/*.sql | wc -l)
+          if [ "$before" -ne "$after" ]; then
+            echo "::error::db/schema/*.ts has changes with no migration. Run 'pnpm db:generate' and commit the result."
+            git --no-pager diff --stat
+            exit 1
+          fi
+          echo "schema and migrations agree ($after migrations)"
