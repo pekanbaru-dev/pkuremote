@@ -129,6 +129,11 @@ jobs:
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
             export IMAGE_TAG='${{ steps.ver.outputs.tag }}'
             docker compose -f docker-compose.deploy.yml pull
+            # Apply the new image's migrations before replacing the live app.
+            # If this fails, set -e keeps the old app serving instead of
+            # shipping code against an older schema.
+            docker compose -f docker-compose.deploy.yml up -d --wait postgres
+            docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
             docker compose -f docker-compose.deploy.yml up -d --remove-orphans
             docker image prune -f
         env:

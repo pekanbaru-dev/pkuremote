@@ -56,6 +56,20 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # One-shot service used by the deploy workflow. It is profile-gated so a
+  # normal `docker compose up` never starts a second long-lived app process.
+  migrate:
+    profiles: ["migrations"]
+    image: ghcr.io/pekanbaru-dev/pkuremote:${IMAGE_TAG:-latest}
+    command: ["node", "scripts/migrate-runtime.mjs"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    networks:
+      - default
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   postgres:
     image: postgres:16
     environment:

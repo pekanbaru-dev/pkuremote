@@ -77,6 +77,10 @@ jobs:
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
             export IMAGE_TAG='staging'
             docker compose -f docker-compose.deploy.yml pull
+            # Keep the currently running app in place until the new image's
+            # migrations have completed successfully.
+            docker compose -f docker-compose.deploy.yml up -d --wait postgres
+            docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
             docker compose -f docker-compose.deploy.yml up -d --remove-orphans
             docker image prune -f
         env:

@@ -50,6 +50,8 @@ ENV HOST=0.0.0.0 \
 COPY --from=build /app/build ./build
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/db/migrations ./db/migrations
+COPY --from=build /app/scripts/migrate-runtime.mjs ./scripts/migrate-runtime.mjs
 
 # Create the uploads dir owned by `node` BEFORE dropping privileges, so the
 # named volume mounted here (see docker-compose.prod.yml) initializes with

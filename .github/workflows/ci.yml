@@ -111,6 +111,10 @@ jobs:
       - name: Apply all migrations to an empty database
         run: pnpm db:migrate
 
+      # Exercise the same lightweight runner that the production image uses.
+      - name: Verify the runtime migration runner
+        run: MIGRATIONS_FOLDER=db/migrations node scripts/migrate-runtime.mjs
+
       # A second run must be a clean no-op. Catches a migration that is recorded
       # but not idempotent, which would break any re-run or partial deploy.
       - name: Re-run migrations (must be a no-op)
