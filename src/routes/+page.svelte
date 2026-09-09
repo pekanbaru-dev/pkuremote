@@ -10,6 +10,7 @@
 		PartnersCta
 	} from "$lib/features/landing";
 	import SiteFooter from "$lib/components/site-footer.svelte";
+	import { WfcSection } from "$lib/features/wfc";
 	import type { PageData } from "./$types.js";
 
 	let { data }: { data: PageData } = $props();
@@ -36,6 +37,7 @@
 	<EventsSection events={data.events} pastEventsTotal={data.pastEventsTotal} {showToast} />
 	<CommunitiesSection {showToast} />
 	<ArticlesSection articles={data.articles} />
+	<WfcSection cafes={data.cafes} />
 	<PartnersCta {showToast} />
 </main>
 

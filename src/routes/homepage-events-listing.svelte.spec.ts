@@ -30,7 +30,8 @@ describe("homepage Lihat semua reveal", () => {
 				pastEvents: makeEvents(3),
 				pastEventsTotal: 3,
 				user: null,
-				articles: []
+				articles: [],
+				cafes: []
 			}
 		});
 
@@ -47,7 +48,8 @@ describe("homepage Lihat semua reveal", () => {
 				pastEvents: makeEvents(6),
 				pastEventsTotal: 7,
 				user: null,
-				articles: []
+				articles: [],
+				cafes: []
 			}
 		});
 
