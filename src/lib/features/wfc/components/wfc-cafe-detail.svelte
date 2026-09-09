@@ -25,7 +25,7 @@
 </script>
 
 <SiteHeader variant="light" />
-<main id="top" class="mx-auto w-full max-w-[1180px] px-3 pb-16 pt-6 md:px-4">
+<main id="top" class="mx-auto w-full max-w-[1180px] px-3 pb-16 pt-6 tablet:px-4">
 	<a
 		href="/wfc#top"
 		class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-primary"
@@ -74,7 +74,7 @@
 	<div class="mt-5 grid gap-5 desktop:grid-cols-[1.15fr_.85fr]">
 		<div class="grid gap-5">
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<div class="flex items-start justify-between gap-3">
 					<div>
@@ -89,7 +89,7 @@
 					>
 				</div>
 				<div class="mt-5 grid gap-3">
-					{#each [["WiFi", 96], ["Suasana", 91], ["Colokan", 94], ["Kenyamanan", 89], ["Ruang", 84], ["Ramah WFC", 95]] as [label, value] (label)}<div
+					{#each cafe.scoreDetails as [label, value] (label)}<div
 							class="grid grid-cols-[6rem_1fr_2rem] items-center gap-2 text-xs text-muted"
 						>
 							<span>{label}</span>
@@ -104,7 +104,7 @@
 						>{cafe.liveNote}</small
 					>
 				</div>
-				<div class="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+				<div class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-4">
 					{#each [["Kecepatan WiFi", cafe.wifi], ["Colokan", cafe.outlets], ["Suasana", cafe.atmosphere], ["Durasi nyaman", cafe.duration]] as [label, value] (label)}<div
 							class="rounded-xl bg-surface-container-low p-3"
 						>
@@ -115,13 +115,13 @@
 				</div>
 			</section>
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<h2 class="font-display text-headline-sm font-bold text-ink">Jam terbaik untuk kerja</h2>
 				<p class="mt-1 text-sm text-muted">Berdasarkan pola keramaian dari check-in terakhir.</p>
 				<div class="mt-4 grid grid-cols-4 gap-2 desktop:grid-cols-7">
-					{#each cafe.bestHours as [time, status], index (time)}<div
-							class:!bg-primary-container={index < 3}
+					{#each cafe.bestHours as [time, status] (time)}<div
+							class:!bg-primary-container={status.toLowerCase().includes("sepi")}
 							class="rounded-xl bg-surface-container-low p-2 text-center"
 						>
 							<span class="block text-[11px] text-muted">{time}</span><strong
@@ -131,7 +131,7 @@
 				</div>
 			</section>
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<h2 class="font-display text-headline-sm font-bold text-ink">Kata mereka</h2>
 				<p class="mt-1 text-sm text-muted">Ulasan yang fokus pada kondisi untuk bekerja.</p>
@@ -149,7 +149,7 @@
 		</div>
 		<div class="grid content-start gap-5">
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<h2 class="font-display text-headline-sm font-bold text-ink">Setup kerja</h2>
 				<p class="mt-1 text-sm text-muted">Hal yang bisa kamu harapkan saat sampai.</p>
@@ -164,7 +164,7 @@
 				</div>
 			</section>
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<h2 class="font-display text-headline-sm font-bold text-ink">Kebijakan WFC</h2>
 				<p class="mt-1 text-sm text-muted">Hal praktis sebelum buka laptop.</p>
@@ -179,7 +179,7 @@
 				</div>
 			</section>
 			<section
-				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm md:p-6"
+				class="rounded-2xl border border-hairline bg-surface-container-lowest p-5 shadow-sm tablet:p-6"
 			>
 				<h2 class="font-display text-headline-sm font-bold text-ink">Lokasi</h2>
 				<p class="mt-1 flex items-start gap-1 text-sm leading-6 text-muted">

@@ -150,7 +150,12 @@ async function seedContent(): Promise<void> {
 				.values(cafe)
 				.onConflictDoUpdate({
 					target: cafes.slug,
-					set: { tags: cafe.tags, wfcCategory: cafe.wfcCategory, updatedAt: new Date() }
+					set: {
+						tags: cafe.tags,
+						wfcCategory: cafe.wfcCategory,
+						scoreDetails: cafe.scoreDetails,
+						updatedAt: new Date()
+					}
 				});
 		}
 	}

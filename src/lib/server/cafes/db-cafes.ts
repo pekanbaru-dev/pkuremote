@@ -20,11 +20,13 @@ function toCafe(row: CafeRow): Cafe {
 }
 
 export async function getPublishedCafes(): Promise<Cafe[]> {
+	const tagFilter = sql`${cafes.tags} @> ${JSON.stringify(["Nongkrong"])}::jsonb`;
 	const rows = await db
 		.select()
 		.from(cafes)
-		.where(eq(cafes.published, true))
-		.orderBy(desc(cafes.score));
+		.where(and(eq(cafes.published, true), tagFilter))
+		.orderBy(desc(cafes.score))
+		.limit(4);
 	return rows.map(toCafe);
 }
 
@@ -52,7 +54,12 @@ export async function searchPublishedCafes(
 				ilike(cafes.tagline, `%${keyword}%`),
 				ilike(cafes.fit, `%${keyword}%`),
 				ilike(cafes.address, `%${keyword}%`),
-				sql`${cafes.tags}::text ILIKE ${`%${keyword}%`}`
+				ilike(cafes.wifi, `%${keyword}%`),
+				ilike(cafes.outlets, `%${keyword}%`),
+				ilike(cafes.atmosphere, `%${keyword}%`),
+				ilike(cafes.duration, `%${keyword}%`),
+				sql`${cafes.tags}::text ILIKE ${`%${keyword}%`}`,
+				sql`${cafes.amenities}::text ILIKE ${`%${keyword}%`}`
 			)
 		: undefined;
 	const baseWhere = categoryFilter
@@ -132,6 +139,7 @@ export function parseCafeFormData(formData: FormData): {
 	input: CafeWriteInput;
 	values: Record<string, string>;
 } {
+	const published = formData.get("published");
 	const text = (name: string) => String(formData.get(name) ?? "").trim();
 	const lines = (name: string) =>
 		text(name)
@@ -149,6 +157,25 @@ export function parseCafeFormData(formData: FormData): {
 			}
 			return [parts[0], parts[1]];
 		});
+	const scoreDetails = (): [string, number][] =>
+		lines("scoreDetails").map((line) => {
+			const parts = line.split("|").map((part) => part.trim());
+			const score = Number(parts[1]);
+			if (
+				parts.length !== 2 ||
+				!parts[0] ||
+				!parts[1] ||
+				!Number.isInteger(score) ||
+				score < 0 ||
+				score > 100
+			) {
+				throw new CafeWriteError(
+					'scoreDetails: gunakan format "label | skor 0-100".',
+					"scoreDetails"
+				);
+			}
+			return [parts[0], score];
+		});
 	const policies = (): [string, string, "ok" | "warn"][] =>
 		lines("policies").map((line) => {
 			const parts = line.split("|").map((part) => part.trim());
@@ -164,7 +191,7 @@ export function parseCafeFormData(formData: FormData): {
 		lines("reviews").map((line) => {
 			const parts = line.split("|").map((part) => part.trim());
 			if (parts.length !== 3 || parts.some((part) => !part)) {
-				throw new CafeWriteError('reviews: gunakan format "nama | kutipan | peran".', "reviews");
+				throw new CafeWriteError('reviews: gunakan format "nama | tanggal | kutipan".', "reviews");
 			}
 			return [parts[0], parts[1], parts[2]];
 		});
@@ -192,9 +219,10 @@ export function parseCafeFormData(formData: FormData): {
 		tags: lines("tags"),
 		bestHours: pairs("bestHours"),
 		amenities: pairs("amenities"),
+		scoreDetails: scoreDetails(),
 		policies: policies(),
 		reviews: reviews(),
-		published: formData.get("published") === "on"
+		published: published === "on" || published === "true"
 	};
 	return { input, values: Object.fromEntries(formData.entries()) as Record<string, string> };
 }
@@ -232,12 +260,17 @@ function validateCafeInput(input: CafeWriteInput): void {
 	}
 	if (
 		!Array.isArray(input.tags) ||
+		!input.tags.includes("Nongkrong") ||
 		!Array.isArray(input.bestHours) ||
 		!Array.isArray(input.amenities) ||
 		!Array.isArray(input.policies) ||
-		!Array.isArray(input.reviews)
+		!Array.isArray(input.reviews) ||
+		!Array.isArray(input.scoreDetails)
 	) {
-		throw new CafeWriteError("Data detail kafe harus berupa array.");
+		throw new CafeWriteError(
+			"Kafe WFC harus memiliki tag Nongkrong dan data detail berbentuk array.",
+			"tags"
+		);
 	}
 }
 

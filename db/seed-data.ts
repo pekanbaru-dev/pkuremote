@@ -251,6 +251,14 @@ export const CAFES = [
 		slug: "monochrome-coffee",
 		name: "Monochrome Coffee",
 		score: 92,
+		scoreDetails: [
+			["WiFi", 85],
+			["Suasana", 90],
+			["Colokan", 88],
+			["Kenyamanan", 92],
+			["Ruang", 84],
+			["Ramah WFC", 91]
+		],
 		occupancy: "32% terisi",
 		distance: "1,2 km",
 		price: "Rp25–50k",
@@ -311,6 +319,14 @@ export const CAFES = [
 		slug: "kopi-titik-temu",
 		name: "Kopi Titik Temu",
 		score: 88,
+		scoreDetails: [
+			["WiFi", 72],
+			["Suasana", 82],
+			["Colokan", 78],
+			["Kenyamanan", 86],
+			["Ruang", 88],
+			["Ramah WFC", 84]
+		],
 		occupancy: "48% terisi",
 		distance: "2,1 km",
 		price: "Rp20–45k",
@@ -367,6 +383,14 @@ export const CAFES = [
 		slug: "ruang-kopi",
 		name: "Ruang Kopi",
 		score: 86,
+		scoreDetails: [
+			["WiFi", 96],
+			["Suasana", 95],
+			["Colokan", 94],
+			["Kenyamanan", 91],
+			["Ruang", 89],
+			["Ramah WFC", 95]
+		],
 		occupancy: "25% terisi",
 		distance: "2,8 km",
 		price: "Rp30–60k",
@@ -427,6 +451,14 @@ export const CAFES = [
 		slug: "nook-workspace",
 		name: "Nook Workspace",
 		score: 83,
+		scoreDetails: [
+			["WiFi", 98],
+			["Suasana", 88],
+			["Colokan", 96],
+			["Kenyamanan", 86],
+			["Ruang", 80],
+			["Ramah WFC", 90]
+		],
 		occupancy: "61% terisi",
 		distance: "3,4 km",
 		price: "Rp40–70k",

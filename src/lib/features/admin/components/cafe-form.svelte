@@ -29,7 +29,7 @@
 	const value = (name: string, fallback = "") => values?.[name] ?? fallback;
 	const linesValue = (name: string, fallback: readonly string[]) =>
 		value(name, fallback.join("\n"));
-	const pairsValue = (name: string, fallback: readonly (readonly string[])[]) =>
+	const pairsValue = (name: string, fallback: readonly (readonly (string | number)[])[]) =>
 		value(name, fallback.map((parts) => parts.join(" | ")).join("\n"));
 	let wfcCategory = $state(
 		untrack(() => value("wfcCategory", cafe?.wfcCategory ?? "wfc-friendly"))
@@ -37,7 +37,9 @@
 	const wfcCategoryLabel = $derived(
 		WFC_CATEGORY_OPTIONS.find((option) => option.value === wfcCategory)?.label ?? "Pilih kategori"
 	);
-	const published = $derived(values ? values.published === "on" : (cafe?.published ?? true));
+	const published = $derived(
+		values ? values.published === "on" || values.published === "true" : (cafe?.published ?? true)
+	);
 </script>
 
 <form method="POST" class="space-y-8">
@@ -165,8 +167,21 @@
 	<section class="grid gap-5 desktop:grid-cols-2">
 		<label class="space-y-2 text-sm font-semibold text-ink">
 			<span>Tags</span>
-			<small class="block font-normal text-on-surface-variant">Satu tag per baris.</small>
+			<small class="block font-normal text-on-surface-variant"
+				>Satu tag per baris. Wajib sertakan tag Nongkrong.</small
+			>
 			<Textarea name="tags" rows={8} value={linesValue("tags", cafe?.tags ?? [])} />
+		</label>
+		<label class="space-y-2 text-sm font-semibold text-ink">
+			<span>Skor detail</span>
+			<small class="block font-normal text-on-surface-variant"
+				>Satu baris: label | skor 0-100.</small
+			>
+			<Textarea
+				name="scoreDetails"
+				rows={8}
+				value={pairsValue("scoreDetails", cafe?.scoreDetails ?? [])}
+			/>
 		</label>
 		<label class="space-y-2 text-sm font-semibold text-ink">
 			<span>Jam terbaik</span>
@@ -188,7 +203,7 @@
 		<label class="space-y-2 text-sm font-semibold text-ink desktop:col-span-2">
 			<span>Review</span>
 			<small class="block font-normal text-on-surface-variant"
-				>Satu baris: nama | kutipan | peran.</small
+				>Satu baris: nama | tanggal | kutipan.</small
 			>
 			<Textarea name="reviews" rows={8} value={pairsValue("reviews", cafe?.reviews ?? [])} />
 		</label>

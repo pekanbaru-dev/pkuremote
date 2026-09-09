@@ -16,6 +16,7 @@ export type CafeBestHour = [string, string];
 export type CafeAmenity = [string, string];
 export type CafePolicy = [string, string, "ok" | "warn"];
 export type CafeReview = [string, string, string];
+export type CafeScoreDetail = [string, number];
 
 export const cafes = pgTable(
 	"cafes",
@@ -48,6 +49,7 @@ export const cafes = pgTable(
 		amenities: jsonb("amenities").$type<CafeAmenity[]>().notNull().default([]),
 		policies: jsonb("policies").$type<CafePolicy[]>().notNull().default([]),
 		reviews: jsonb("reviews").$type<CafeReview[]>().notNull().default([]),
+		scoreDetails: jsonb("score_details").$type<CafeScoreDetail[]>().notNull().default([]),
 		published: boolean("published").notNull().default(true),
 		createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()

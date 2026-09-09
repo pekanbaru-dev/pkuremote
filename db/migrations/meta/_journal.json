@@ -43,6 +43,13 @@
 			"when": 1788942359337,
 			"tag": "0005_daffy_blob",
 			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1788945028313,
+			"tag": "0006_normal_doctor_strange",
+			"breakpoints": true
 		}
 	]
 }

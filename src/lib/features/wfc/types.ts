@@ -3,6 +3,7 @@ export type CafeBestHour = readonly [string, string];
 export type CafeAmenity = readonly [string, string];
 export type CafePolicy = readonly [string, string, "ok" | "warn"];
 export type CafeReview = readonly [string, string, string];
+export type CafeScoreDetail = readonly [string, number];
 
 export type Cafe = {
 	id: string;
@@ -31,6 +32,7 @@ export type Cafe = {
 	amenities: CafeAmenity[];
 	policies: CafePolicy[];
 	reviews: CafeReview[];
+	scoreDetails: CafeScoreDetail[];
 	published: boolean;
 	createdAt: string;
 	updatedAt: string;
