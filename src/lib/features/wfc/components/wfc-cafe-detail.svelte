@@ -8,6 +8,7 @@
 	import MapPin from "@lucide/svelte/icons/map-pin";
 	import Navigation from "@lucide/svelte/icons/navigation";
 	import type { Cafe } from "../types.js";
+	import { getWfcCategory } from "../category.js";
 
 	let { cafe: cafeProp }: { cafe: Cafe } = $props();
 	let cafe = $derived(cafeProp);
@@ -46,7 +47,10 @@
 		>
 			<div>
 				<h1 class="font-display text-display-sm font-extrabold tracking-tight">{cafe.name}</h1>
-				<p class="mt-2 text-sm text-white/85">
+				<p class="mt-1 text-sm font-semibold text-white/90">
+					{getWfcCategory(cafe.wfcCategory).label} · {cafe.tagline}
+				</p>
+				<p class="mt-1 text-sm text-white/85">
 					Pekanbaru · {cafe.distance} · {cafe.price} · {cafe.closing}
 				</p>
 			</div>

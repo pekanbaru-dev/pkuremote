@@ -1,11 +1,13 @@
 import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
 import { cafes, type CafeRow, type NewCafeRow } from "../../../../db/schema";
+import { isWfcCategory, type WfcCategory } from "../../features/wfc/category.js";
 import type { Cafe } from "../../features/wfc/types.ts";
 
 function toCafe(row: CafeRow): Cafe {
 	return {
 		...row,
+		wfcCategory: row.wfcCategory as WfcCategory,
 		imageUrl: row.imageUrl ?? null,
 		tags: row.tags ?? [],
 		bestHours: row.bestHours ?? [],
@@ -35,6 +37,7 @@ export type CafeSearchResult = {
 
 export async function searchPublishedCafes(
 	query: string,
+	category: WfcCategory | "" = "",
 	page = 1,
 	pageSize = 3
 ): Promise<CafeSearchResult> {
@@ -42,6 +45,7 @@ export async function searchPublishedCafes(
 	const normalizedSize = Math.min(24, Math.max(1, Math.floor(pageSize)));
 	const keyword = query.trim();
 	const tagFilter = sql`${cafes.tags} @> ${JSON.stringify(["Nongkrong"])}::jsonb`;
+	const categoryFilter = isWfcCategory(category) ? eq(cafes.wfcCategory, category) : undefined;
 	const keywordFilter = keyword
 		? or(
 				ilike(cafes.name, `%${keyword}%`),
@@ -51,9 +55,10 @@ export async function searchPublishedCafes(
 				sql`${cafes.tags}::text ILIKE ${`%${keyword}%`}`
 			)
 		: undefined;
-	const where = keywordFilter
-		? and(eq(cafes.published, true), tagFilter, keywordFilter)
+	const baseWhere = categoryFilter
+		? and(eq(cafes.published, true), tagFilter, categoryFilter)
 		: and(eq(cafes.published, true), tagFilter);
+	const where = keywordFilter ? and(baseWhere, keywordFilter) : baseWhere;
 	const [rows, [{ total }]] = await Promise.all([
 		db
 			.select()
@@ -172,6 +177,7 @@ export function parseCafeFormData(formData: FormData): {
 		price: text("price"),
 		closing: text("closing"),
 		fit: text("fit"),
+		wfcCategory: text("wfcCategory") as WfcCategory,
 		imageUrl: text("imageUrl") || null,
 		address: text("address"),
 		latitude: Number(text("latitude")),
@@ -195,6 +201,9 @@ export function parseCafeFormData(formData: FormData): {
 
 function validateCafeInput(input: CafeWriteInput): void {
 	if (!input.name) throw new CafeWriteError("Nama kafe wajib diisi.", "name");
+	if (!isWfcCategory(input.wfcCategory)) {
+		throw new CafeWriteError("Pilih salah satu kategori WFC.", "wfcCategory");
+	}
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug)) {
 		throw new CafeWriteError("Slug hanya boleh huruf kecil, angka, dan tanda hubung.", "slug");
 	}

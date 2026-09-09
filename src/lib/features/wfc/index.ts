@@ -4,5 +4,12 @@
  * Consumers SHALL import only from `$lib/features/wfc`.
  */
 export type { Cafe, CafeAmenity, CafeBestHour, CafePolicy, CafeReview } from "./types.js";
+export {
+	WFC_CATEGORY_OPTIONS,
+	WFC_CATEGORY_VALUES,
+	getWfcCategory,
+	isWfcCategory,
+	type WfcCategory
+} from "./category.js";
 export { default as WfcSection } from "./components/wfc-section.svelte";
 export { default as WfcCafeDetail } from "./components/wfc-cafe-detail.svelte";

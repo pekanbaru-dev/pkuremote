@@ -1,3 +1,4 @@
+import type { WfcCategory } from "./category.js";
 export type CafeBestHour = readonly [string, string];
 export type CafeAmenity = readonly [string, string];
 export type CafePolicy = readonly [string, string, "ok" | "warn"];
@@ -14,6 +15,7 @@ export type Cafe = {
 	closing: string;
 	fit: string;
 	imageUrl: string | null;
+	wfcCategory: WfcCategory;
 	address: string;
 	latitude: number;
 	longitude: number;

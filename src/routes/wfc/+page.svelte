@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Button } from "$lib/components/primitives";
+	import * as Select from "$lib/components/ui/select";
 	import { Input } from "$lib/components/ui/input";
 	import SiteFooter from "$lib/components/site-footer.svelte";
 	import SiteHeader from "$lib/components/site-header.svelte";
+	import { WFC_CATEGORY_OPTIONS, getWfcCategory, type WfcCategory } from "$lib/features/wfc";
 	import ArrowLeft from "@lucide/svelte/icons/arrow-left";
 	import ArrowRight from "@lucide/svelte/icons/arrow-right";
 	import Search from "@lucide/svelte/icons/search";
@@ -10,8 +12,15 @@
 
 	let { data }: { data: PageData } = $props();
 	const totalPages = $derived(Math.ceil(data.total / data.pageSize));
+	const categoryLabel = $derived(
+		data.category ? getWfcCategory(data.category as WfcCategory).label : "Semua kategori"
+	);
 	const pageHref = (page: number) =>
-		`/wfc?${new URLSearchParams({ ...(data.query ? { q: data.query } : {}), page: String(page) })}`;
+		`/wfc?${new URLSearchParams({
+			...(data.query ? { q: data.query } : {}),
+			...(data.category ? { category: data.category } : {}),
+			page: String(page)
+		})}`;
 </script>
 
 <svelte:head>
@@ -58,6 +67,17 @@
 				aria-label="Kata kunci WFC"
 			/>
 		</div>
+		<div class="tablet:w-64">
+			<Select.Root type="single" name="category" value={data.category}>
+				<Select.Trigger class="w-full">{categoryLabel}</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="" label="Semua kategori" />
+					{#each WFC_CATEGORY_OPTIONS as option (option.value)}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
 		<Button type="submit" intent="primary"><Search size={16} />Cari tempat</Button>
 	</form>
 
@@ -98,6 +118,11 @@
 						<h3 class="font-display text-xl font-bold text-ink">{cafe.name}</h3>
 						<p class="mt-1 text-xs text-muted">{cafe.distance} · {cafe.price} · {cafe.closing}</p>
 						<p class="mt-3 text-sm text-ink">{cafe.fit}</p>
+						<span
+							class="mt-3 inline-flex rounded-full bg-primary-container/40 px-2.5 py-1 text-xs font-bold text-on-primary-container"
+						>
+							{getWfcCategory(cafe.wfcCategory).label}
+						</span>
 						<div class="mt-3 flex flex-wrap gap-1.5">
 							{#each cafe.tags as tag (tag)}<span
 									class="rounded-md bg-surface-container-low px-2 py-1 text-[11px] text-muted"

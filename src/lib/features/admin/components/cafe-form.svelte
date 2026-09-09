@@ -1,6 +1,5 @@
 <script lang="ts" module>
 	import type { Cafe } from "$lib/features/wfc";
-
 	export type CafeFormValues = Record<string, string>;
 
 	export type CafeFormProps = {
@@ -12,10 +11,13 @@
 </script>
 
 <script lang="ts">
+	import { untrack } from "svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea";
+	import * as Select from "$lib/components/ui/select";
 	import { Checkbox } from "$lib/components/primitives";
+	import { WFC_CATEGORY_OPTIONS } from "$lib/features/wfc";
 
 	let {
 		cafe,
@@ -29,6 +31,12 @@
 		value(name, fallback.join("\n"));
 	const pairsValue = (name: string, fallback: readonly (readonly string[])[]) =>
 		value(name, fallback.map((parts) => parts.join(" | ")).join("\n"));
+	let wfcCategory = $state(
+		untrack(() => value("wfcCategory", cafe?.wfcCategory ?? "wfc-friendly"))
+	);
+	const wfcCategoryLabel = $derived(
+		WFC_CATEGORY_OPTIONS.find((option) => option.value === wfcCategory)?.label ?? "Pilih kategori"
+	);
 	const published = $derived(values ? values.published === "on" : (cafe?.published ?? true));
 </script>
 
@@ -137,6 +145,20 @@
 		<label class="space-y-2 text-sm font-semibold text-ink desktop:col-span-2">
 			<span>Kesesuaian</span>
 			<Textarea name="fit" required rows={3} value={value("fit", cafe?.fit)} />
+		</label>
+		<label class="space-y-2 text-sm font-semibold text-ink desktop:col-span-2">
+			<span>Kategori WFC</span>
+			<Select.Root type="single" name="wfcCategory" bind:value={wfcCategory}>
+				<Select.Trigger class="w-full">{wfcCategoryLabel}</Select.Trigger>
+				<Select.Content>
+					{#each WFC_CATEGORY_OPTIONS as option (option.value)}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+			<small class="block font-normal text-on-surface-variant">
+				{WFC_CATEGORY_OPTIONS.find((option) => option.value === wfcCategory)?.description}
+			</small>
 		</label>
 	</section>
 
