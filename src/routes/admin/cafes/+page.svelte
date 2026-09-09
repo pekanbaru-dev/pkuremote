@@ -60,7 +60,9 @@
 							>
 							<Table.Cell class="py-3.5">
 								<div class="flex justify-end gap-1.5">
-									<Button href="/wfc/cafe/{cafe.slug}" variant="ghost" size="sm">Lihat</Button>
+									{#if cafe.published}
+										<Button href="/wfc/cafe/{cafe.slug}" variant="ghost" size="sm">Lihat</Button>
+									{/if}
 									<Button href="/admin/cafes/{cafe.id}/edit" variant="ghost" size="sm">Ubah</Button>
 									<Button
 										variant="ghost"

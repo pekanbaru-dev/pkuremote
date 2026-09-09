@@ -32,7 +32,7 @@
 </svelte:head>
 
 <SiteHeader variant="light" />
-<main id="top" class="mx-auto w-full max-w-[1180px] px-3 pb-16 pt-10 md:px-4">
+<main id="top" class="mx-auto w-full max-w-[1180px] px-3 pb-16 pt-10 tablet:px-4">
 	<a
 		href="/#wfc"
 		class="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-muted hover:text-primary"
@@ -98,7 +98,7 @@
 			</p>
 		</div>
 	{:else}
-		<div class="mt-6 grid gap-4 md:grid-cols-2 desktop:grid-cols-3">
+		<div class="mt-6 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
 			{#each data.items as cafe (cafe.id)}
 				<article
 					class="overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest shadow-sm"

@@ -1,0 +1,1 @@
+ALTER TABLE "cafes" ADD COLUMN "score_details" jsonb DEFAULT '[]'::jsonb NOT NULL;

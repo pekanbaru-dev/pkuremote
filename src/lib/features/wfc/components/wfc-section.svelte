@@ -14,9 +14,9 @@
 	const visibleCafes = $derived(cafes.slice(1, 4));
 </script>
 
-<section id="wfc" class="mx-auto mt-16 w-full max-w-[1180px] px-3 md:px-4">
+<section id="wfc" class="mx-auto mt-16 w-full max-w-[1180px] px-3 tablet:px-4">
 	<div
-		class="flex flex-col justify-between gap-4 border-b border-hairline pb-5 md:flex-row md:items-end"
+		class="flex flex-col justify-between gap-4 border-b border-hairline pb-5 tablet:flex-row tablet:items-end"
 	>
 		<div>
 			<p class="label-meta text-primary">Work From Cafe</p>
@@ -61,7 +61,7 @@
 					</p>
 				</div>
 			</a>
-			<div class="flex flex-col p-5 md:p-7">
+			<div class="flex flex-col p-5 tablet:p-7">
 				<div class="flex items-start justify-between gap-3">
 					<div>
 						<div class="font-display text-display-sm font-extrabold leading-none text-ink">
@@ -133,7 +133,7 @@
 		</div>
 		<span class="text-xs text-muted">{visibleCafes.length} tempat</span>
 	</div>
-	<div class="mt-4 grid gap-4 md:grid-cols-2 desktop:grid-cols-3">
+	<div class="mt-4 grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
 		{#each visibleCafes as cafe (cafe.id)}
 			<article
 				class="overflow-hidden rounded-2xl border border-hairline bg-surface-container-lowest shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
