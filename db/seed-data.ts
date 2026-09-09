@@ -256,6 +256,7 @@ export const CAFES = [
 		price: "Rp25–50k",
 		closing: "Buka sampai 22.00",
 		fit: "fokus lama",
+		wfcCategory: "wfc-friendly",
 		imageUrl:
 			"https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85",
 		address: "Jl. Contoh No. 24, Pekanbaru",
@@ -315,6 +316,7 @@ export const CAFES = [
 		price: "Rp20–45k",
 		closing: "Buka sampai 23.00",
 		fit: "meeting santai",
+		wfcCategory: "meetup-friendly",
 		imageUrl:
 			"https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=900&q=80",
 		address: "Jl. Ahmad Yani No. 18, Pekanbaru",
@@ -370,6 +372,7 @@ export const CAFES = [
 		price: "Rp30–60k",
 		closing: "Buka sampai 21.30",
 		fit: "fokus lama",
+		wfcCategory: "wfc-friendly",
 		imageUrl:
 			"https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=80",
 		address: "Jl. Tuanku Tambusai No. 7, Pekanbaru",
@@ -429,6 +432,7 @@ export const CAFES = [
 		price: "Rp40–70k",
 		closing: "Buka sampai 00.00",
 		fit: "kerja malam",
+		wfcCategory: "quick-visit",
 		imageUrl:
 			"https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=900&q=80",
 		address: "Jl. Soekarno Hatta No. 52, Pekanbaru",

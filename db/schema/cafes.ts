@@ -31,6 +31,7 @@ export const cafes = pgTable(
 		price: text("price").notNull(),
 		closing: text("closing").notNull(),
 		fit: text("fit").notNull(),
+		wfcCategory: text("wfc_category").notNull().default("wfc-friendly"),
 		imageUrl: text("image_url"),
 		address: text("address").notNull(),
 		latitude: doublePrecision("latitude").notNull(),
@@ -53,7 +54,11 @@ export const cafes = pgTable(
 	},
 	(table) => ({
 		slugIdx: index("cafes_slug_idx").on(table.slug),
-		scoreCheck: check("cafes_score_check", sql`${table.score} BETWEEN 0 AND 100`)
+		scoreCheck: check("cafes_score_check", sql`${table.score} BETWEEN 0 AND 100`),
+		categoryCheck: check(
+			"cafes_category_check",
+			sql`${table.wfcCategory} IN ('wfc-friendly', 'meetup-friendly', 'quick-visit')`
+		)
 	})
 );
 

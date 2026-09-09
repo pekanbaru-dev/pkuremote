@@ -4,6 +4,7 @@
 	import ArrowRight from "@lucide/svelte/icons/arrow-right";
 	import Heart from "@lucide/svelte/icons/heart";
 	import MapPin from "@lucide/svelte/icons/map-pin";
+	import { getWfcCategory } from "../category.js";
 	import type { Cafe } from "../types.js";
 
 	let { cafes }: { cafes: readonly Cafe[] } = $props();
@@ -50,7 +51,7 @@
 				</span>
 				<div class="absolute bottom-5 left-5 right-5">
 					<p class="text-xs font-bold uppercase tracking-widest text-white/80">
-						{featured.tagline}
+						{getWfcCategory(featured.wfcCategory).label} · {featured.tagline}
 					</p>
 					<h3 class="mt-2 font-display text-display-sm font-extrabold tracking-tight">
 						{featured.name}
@@ -169,6 +170,11 @@
 						<MapPin size={12} class="mr-1 inline" />{cafe.distance} · {cafe.price} · {cafe.closing}
 					</p>
 					<p class="mt-3 text-xs font-semibold text-ink">Cocok untuk: {cafe.fit}</p>
+					<span
+						class="mt-2 inline-flex rounded-full bg-primary-container/40 px-2.5 py-1 text-[11px] font-bold text-on-primary-container"
+					>
+						{getWfcCategory(cafe.wfcCategory).label}
+					</span>
 					<a
 						class="mt-4 inline-flex items-center gap-1 text-xs font-bold text-primary"
 						href={`/wfc/cafe/${cafe.slug}`}

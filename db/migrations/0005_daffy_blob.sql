@@ -1,0 +1,2 @@
+ALTER TABLE "cafes" ADD COLUMN "wfc_category" text DEFAULT 'wfc-friendly' NOT NULL;--> statement-breakpoint
+ALTER TABLE "cafes" ADD CONSTRAINT "cafes_category_check" CHECK ("cafes"."wfc_category" IN ('wfc-friendly', 'meetup-friendly', 'quick-visit'));
