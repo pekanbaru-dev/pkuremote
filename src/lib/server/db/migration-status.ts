@@ -4,9 +4,9 @@
  * Drizzle tracks migrations in two places that must agree: the committed
  * `db/migrations/meta/_journal.json` (which migration FILES exist) and the
  * `drizzle.__drizzle_migrations` table (which have actually RUN in this
- * database). The deploy does not apply migrations (DEPLOY.md), so an image can
- * ship code ahead of the schema — which is what caused the 2026-08-31 outage
- * (see issue #60). This module makes that state detectable.
+ * database). The deploy applies migrations before replacing the app, and this
+ * module keeps schema drift detectable at boot and through `/healthz` — the
+ * guard added after the 2026-08-31 outage (see issue #60).
  *
  * The two are joined on the timestamp: `__drizzle_migrations.created_at`
  * equals the journal entry's `when`, verified against the existing 0000 row in

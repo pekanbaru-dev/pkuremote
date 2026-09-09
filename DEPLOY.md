@@ -16,11 +16,11 @@ PR ─────────────────▶ CI (.github/workflows/
 merge to master ─────▶ Deploy production (.github/workflows/deploy.yml)
                        build image ▶ push :sha-<commit> + :latest
                        ▶ [production Environment gate — waits for Approve]
-                       ▶ ssh server: docker compose pull && up -d
+                       ▶ ssh server: pull ▶ wait for Postgres ▶ migrate ▶ up -d
 
 push staging-test ───▶ Deploy staging-test (.github/workflows/deploy-staging.yml)
                        build image ▶ push :staging
-                       ▶ NO gate — ssh server: docker compose pull && up -d
+                       ▶ NO gate — ssh server: pull ▶ migrate ▶ up -d
                        (targets the SAME server/DB as prod — no staging box yet)
 
 rollback ────────────▶ Actions ▸ Deploy (production) ▸ "Run workflow" ▸
@@ -239,11 +239,12 @@ Once the server has the compose file + `.env`, the domain is registered with
 `caddyku` (step 8), DNS resolves, and GitHub is configured, **merge a PR to
 `master`**. The Deploy (production) workflow starts and pauses at "Waiting";
 open **Actions ▸ the run ▸ Review deployments ▸ Approve**. It then builds the
-image, pushes to GHCR, SSHes in, and runs `docker compose pull && up -d`.
+image, pushes to GHCR, SSHes in, applies the image's migrations, and only then
+replaces the app container.
 
-> First cutover only: the in-stack Postgres starts empty, so apply the initial
-> schema + seed (see "Database migrations" below) right after the first deploy —
-> the app 500s until migrations run.
+> First cutover only: the in-stack Postgres starts empty, so the deploy applies
+> the initial schema automatically. Run the optional seed procedure below if the
+> site needs demo/content data.
 
 Watch the shared proxy pick it up:
 
@@ -303,18 +304,26 @@ itself carries no secrets.
 
 ## Database migrations
 
-Drizzle migrations are **not** run by the deploy. The in-stack `postgres` has no
-published host port, so apply migrations + seed from a trusted machine (a repo
-checkout) over an SSH tunnel:
+Production deploys run Drizzle migrations automatically from the exact image
+being released. The workflow starts or waits for the in-stack `postgres`, runs a
+profile-gated one-shot `migrate` service, and only replaces `app` after it exits
+successfully. The image contains the committed `db/migrations` files and the
+small runtime migrator; no database port or long-lived migration container is
+exposed.
+
+If a migration fails, `set -e` stops the deploy before `app` is replaced. The
+Postgres migration is transactional, so a failed migration is rolled back and
+the previous app remains serving. Fix the migration, deploy again, and inspect
+`docker compose --profile migrations run --rm migrate` output if needed.
+
+For a manual recovery or first-time seed, use the server's existing credentials
+and the seed procedure below. Do not run `db:push` against production:
 
 ```bash
-# 1. On the server, temporarily publish Postgres on loopback for the one-off:
-#    add `ports: ["127.0.0.1:5432:5432"]` to the postgres service, `up -d`,
-#    OR forward it: ssh -L 5432:localhost:5432 <user>@<server>  (with the port published)
-# 2. From your machine, in the repo, against the tunneled DB:
-DATABASE_URL=postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB> pnpm db:migrate
-DATABASE_URL=postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB> pnpm db:seed
-# 3. Remove the temporary port publish and `up -d` again.
+# The deploy's migration equivalent, run on the server when explicitly needed:
+cd ~/projects/pkuremote
+IMAGE_TAG=sha-abc1234 docker compose -f docker-compose.deploy.yml up -d --wait postgres
+IMAGE_TAG=sha-abc1234 docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
 ```
 
 The `postgres_data` named volume persists the database across image redeploys;
@@ -322,11 +331,11 @@ only destroying that volume requires re-running migrate + seed.
 
 ### Verifying the schema matches the running build
 
-Because the deploy does not migrate, an image can ship code that expects columns
-the database does not have. On 2026-08-31 this took the site down for hours: prod
-sat at `0000` while the image needed `0001`+`0002`, so `profiles.role` was
-missing and **every request carrying a session cookie 500'd on every route,
-including `/login`** (issues #60 / #61).
+Before this guard existed, an image could ship code that expected columns the
+database did not have. On 2026-08-31 this took the site down for hours: prod sat
+at `0000` while the image needed `0001`+`0002`, so `profiles.role` was missing
+and **every request carrying a session cookie 500'd on every route, including
+`/login`** (issues #60 / #61).
 
 Two things now make that state visible:
 
@@ -340,6 +349,14 @@ Two things now make that state visible:
   can be run by hand: `scripts/smoke-test.sh https://pkubersua.com`. Note it
   probes with a **bogus session cookie** on purpose — an anonymous homepage ping
   stays `200` throughout this kind of outage, so it proves nothing.
+
+Migration files are append-only. A new migration can fail before deployment when
+it duplicates a column already introduced by an earlier file, has a missing
+snapshot/journal entry, depends on existing data that violates a new constraint,
+or contains SQL that only works on a developer database. The CI `migrations` job
+now applies every migration to an empty Postgres, runs the runtime migrator, runs
+it again as a no-op, seeds the result, and checks that schema changes generated a
+committed migration.
 
 ### Seeding a real deployment
 

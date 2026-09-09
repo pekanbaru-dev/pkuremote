@@ -156,7 +156,8 @@ DB-backed sessions) against Google — there is no Supabase.
 (Docker, firewall, `caddyku`, the Google OAuth client, the server `.env`), the
 GitHub `production` Environment + secrets, and the release / rollback flow
 (`git tag v1.2.0 && git push origin v1.2.0`). Database migrations are applied
-manually over an SSH tunnel (also in `DEPLOY.md`), not by the deploy.
+automatically by the deploy from the exact release image (details and manual
+recovery are in `DEPLOY.md`).
 
 ## Project structure
 
