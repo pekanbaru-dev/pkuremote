@@ -1,5 +1,6 @@
 import { getUpcomingEvents, getPastEvents } from "$lib/server/events";
 import { getPublishedArticles } from "$lib/server/articles";
+import { getPublishedCafes } from "$lib/server/cafes";
 import type { PageServerLoad } from "./$types.js";
 
 export const load: PageServerLoad = async () => {
@@ -10,6 +11,7 @@ export const load: PageServerLoad = async () => {
 		events: allUpcoming,
 		pastEvents: allPast.slice(0, 6),
 		pastEventsTotal: allPast.length,
-		articles
+		articles,
+		cafes: await getPublishedCafes()
 	};
 };

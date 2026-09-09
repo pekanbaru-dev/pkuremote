@@ -245,3 +245,238 @@ export const EVENTS: {
 		categorySlugs: ["culture"]
 	}
 ];
+
+export const CAFES = [
+	{
+		slug: "monochrome-coffee",
+		name: "Monochrome Coffee",
+		score: 92,
+		occupancy: "32% terisi",
+		distance: "1,2 km",
+		price: "Rp25–50k",
+		closing: "Buka sampai 22.00",
+		fit: "fokus lama",
+		imageUrl:
+			"https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=85",
+		address: "Jl. Contoh No. 24, Pekanbaru",
+		latitude: -0.507068,
+		longitude: 101.447779,
+		wifi: "85 Mbps",
+		outlets: "Banyak",
+		atmosphere: "Tenang",
+		duration: "3–5 jam",
+		tagline: "Paling cocok untuk fokus",
+		liveStatus: "Lagi sepi",
+		liveNote: "Biasanya tetap tenang sampai pukul 15.00 · Diperbarui 4 menit lalu",
+		tags: ["Nongkrong", "85 Mbps", "Banyak colokan", "Tenang"],
+		bestHours: [
+			["09.00", "Sepi"],
+			["10.00", "Sepi"],
+			["11.00", "Sepi"],
+			["12.00", "Sedang"],
+			["13.00", "Sedang"],
+			["14.00", "Sedang"],
+			["15.00", "Ramai"]
+		],
+		amenities: [
+			["85 Mbps", "WiFi cepat dan stabil"],
+			["Banyak colokan", "Dekat sebagian besar kursi"],
+			["Tenang", "Suara latar rendah"],
+			["Nyaman", "Cocok untuk 3–5 jam"],
+			["Ramah meeting", "Area belakang disarankan"],
+			["AC cukup dingin", "Bawa outer tipis"]
+		],
+		policies: [
+			["Laptop diperbolehkan", "Ya", "ok"],
+			["Boleh duduk lama", "Ya", "ok"],
+			["Minimum order", "Rp30k", "warn"],
+			["Batas waktu akhir pekan", "2 jam", "warn"],
+			["Perlu reservasi", "Tidak", "ok"]
+		],
+		reviews: [
+			[
+				"Raka · Fokus",
+				"2 hari lalu",
+				"WiFi stabil, colokan cukup banyak di area dinding, dan cukup tenang sebelum jam makan siang."
+			],
+			[
+				"Nadia · Meeting",
+				"5 hari lalu",
+				"Masih nyaman untuk meeting di area belakang, tapi mulai lebih ramai setelah jam 15.00."
+			]
+		]
+	},
+	{
+		slug: "kopi-titik-temu",
+		name: "Kopi Titik Temu",
+		score: 88,
+		occupancy: "48% terisi",
+		distance: "2,1 km",
+		price: "Rp20–45k",
+		closing: "Buka sampai 23.00",
+		fit: "meeting santai",
+		imageUrl:
+			"https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=900&q=80",
+		address: "Jl. Ahmad Yani No. 18, Pekanbaru",
+		latitude: -0.501462,
+		longitude: 101.445112,
+		wifi: "72 Mbps",
+		outlets: "Cukup",
+		atmosphere: "Hangat",
+		duration: "2–4 jam",
+		tagline: "Nyaman untuk meeting santai",
+		liveStatus: "Cukup ramai",
+		liveNote: "Area belakang biasanya lebih tenang · Diperbarui 8 menit lalu",
+		tags: ["Nongkrong", "72 Mbps", "Colokan cukup", "Ramah meeting"],
+		bestHours: [
+			["09.00", "Sepi"],
+			["10.00", "Sepi"],
+			["11.00", "Sedang"],
+			["12.00", "Ramai"],
+			["13.00", "Ramai"],
+			["14.00", "Sedang"],
+			["15.00", "Sedang"]
+		],
+		amenities: [
+			["72 Mbps", "WiFi cukup stabil"],
+			["Colokan cukup", "Tersedia di area belakang"],
+			["Hangat", "Suasana lebih hidup"],
+			["Nyaman", "Cocok untuk 2–4 jam"],
+			["Ramah meeting", "Meja komunal tersedia"],
+			["Parkir mudah", "Area parkir di depan"]
+		],
+		policies: [
+			["Laptop diperbolehkan", "Ya", "ok"],
+			["Boleh duduk lama", "Ya", "ok"],
+			["Minimum order", "Rp20k", "warn"],
+			["Batas waktu akhir pekan", "Tidak ada", "ok"],
+			["Perlu reservasi", "Tidak", "ok"]
+		],
+		reviews: [
+			[
+				"Dimas · Meeting",
+				"1 hari lalu",
+				"Meja komunalnya pas untuk ngobrol dan meeting kecil. WiFi cukup stabil."
+			],
+			["Salsa · Ngobrol", "4 hari lalu", "Suasananya hangat, tapi siang hari bisa cukup ramai."]
+		]
+	},
+	{
+		slug: "ruang-kopi",
+		name: "Ruang Kopi",
+		score: 86,
+		occupancy: "25% terisi",
+		distance: "2,8 km",
+		price: "Rp30–60k",
+		closing: "Buka sampai 21.30",
+		fit: "fokus lama",
+		imageUrl:
+			"https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=900&q=80",
+		address: "Jl. Tuanku Tambusai No. 7, Pekanbaru",
+		latitude: -0.494318,
+		longitude: 101.430889,
+		wifi: "96 Mbps",
+		outlets: "Banyak",
+		atmosphere: "Tenang",
+		duration: "3–5 jam",
+		tagline: "Ruang tenang untuk fokus lama",
+		liveStatus: "Lagi sepi",
+		liveNote: "Kursi dekat jendela biasanya kosong sampai siang · Diperbarui 12 menit lalu",
+		tags: ["Nongkrong", "96 Mbps", "Tenang", "Kursi nyaman"],
+		bestHours: [
+			["09.00", "Sepi"],
+			["10.00", "Sepi"],
+			["11.00", "Sepi"],
+			["12.00", "Sedang"],
+			["13.00", "Sedang"],
+			["14.00", "Ramai"],
+			["15.00", "Ramai"]
+		],
+		amenities: [
+			["96 Mbps", "WiFi cepat dan stabil"],
+			["Banyak colokan", "Dekat kursi panjang"],
+			["Tenang", "Musik latar rendah"],
+			["Kursi nyaman", "Cocok untuk fokus lama"],
+			["Cahaya natural", "Area dekat jendela"],
+			["AC sejuk", "Suhu ruangan stabil"]
+		],
+		policies: [
+			["Laptop diperbolehkan", "Ya", "ok"],
+			["Boleh duduk lama", "Ya", "ok"],
+			["Minimum order", "Rp30k", "warn"],
+			["Batas waktu akhir pekan", "3 jam", "warn"],
+			["Perlu reservasi", "Tidak", "ok"]
+		],
+		reviews: [
+			[
+				"Maya · Fokus",
+				"3 hari lalu",
+				"Tempatnya tenang dan kursinya enak buat kerja beberapa jam."
+			],
+			[
+				"Arif · Belajar",
+				"6 hari lalu",
+				"WiFi kencang, paling nyaman datang sebelum jam makan siang."
+			]
+		]
+	},
+	{
+		slug: "nook-workspace",
+		name: "Nook Workspace",
+		score: 83,
+		occupancy: "61% terisi",
+		distance: "3,4 km",
+		price: "Rp40–70k",
+		closing: "Buka sampai 00.00",
+		fit: "kerja malam",
+		imageUrl:
+			"https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=900&q=80",
+		address: "Jl. Soekarno Hatta No. 52, Pekanbaru",
+		latitude: -0.481938,
+		longitude: 101.421577,
+		wifi: "110 Mbps",
+		outlets: "Banyak",
+		atmosphere: "Produktif",
+		duration: "3–6 jam",
+		tagline: "Buka malam untuk menyelesaikan kerja",
+		liveStatus: "Cukup ramai",
+		liveNote: "Area lantai atas lebih lengang setelah pukul 20.00 · Diperbarui 5 menit lalu",
+		tags: ["Nongkrong", "110 Mbps", "Banyak colokan", "Buka malam"],
+		bestHours: [
+			["17.00", "Sedang"],
+			["18.00", "Sedang"],
+			["19.00", "Ramai"],
+			["20.00", "Sedang"],
+			["21.00", "Sepi"],
+			["22.00", "Sepi"],
+			["23.00", "Sepi"]
+		],
+		amenities: [
+			["110 Mbps", "WiFi sangat cepat"],
+			["Banyak colokan", "Hampir setiap meja"],
+			["Produktif", "Cocok untuk kerja malam"],
+			["Nyaman", "Cocok untuk 3–6 jam"],
+			["Ruang atas", "Lebih tenang setelah malam"],
+			["Buka sampai tengah malam", "Fleksibel untuk deadline"]
+		],
+		policies: [
+			["Laptop diperbolehkan", "Ya", "ok"],
+			["Boleh duduk lama", "Ya", "ok"],
+			["Minimum order", "Rp40k", "warn"],
+			["Batas waktu akhir pekan", "Tidak ada", "ok"],
+			["Perlu reservasi", "Tidak", "ok"]
+		],
+		reviews: [
+			[
+				"Fikri · Kerja malam",
+				"2 hari lalu",
+				"Buka sampai tengah malam sangat membantu kalau ada deadline."
+			],
+			[
+				"Tari · Fokus",
+				"1 minggu lalu",
+				"Colokan banyak dan WiFi kencang, lantai atas lebih tenang."
+			]
+		]
+	}
+] as const;

@@ -30,7 +30,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { sql } from "drizzle-orm";
 import postgres from "postgres";
 import * as schema from "./schema";
-import { CATEGORIES, EVENTS } from "./seed-data";
+import { CAFES, CATEGORIES, EVENTS } from "./seed-data";
 import {
 	users,
 	profiles,
@@ -38,7 +38,8 @@ import {
 	announcements,
 	posts,
 	categories,
-	eventCategories
+	eventCategories,
+	cafes
 } from "./schema";
 
 // `--events-only` seeds just categories/events/join rows: no demo author,
@@ -138,6 +139,19 @@ async function seedContent(): Promise<void> {
 				.insert(eventCategories)
 				.values({ eventId: event.id, categoryId: catId })
 				.onConflictDoNothing();
+		}
+	}
+
+	if (!EVENTS_ONLY) {
+		console.log(`  · inserting ${CAFES.length} cafes`);
+		for (const cafe of CAFES) {
+			await db
+				.insert(cafes)
+				.values(cafe)
+				.onConflictDoUpdate({
+					target: cafes.slug,
+					set: { tags: cafe.tags, updatedAt: new Date() }
+				});
 		}
 	}
 

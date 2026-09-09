@@ -6,6 +6,7 @@ describe("NAV_ITEMS", () => {
 		expect(NAV_ITEMS.map((i) => i.href)).toEqual([
 			"/admin",
 			"/admin/events",
+			"/admin/cafes",
 			"/admin/categories",
 			"/admin/articles",
 			"/admin/settings"

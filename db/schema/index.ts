@@ -9,4 +9,5 @@ export * from "./registrations";
 export * from "./relations";
 export * from "./announcements";
 export * from "./posts";
+export * from "./cafes";
 export * from "./post-slug-redirects";

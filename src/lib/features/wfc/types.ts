@@ -1,0 +1,35 @@
+export type CafeBestHour = readonly [string, string];
+export type CafeAmenity = readonly [string, string];
+export type CafePolicy = readonly [string, string, "ok" | "warn"];
+export type CafeReview = readonly [string, string, string];
+
+export type Cafe = {
+	id: string;
+	slug: string;
+	name: string;
+	score: number;
+	occupancy: string;
+	distance: string;
+	price: string;
+	closing: string;
+	fit: string;
+	imageUrl: string | null;
+	address: string;
+	latitude: number;
+	longitude: number;
+	wifi: string;
+	outlets: string;
+	atmosphere: string;
+	duration: string;
+	tagline: string;
+	liveStatus: string;
+	liveNote: string;
+	tags: string[];
+	bestHours: CafeBestHour[];
+	amenities: CafeAmenity[];
+	policies: CafePolicy[];
+	reviews: CafeReview[];
+	published: boolean;
+	createdAt: string;
+	updatedAt: string;
+};
