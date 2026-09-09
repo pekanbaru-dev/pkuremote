@@ -50,3 +50,4 @@ caddy_data/
 
 # Local-only compose override (port remaps, etc.)
 docker-compose.override.yml
+.vitest-attachments
