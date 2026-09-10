@@ -77,6 +77,10 @@
 			/>
 		</label>
 		<label class="space-y-2 text-sm font-semibold text-ink">
+			<span>Keramaian</span>
+			<Input name="occupancy" required value={value("occupancy", cafe?.occupancy)} />
+		</label>
+		<label class="space-y-2 text-sm font-semibold text-ink">
 			<span>Status</span>
 			<Input name="liveStatus" required value={value("liveStatus", cafe?.liveStatus)} />
 		</label>
