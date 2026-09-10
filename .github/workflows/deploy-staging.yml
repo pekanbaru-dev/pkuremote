@@ -62,7 +62,9 @@ jobs:
       # No compose-file sync here on purpose. This workflow is UNGATED, so
       # syncing would let any push to `staging-test` overwrite the production
       # server's compose file with an unreviewed version. Only the gated
-      # production deploy is allowed to change it.
+      # production deploy is allowed to change it. Run the migrator through the
+      # existing `app` service below instead of depending on the profile-gated
+      # service added by the current compose file.
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
         with:
@@ -78,9 +80,12 @@ jobs:
             export IMAGE_TAG='staging'
             docker compose -f docker-compose.deploy.yml pull
             # Keep the currently running app in place until the new image's
-            # migrations have completed successfully.
+            # migrations have completed successfully. `--no-deps` prevents
+            # Compose from starting/replacing `app`; the pulled staging image
+            # supplies the runtime migrator and the existing app environment
+            # supplies DATABASE_URL.
             docker compose -f docker-compose.deploy.yml up -d --wait postgres
-            docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
+            docker compose -f docker-compose.deploy.yml run --rm --no-deps --entrypoint node app scripts/migrate-runtime.mjs
             docker compose -f docker-compose.deploy.yml up -d --remove-orphans
             docker image prune -f
         env:

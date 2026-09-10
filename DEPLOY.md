@@ -20,11 +20,12 @@ merge to master ─────▶ Deploy production (.github/workflows/deploy.y
 
 push staging-test ───▶ Deploy staging-test (.github/workflows/deploy-staging.yml)
                        build image ▶ push :staging
-                       ▶ NO gate — ssh server: pull ▶ migrate ▶ up -d
+                       ▶ NO gate — ssh server: pull ▶ migrate via app ▶ up -d
                        (targets the SAME server/DB as prod — no staging box yet)
 
 rollback ────────────▶ Actions ▸ Deploy (production) ▸ "Run workflow" ▸
-                       enter an older image tag, e.g. sha-abc1234 (no rebuild)
+                       enter an older image tag, e.g. sha-abc1234 (no rebuild,
+                       forward migrations skipped)
 ```
 
 Production deploys on every **merge to `master`**, gated by the `production`
@@ -263,6 +264,11 @@ Push the `staging-test` branch — it force-deploys immediately, no gate. **Note
 until a dedicated staging host exists this targets the **same** server, domain,
 and database as production, so a push here goes live on the real site.
 
+The ungated workflow deliberately does not replace the server's compose file.
+After pulling the `:staging` image, it runs that image's migrator through the
+existing `app` service with `--no-deps`, so this path also works when the server
+still has a compose file from before the profile-gated `migrate` service existed.
+
 ```bash
 git push origin HEAD:staging-test
 ```
@@ -310,6 +316,10 @@ profile-gated one-shot `migrate` service, and only replaces `app` after it exits
 successfully. The image contains the committed `db/migrations` files and the
 small runtime migrator; no database port or long-lived migration container is
 exposed.
+
+Manual rollback runs intentionally skip migrations. Historical images may not
+contain the runtime migrator, and migrations are append-only; the rollback
+restores the selected application image without applying newer schema changes.
 
 If a migration fails, `set -e` stops the deploy before `app` is replaced. The
 Postgres migration is transactional, so a failed migration is rolled back and

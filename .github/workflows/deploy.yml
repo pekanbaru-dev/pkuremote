@@ -63,7 +63,9 @@ jobs:
 
       # Build the image from the merged commit and push it as :sha-<short> plus
       # :latest. On a rollback run this is skipped — the older image already
-      # exists in GHCR and the server just pulls it.
+      # exists in GHCR and the server just pulls it. Rollbacks also skip the
+      # forward-migration step below because historical images may predate the
+      # runtime migrator.
       - name: Build and push release image
         if: steps.ver.outputs.build == 'true'
         uses: docker/build-push-action@v6
@@ -129,11 +131,18 @@ jobs:
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
             export IMAGE_TAG='${{ steps.ver.outputs.tag }}'
             docker compose -f docker-compose.deploy.yml pull
-            # Apply the new image's migrations before replacing the live app.
-            # If this fails, set -e keeps the old app serving instead of
-            # shipping code against an older schema.
-            docker compose -f docker-compose.deploy.yml up -d --wait postgres
-            docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
+            if [ "${{ steps.ver.outputs.build }}" = "true" ]; then
+              # Apply the new image's migrations before replacing the live app.
+              # If this fails, set -e keeps the old app serving instead of
+              # shipping code against an older schema.
+              docker compose -f docker-compose.deploy.yml up -d --wait postgres
+              docker compose -f docker-compose.deploy.yml --profile migrations run --rm migrate
+            else
+              # Rollbacks may target an image built before the runtime migrator
+              # was added. Migrations are append-only, so do not apply newer
+              # schema changes while restoring an older application image.
+              echo "Rollback requested; skipping forward migrations"
+            fi
             docker compose -f docker-compose.deploy.yml up -d --remove-orphans
             docker image prune -f
         env:
