@@ -73,14 +73,14 @@ async function loadCategoriesForEvents(
 }
 
 /**
- * Return all events whose `startsAt` is in the future, sorted ascending
- * (soonest first), each carrying an eager-loaded `categories` array.
+ * Return all active events (upcoming and live), sorted ascending (soonest
+ * first), each carrying an eager-loaded `categories` array.
  */
 export async function getUpcomingEvents(): Promise<Event[]> {
 	const rows: EventRow[] = await db
 		.select()
 		.from(events)
-		.where(eq(events.status, "upcoming"))
+		.where(inArray(events.status, ["upcoming", "live"]))
 		.orderBy(asc(events.startsAt));
 
 	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
