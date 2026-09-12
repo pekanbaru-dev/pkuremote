@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import {
-	getAllCategories,
+	getCategoriesForScope,
 	createEvent,
 	parseEventFormData,
 	EventWriteError
@@ -12,7 +12,7 @@ import type { PageServerLoad, Actions } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
 	requireAdmin(locals);
-	return { categories: await getAllCategories() };
+	return { categories: await getCategoriesForScope("event") };
 };
 
 export const actions: Actions = {
@@ -20,6 +20,17 @@ export const actions: Actions = {
 		requireAdmin(locals);
 		const formData = await request.formData();
 		const { input, bannerFile, values } = parseEventFormData(formData);
+		const allowedCategories = await getCategoriesForScope("event");
+		if (
+			!input.categoryIds.every((id) => allowedCategories.some((category) => category.id === id))
+		) {
+			return fail(400, {
+				message: "Pilih kategori yang tersedia untuk event.",
+				field: "categoryIds",
+				code: "VALIDATION",
+				values
+			});
+		}
 
 		try {
 			if (bannerFile) {

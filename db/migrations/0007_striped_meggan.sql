@@ -1,0 +1,2 @@
+ALTER TABLE "categories" ADD COLUMN "scope" text DEFAULT 'both' NOT NULL;--> statement-breakpoint
+ALTER TABLE "categories" ADD CONSTRAINT "categories_scope_check" CHECK ("categories"."scope" IN ('both', 'article', 'event'));

@@ -7,7 +7,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
 import { isUniqueViolation } from "$lib/server/db/pg-error";
-import { categories } from "../../../../db/schema";
+import { categories, CATEGORY_SCOPES, type CategoryScope } from "../../../../db/schema";
+
+export type { CategoryScope } from "../../../../db/schema";
 
 export type CategoryWriteErrorCode = "SLUG_TAKEN" | "VALIDATION" | "NOT_FOUND";
 
@@ -22,7 +24,7 @@ export class CategoryWriteError extends Error {
 	}
 }
 
-export type CategoryWriteInput = { name: string; slug: string };
+export type CategoryWriteInput = { name: string; slug: string; scope?: CategoryScope };
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -37,6 +39,9 @@ export function validateCategoryInput(input: CategoryWriteInput): void {
 			"slug"
 		);
 	}
+	if (input.scope && !CATEGORY_SCOPES.includes(input.scope)) {
+		throw new CategoryWriteError("VALIDATION", "Cakupan kategori tidak valid.", "scope");
+	}
 }
 
 export async function createCategory(input: CategoryWriteInput): Promise<string> {
@@ -44,7 +49,7 @@ export async function createCategory(input: CategoryWriteInput): Promise<string>
 	try {
 		const [row] = await db
 			.insert(categories)
-			.values({ name: input.name.trim(), slug: input.slug.trim() })
+			.values({ name: input.name.trim(), slug: input.slug.trim(), scope: input.scope ?? "both" })
 			.returning({ id: categories.id });
 		return row.id;
 	} catch (err) {
@@ -60,7 +65,11 @@ export async function updateCategory(id: string, input: CategoryWriteInput): Pro
 	try {
 		const updated = await db
 			.update(categories)
-			.set({ name: input.name.trim(), slug: input.slug.trim() })
+			.set({
+				name: input.name.trim(),
+				slug: input.slug.trim(),
+				scope: input.scope ?? "both"
+			})
 			.where(eq(categories.id, id))
 			.returning({ id: categories.id });
 		if (updated.length === 0) {

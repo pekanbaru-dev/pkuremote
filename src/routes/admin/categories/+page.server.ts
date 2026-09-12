@@ -4,7 +4,9 @@ import {
 	createCategory,
 	updateCategory,
 	deleteCategory,
-	CategoryWriteError
+	CategoryWriteError,
+	type CategoryScope,
+	type CategoryWriteInput
 } from "$lib/server/categories";
 import { requireAdmin } from "$lib/server/auth/admin";
 import type { PageServerLoad, Actions } from "./$types";
@@ -14,10 +16,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return { categories: await getAllCategories() };
 };
 
-function readCategoryInput(form: FormData) {
+function readCategoryInput(form: FormData): CategoryWriteInput {
 	return {
 		name: String(form.get("name") ?? "").trim(),
-		slug: String(form.get("slug") ?? "").trim()
+		slug: String(form.get("slug") ?? "").trim(),
+		scope: String(form.get("scope") ?? "both") as CategoryScope
 	};
 }
 

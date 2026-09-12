@@ -1,26 +1,19 @@
-import { getUpcomingEvents, getPastEvents } from "$lib/server/events";
+import { getCategoriesForScope, getPastEvents, getUpcomingEvents } from "$lib/server/events";
 import type { PageServerLoad } from "./$types.js";
 
 export const load: PageServerLoad = async ({ url }) => {
-	const categorySlug = url.searchParams.get("category");
+	const categories = await getCategoriesForScope("event");
+	const requestedSlug = url.searchParams.get("category");
+	const filter = categories.find((category) => category.slug === requestedSlug) ?? null;
 	const allUpcoming = await getUpcomingEvents();
 	const allPast = await getPastEvents();
 
-	const upcoming = categorySlug
-		? allUpcoming.filter((e) => e.categories.some((c) => c.slug === categorySlug))
+	const upcoming = filter
+		? allUpcoming.filter((e) => e.categories.some((c) => c.slug === filter.slug))
 		: allUpcoming;
-	const past = categorySlug
-		? allPast.filter((e) => e.categories.some((c) => c.slug === categorySlug))
+	const past = filter
+		? allPast.filter((e) => e.categories.some((c) => c.slug === filter.slug))
 		: allPast;
 
-	let filter: { name: string; slug: string } | null = null;
-	if (categorySlug) {
-		const match = upcoming
-			.concat(past)
-			.flatMap((e) => e.categories)
-			.find((c) => c.slug === categorySlug);
-		filter = { name: match?.name ?? categorySlug, slug: categorySlug };
-	}
-
-	return { upcoming, past, filter };
+	return { upcoming, past, filter, categories };
 };

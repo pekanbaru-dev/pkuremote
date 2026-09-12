@@ -56,6 +56,32 @@
 		</p>
 	</div>
 
+	{#if data.categories.length > 0}
+		<nav class="mb-xl flex flex-wrap gap-2" aria-label="Filter event berdasarkan kategori">
+			<a
+				href="/events"
+				class="rounded-full border px-3 py-1.5 text-label-md transition-colors {filter
+					? 'border-hairline text-on-surface-variant hover:bg-surface-container'
+					: 'border-primary bg-primary text-on-primary'}"
+				aria-current={filter ? undefined : "page"}
+			>
+				Semua
+			</a>
+			{#each data.categories as category (category.id)}
+				<a
+					href="/events?category={encodeURIComponent(category.slug)}"
+					class="rounded-full border px-3 py-1.5 text-label-md transition-colors {filter?.slug ===
+					category.slug
+						? 'border-primary bg-primary text-on-primary'
+						: 'border-hairline text-on-surface-variant hover:bg-surface-container'}"
+					aria-current={filter?.slug === category.slug ? "page" : undefined}
+				>
+					{category.name}
+				</a>
+			{/each}
+		</nav>
+	{/if}
+
 	{#if filter}
 		<div
 			class="mb-lg inline-flex items-center gap-2 rounded-full border border-hairline bg-surface-container-low px-4 py-2 text-label-md text-ink"

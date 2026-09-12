@@ -10,7 +10,7 @@
  *   published → archived   (archiveArticle — admin only)
  *   published → draft      (unpublishArticle — editor/admin)
  */
-import { eq, desc, and, count, sql } from "drizzle-orm";
+import { eq, desc, and, count, or, sql } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
 import { posts, postSlugRedirects, profiles, categories } from "../../../../db/schema";
 import type { PostStatus } from "../../../../db/schema";
@@ -24,6 +24,7 @@ export type ArticleWithAuthor = ArticleRow & {
 	authorDisplayName: string | null;
 	authorAvatarUrl: string | null;
 	categoryName?: string | null;
+	categorySlug?: string | null;
 };
 
 export type PaginatedArticles = {
@@ -33,6 +34,14 @@ export type PaginatedArticles = {
 	pageSize: number;
 	totalPages: number;
 };
+
+function articleCategoryScope() {
+	return or(eq(categories.scope, "both"), eq(categories.scope, "article"));
+}
+
+function articleCategoryJoin() {
+	return and(eq(categories.id, posts.categoryId), articleCategoryScope());
+}
 
 export type CreateArticleInput = {
 	title: string;
@@ -88,11 +97,12 @@ export async function getArticleBySlug(slug: string): Promise<ArticleWithAuthor 
 			...articleColumns(),
 			authorDisplayName: profiles.displayName,
 			authorAvatarUrl: profiles.avatarUrl,
-			categoryName: categories.name
+			categoryName: categories.name,
+			categorySlug: categories.slug
 		})
 		.from(posts)
 		.leftJoin(profiles, eq(profiles.id, posts.authorId))
-		.leftJoin(categories, eq(categories.id, posts.categoryId))
+		.leftJoin(categories, articleCategoryJoin())
 		.where(and(eq(posts.slug, slug), eq(posts.status, "published")))
 		.limit(1);
 	return row as ArticleWithAuthor | undefined;
@@ -106,9 +116,13 @@ export async function getArticleBySlug(slug: string): Promise<ArticleWithAuthor 
  */
 export async function getPublishedArticles(
 	page = 1,
-	limit = PAGE_SIZE
+	limit = PAGE_SIZE,
+	categorySlug?: string
 ): Promise<PaginatedArticles> {
 	const offset = (page - 1) * limit;
+	const conditions = [eq(posts.status, "published")];
+	if (categorySlug) conditions.push(eq(categories.slug, categorySlug));
+	const where = and(...conditions);
 
 	const [rows, [countRow]] = await Promise.all([
 		db
@@ -116,16 +130,21 @@ export async function getPublishedArticles(
 				...articleColumns(),
 				authorDisplayName: profiles.displayName,
 				authorAvatarUrl: profiles.avatarUrl,
-				categoryName: categories.name
+				categoryName: categories.name,
+				categorySlug: categories.slug
 			})
 			.from(posts)
 			.leftJoin(profiles, eq(profiles.id, posts.authorId))
-			.leftJoin(categories, eq(categories.id, posts.categoryId))
-			.where(eq(posts.status, "published"))
+			.leftJoin(categories, articleCategoryJoin())
+			.where(where)
 			.orderBy(desc(posts.publishedAt))
 			.limit(limit)
 			.offset(offset),
-		db.select({ total: count() }).from(posts).where(eq(posts.status, "published"))
+		db
+			.select({ total: count() })
+			.from(posts)
+			.leftJoin(categories, articleCategoryJoin())
+			.where(where)
 	]);
 
 	const total = countRow?.total ?? 0;
@@ -164,11 +183,12 @@ export async function getArticlesByAuthor(
 			...articleColumns(),
 			authorDisplayName: profiles.displayName,
 			authorAvatarUrl: profiles.avatarUrl,
-			categoryName: categories.name
+			categoryName: categories.name,
+			categorySlug: categories.slug
 		})
 		.from(posts)
 		.leftJoin(profiles, eq(profiles.id, posts.authorId))
-		.leftJoin(categories, eq(categories.id, posts.categoryId))
+		.leftJoin(categories, articleCategoryJoin())
 		.where(and(...conditions))
 		.orderBy(desc(posts.createdAt));
 	return rows as ArticleWithAuthor[];
