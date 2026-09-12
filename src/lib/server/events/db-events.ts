@@ -6,13 +6,14 @@
  * (`+page.server.ts` files and the homepage) get the same `Event` shape
  * they did before; the data source is now the database.
  */
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "$lib/server/db/client";
-import { events, eventCategories, categories } from "../../../../db/schema";
+import { events, eventCategories, categories, type CategoryScope } from "../../../../db/schema";
 import type { Event, EventCategoryRef } from "../../features/events/types.ts";
 
 type EventRow = typeof events.$inferSelect;
 type CategoryRow = typeof categories.$inferSelect;
+export type AdminCategory = EventCategoryRef & { scope: CategoryScope };
 
 function toIso(d: Date | string | null | undefined): string | undefined {
 	if (d == null) return undefined;
@@ -48,7 +49,8 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
  * map; the caller is responsible for defaulting to `[]`.
  */
 async function loadCategoriesForEvents(
-	eventIds: string[]
+	eventIds: string[],
+	scope?: Exclude<CategoryScope, "both">
 ): Promise<Map<string, EventCategoryRef[]>> {
 	const out = new Map<string, EventCategoryRef[]>();
 	if (eventIds.length === 0) return out;
@@ -62,7 +64,14 @@ async function loadCategoriesForEvents(
 		})
 		.from(eventCategories)
 		.innerJoin(categories, eq(categories.id, eventCategories.categoryId))
-		.where(inArray(eventCategories.eventId, eventIds));
+		.where(
+			scope
+				? and(
+						inArray(eventCategories.eventId, eventIds),
+						or(eq(categories.scope, "both"), eq(categories.scope, scope))
+					)
+				: inArray(eventCategories.eventId, eventIds)
+		);
 
 	for (const row of joinRows) {
 		const list = out.get(row.eventId) ?? [];
@@ -83,7 +92,10 @@ export async function getUpcomingEvents(): Promise<Event[]> {
 		.where(inArray(events.status, ["upcoming", "live"]))
 		.orderBy(asc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
+	const catMap = await loadCategoriesForEvents(
+		rows.map((r) => r.id),
+		"event"
+	);
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
@@ -98,7 +110,10 @@ export async function getPastEvents(): Promise<Event[]> {
 		.where(eq(events.status, "past"))
 		.orderBy(desc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
+	const catMap = await loadCategoriesForEvents(
+		rows.map((r) => r.id),
+		"event"
+	);
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
@@ -131,7 +146,7 @@ export async function getEventById(id: string): Promise<Event | undefined> {
 export async function getEventBySlug(slug: string): Promise<Event | undefined> {
 	const [row] = await db.select().from(events).where(eq(events.slug, slug)).limit(1);
 	if (!row) return undefined;
-	const catMap = await loadCategoriesForEvents([row.id]);
+	const catMap = await loadCategoriesForEvents([row.id], "event");
 	return rowToEvent(row, catMap.get(row.id) ?? []);
 }
 
@@ -146,7 +161,12 @@ export async function getEventsByCategorySlug(slug: string): Promise<Event[]> {
 		.from(events)
 		.innerJoin(eventCategories, eq(eventCategories.eventId, events.id))
 		.innerJoin(categories, eq(categories.id, eventCategories.categoryId))
-		.where(eq(categories.slug, slug));
+		.where(
+			and(
+				eq(categories.slug, slug),
+				or(eq(categories.scope, "both"), eq(categories.scope, "event"))
+			)
+		);
 
 	const ids: string[] = matched.map((m: { id: string }) => m.id);
 	if (ids.length === 0) return [];
@@ -157,17 +177,42 @@ export async function getEventsByCategorySlug(slug: string): Promise<Event[]> {
 		.where(inArray(events.id, ids))
 		.orderBy(asc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
+	const catMap = await loadCategoriesForEvents(
+		rows.map((r) => r.id),
+		"event"
+	);
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
 /**
  * Return every category, sorted by `name` ascending.
  */
-export async function getAllCategories(): Promise<EventCategoryRef[]> {
+export async function getAllCategories(): Promise<AdminCategory[]> {
 	const rows: CategoryRow[] = await db
+		.select({
+			id: categories.id,
+			name: categories.name,
+			slug: categories.slug,
+			scope: categories.scope
+		})
+		.from(categories)
+		.orderBy(asc(categories.name));
+	return rows.map((row) => ({
+		id: row.id,
+		name: row.name,
+		slug: row.slug,
+		scope: row.scope as CategoryScope
+	}));
+}
+
+/** Return categories available to a specific content type. */
+export async function getCategoriesForScope(
+	scope: Exclude<CategoryScope, "both">
+): Promise<EventCategoryRef[]> {
+	const rows = await db
 		.select({ id: categories.id, name: categories.name, slug: categories.slug })
 		.from(categories)
+		.where(or(eq(categories.scope, "both"), eq(categories.scope, scope)))
 		.orderBy(asc(categories.name));
 	return rows;
 }

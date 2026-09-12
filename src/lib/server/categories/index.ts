@@ -10,5 +10,6 @@ export {
 	validateCategoryInput,
 	CategoryWriteError,
 	type CategoryWriteErrorCode,
-	type CategoryWriteInput
+	type CategoryWriteInput,
+	type CategoryScope
 } from "./db-categories.ts";

@@ -10,12 +10,16 @@ import {
 	readArticleForm
 } from "$lib/server/articles";
 import { uploadArticleCover, MediaUploadError } from "$lib/server/storage";
-import { getAllCategories } from "$lib/server/events";
+import { getCategoriesForScope } from "$lib/server/events";
 import type { Actions, PageServerLoad } from "./$types";
 
-async function isKnownCategory(categoryId: string): Promise<boolean> {
+async function isKnownCategory(
+	categoryId: string,
+	existingCategoryId?: string | null
+): Promise<boolean> {
 	if (!categoryId) return true;
-	const categories = await getAllCategories();
+	if (categoryId === existingCategoryId) return true;
+	const categories = await getCategoriesForScope("article");
 	return categories.some((category) => category.id === categoryId);
 }
 
@@ -49,16 +53,17 @@ async function createDraftArticle(
 }
 
 async function draftValidationError(
-	values: ReturnType<typeof readArticleForm>
+	values: ReturnType<typeof readArticleForm>,
+	existingCategoryId?: string | null
 ): Promise<string | undefined> {
 	if (values.slug && !generateSlug(values.slug)) return "Slug tidak valid.";
-	if (values.categoryId && !(await isKnownCategory(values.categoryId))) {
+	if (values.categoryId && !(await isKnownCategory(values.categoryId, existingCategoryId))) {
 		return "Kategori tidak valid.";
 	}
 }
 
 export const load: PageServerLoad = async () => {
-	return { categories: await getAllCategories() };
+	return { categories: await getCategoriesForScope("article") };
 };
 
 export const actions: Actions = {

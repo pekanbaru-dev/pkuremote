@@ -1,5 +1,8 @@
-import { pgTable, uuid, text, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, index, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+
+export const CATEGORY_SCOPES = ["both", "article", "event"] as const;
+export type CategoryScope = (typeof CATEGORY_SCOPES)[number];
 
 export const categories = pgTable(
 	"categories",
@@ -8,10 +11,12 @@ export const categories = pgTable(
 			.primaryKey()
 			.default(sql`gen_random_uuid()`),
 		name: text("name").notNull().unique(),
-		slug: text("slug").notNull().unique()
+		slug: text("slug").notNull().unique(),
+		scope: text("scope").notNull().default("both")
 	},
 	(table) => ({
-		slugIdx: index("categories_slug_idx").on(table.slug)
+		slugIdx: index("categories_slug_idx").on(table.slug),
+		scopeCheck: check("categories_scope_check", sql`${table.scope} IN ('both', 'article', 'event')`)
 	})
 );
 

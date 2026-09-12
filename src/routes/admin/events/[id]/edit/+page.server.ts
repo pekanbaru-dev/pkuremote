@@ -1,7 +1,7 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 import {
 	getEventById,
-	getAllCategories,
+	getCategoriesForScope,
 	updateEvent,
 	parseEventFormData,
 	EventWriteError
@@ -16,14 +16,27 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!event) {
 		error(404, "Event tidak ditemukan");
 	}
-	return { event, categories: await getAllCategories() };
+	return { event, categories: await getCategoriesForScope("event") };
 };
 
 export const actions: Actions = {
 	default: async ({ request, locals, params }) => {
 		requireAdmin(locals);
+		const currentEvent = await getEventById(params.id);
+		if (!currentEvent) error(404, "Event tidak ditemukan");
 		const formData = await request.formData();
 		const { input, bannerFile, values } = parseEventFormData(formData);
+		const allowedCategories = await getCategoriesForScope("event");
+		const allowedIds = new Set(allowedCategories.map((category) => category.id));
+		const existingIds = new Set(currentEvent.categories.map((category) => category.id));
+		if (!input.categoryIds.every((id) => allowedIds.has(id) || existingIds.has(id))) {
+			return fail(400, {
+				message: "Pilih kategori yang tersedia untuk event.",
+				field: "categoryIds",
+				code: "VALIDATION",
+				values
+			});
+		}
 		const currentBannerUrl = String(formData.get("currentBannerUrl") ?? "") || null;
 
 		// Default to keeping the existing banner; a new upload replaces it.

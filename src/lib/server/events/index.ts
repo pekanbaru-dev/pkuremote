@@ -13,6 +13,7 @@ export {
 	getEventBySlug,
 	getEventsByCategorySlug,
 	getAllCategories,
+	getCategoriesForScope,
 	getCategoryBySlug
 } from "./db-events.ts";
 

@@ -27,7 +27,9 @@ describe("events listing page", () => {
 			makeEvent("u2", "2099-02-01T19:00:00+07:00", NOOP_CAT)
 		];
 
-		render(EventsPage, { data: { upcoming, past: [], filter: null, user: null } });
+		render(EventsPage, {
+			data: { upcoming, past: [], filter: null, categories: [], user: null }
+		});
 
 		await expect.element(page.getByRole("heading", { name: "Event Akan Datang" })).toBeVisible();
 		await expect.element(page.getByRole("link", { name: "Event u1" })).toBeVisible();
@@ -40,7 +42,9 @@ describe("events listing page", () => {
 			makeEvent("p2", "2000-02-01T19:00:00+07:00")
 		];
 
-		render(EventsPage, { data: { upcoming: [], past, filter: null, user: null } });
+		render(EventsPage, {
+			data: { upcoming: [], past, filter: null, categories: [], user: null }
+		});
 
 		await expect
 			.element(
@@ -53,7 +57,9 @@ describe("events listing page", () => {
 	it("omits the past section when no past events exist", async () => {
 		const upcoming = [makeEvent("u1", "2099-01-01T19:00:00+07:00")];
 
-		render(EventsPage, { data: { upcoming, past: [], filter: null, user: null } });
+		render(EventsPage, {
+			data: { upcoming, past: [], filter: null, categories: [], user: null }
+		});
 
 		expect(page.getByRole("heading", { name: "Event Sebelumnya" })).toHaveLength(0);
 	});
@@ -65,7 +71,8 @@ describe("events listing page", () => {
 			data: {
 				upcoming: [],
 				past,
-				filter: { name: "Workshop", slug: "workshop" },
+				filter: { id: "c1", name: "Workshop", slug: "workshop" },
+				categories: NOOP_CAT,
 				user: null
 			}
 		});
@@ -78,5 +85,20 @@ describe("events listing page", () => {
 				page.getByText("Belum ada event 'Workshop' — coba hapus filter atau pilih kategori lain.")
 			)
 			.toBeVisible();
+	});
+
+	it("renders category navigation links for the event scope", async () => {
+		render(EventsPage, {
+			data: {
+				upcoming: [],
+				past: [],
+				filter: null,
+				categories: NOOP_CAT,
+				user: null
+			}
+		});
+
+		const categoryLink = page.getByRole("link", { name: "Workshop" });
+		await expect.element(categoryLink).toHaveAttribute("href", "/events?category=workshop");
 	});
 });

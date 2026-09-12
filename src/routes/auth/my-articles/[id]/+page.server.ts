@@ -10,22 +10,27 @@ import {
 	readArticleForm,
 	hasFormValue
 } from "$lib/server/articles";
-import { getAllCategories } from "$lib/server/events";
+import { getCategoriesForScope } from "$lib/server/events";
 import { uploadArticleCover, deleteArticleCover, MediaUploadError } from "$lib/server/storage";
 import { sanitizeArticleHtml } from "$lib/server/markdown";
 import type { Actions, PageServerLoad } from "./$types";
 
-async function isKnownCategory(categoryId: string): Promise<boolean> {
+async function isKnownCategory(
+	categoryId: string,
+	existingCategoryId?: string | null
+): Promise<boolean> {
 	if (!categoryId) return true;
-	const categories = await getAllCategories();
+	if (categoryId === existingCategoryId) return true;
+	const categories = await getCategoriesForScope("article");
 	return categories.some((category) => category.id === categoryId);
 }
 
 async function draftValidationError(
-	values: ReturnType<typeof readArticleForm>
+	values: ReturnType<typeof readArticleForm>,
+	existingCategoryId?: string | null
 ): Promise<string | undefined> {
 	if (values.slug && !generateSlug(values.slug)) return "Slug tidak valid.";
-	if (values.categoryId && !(await isKnownCategory(values.categoryId))) {
+	if (values.categoryId && !(await isKnownCategory(values.categoryId, existingCategoryId))) {
 		return "Kategori tidak valid.";
 	}
 }
@@ -55,7 +60,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!article) error(404, "Artikel tidak ditemukan.");
 	if (article.authorId !== locals.user!.id) error(403, "Kamu tidak punya akses ke artikel ini.");
 	const bodyHtml = sanitizeArticleHtml(article.body);
-	return { article, categories: await getAllCategories(), bodyHtml };
+	return { article, categories: await getCategoriesForScope("article"), bodyHtml };
 };
 
 export const actions: Actions = {
@@ -74,7 +79,7 @@ export const actions: Actions = {
 		const formData = await request.formData();
 		const values = readArticleForm(formData);
 		const coverFile = formData.get("coverImage") as File | null;
-		const validationError = await draftValidationError(values);
+		const validationError = await draftValidationError(values, article.categoryId);
 		if (validationError) return fail(400, { error: validationError });
 
 		// Handle cover image upload — upload the new file first, then delete
@@ -124,7 +129,7 @@ export const actions: Actions = {
 		const validationError = firstArticleFormError(validateArticleForm(values));
 		if (validationError) return fail(400, { error: validationError });
 
-		const draftError = await draftValidationError(values);
+		const draftError = await draftValidationError(values, article.categoryId);
 		if (draftError) return fail(400, { error: draftError });
 
 		let coverImageUrl: string | null;

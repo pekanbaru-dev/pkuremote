@@ -57,9 +57,9 @@
 			</h1>
 
 			<!-- Kategori -->
-			{#if data.article.categoryName}
+			{#if data.article.categoryName && data.article.categorySlug}
 				<a
-					href="/blog?category={data.article.categoryName}"
+					href="/blog?category={encodeURIComponent(data.article.categorySlug)}"
 					class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary/10 text-primary mb-4 hover:bg-primary/20 transition-colors"
 				>
 					{data.article.categoryName}
