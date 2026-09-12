@@ -40,7 +40,7 @@ function articleCategoryScope() {
 }
 
 function articleCategoryJoin() {
-	return and(eq(categories.id, posts.categoryId), articleCategoryScope());
+	return eq(categories.id, posts.categoryId);
 }
 
 export type CreateArticleInput = {
@@ -121,7 +121,10 @@ export async function getPublishedArticles(
 ): Promise<PaginatedArticles> {
 	const offset = (page - 1) * limit;
 	const conditions = [eq(posts.status, "published")];
-	if (categorySlug) conditions.push(eq(categories.slug, categorySlug));
+	if (categorySlug) {
+		const categoryFilter = and(eq(categories.slug, categorySlug), articleCategoryScope());
+		if (categoryFilter) conditions.push(categoryFilter);
+	}
 	const where = and(...conditions);
 
 	const [rows, [countRow]] = await Promise.all([

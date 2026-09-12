@@ -51,8 +51,8 @@ function makeRow(overrides: Record<string, unknown> = {}) {
 describe("getUpcomingEvents", () => {
 	it("includes upcoming and live events in the active listing query", async () => {
 		const rows = [
-			makeRow({ id: "upcoming", status: "upcoming" }),
-			makeRow({ id: "live", status: "live" })
+			makeRow({ id: "e-upcoming", status: "upcoming" }),
+			makeRow({ id: "e-live", status: "live" })
 		];
 		dbMocks.orderBy.mockResolvedValueOnce(rows);
 		dbMocks.where
@@ -62,6 +62,10 @@ describe("getUpcomingEvents", () => {
 		const result = await getUpcomingEvents();
 
 		expect(dbMocks.inArray).toHaveBeenNthCalledWith(1, expect.anything(), ["upcoming", "live"]);
+		expect(dbMocks.where).toHaveBeenNthCalledWith(2, {
+			kind: "inArray",
+			values: ["e-upcoming", "e-live"]
+		});
 		expect(result.map((event) => event.status)).toEqual(["upcoming", "live"]);
 	});
 });
