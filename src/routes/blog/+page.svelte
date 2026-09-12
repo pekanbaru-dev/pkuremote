@@ -7,6 +7,12 @@
 	let { data }: { data: PageData } = $props();
 	const filter = $derived(data.filter);
 
+	function pageHref(page: number): string {
+		return filter
+			? `/blog?page=${page}&category=${encodeURIComponent(filter.slug)}`
+			: `/blog?page=${page}`;
+	}
+
 	const jsonLd = $derived(
 		articleListJsonLd(
 			data.articles.map((a) => ({
@@ -119,7 +125,7 @@
 			<div class="mt-10 flex items-center justify-center gap-2">
 				{#if data.page > 1}
 					<a
-						href="/blog?page={data.page - 1}"
+						href={pageHref(data.page - 1)}
 						class="px-4 py-2 rounded-lg border border-hairline text-label-md font-label font-medium text-ink hover:bg-surface-container transition-colors"
 					>
 						← Sebelumnya
@@ -132,7 +138,7 @@
 
 				{#if data.page < data.totalPages}
 					<a
-						href="/blog?page={data.page + 1}"
+						href={pageHref(data.page + 1)}
 						class="px-4 py-2 rounded-lg border border-hairline text-label-md font-label font-medium text-ink hover:bg-surface-container transition-colors"
 					>
 						Selanjutnya →

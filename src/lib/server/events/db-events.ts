@@ -49,8 +49,7 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
  * map; the caller is responsible for defaulting to `[]`.
  */
 async function loadCategoriesForEvents(
-	eventIds: string[],
-	scope?: Exclude<CategoryScope, "both">
+	eventIds: string[]
 ): Promise<Map<string, EventCategoryRef[]>> {
 	const out = new Map<string, EventCategoryRef[]>();
 	if (eventIds.length === 0) return out;
@@ -64,14 +63,7 @@ async function loadCategoriesForEvents(
 		})
 		.from(eventCategories)
 		.innerJoin(categories, eq(categories.id, eventCategories.categoryId))
-		.where(
-			scope
-				? and(
-						inArray(eventCategories.eventId, eventIds),
-						or(eq(categories.scope, "both"), eq(categories.scope, scope))
-					)
-				: inArray(eventCategories.eventId, eventIds)
-		);
+		.where(inArray(eventCategories.eventId, eventIds));
 
 	for (const row of joinRows) {
 		const list = out.get(row.eventId) ?? [];
@@ -92,10 +84,7 @@ export async function getUpcomingEvents(): Promise<Event[]> {
 		.where(inArray(events.status, ["upcoming", "live"]))
 		.orderBy(asc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(
-		rows.map((r) => r.id),
-		"event"
-	);
+	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
@@ -110,10 +99,7 @@ export async function getPastEvents(): Promise<Event[]> {
 		.where(eq(events.status, "past"))
 		.orderBy(desc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(
-		rows.map((r) => r.id),
-		"event"
-	);
+	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
@@ -146,7 +132,7 @@ export async function getEventById(id: string): Promise<Event | undefined> {
 export async function getEventBySlug(slug: string): Promise<Event | undefined> {
 	const [row] = await db.select().from(events).where(eq(events.slug, slug)).limit(1);
 	if (!row) return undefined;
-	const catMap = await loadCategoriesForEvents([row.id], "event");
+	const catMap = await loadCategoriesForEvents([row.id]);
 	return rowToEvent(row, catMap.get(row.id) ?? []);
 }
 
@@ -177,10 +163,7 @@ export async function getEventsByCategorySlug(slug: string): Promise<Event[]> {
 		.where(inArray(events.id, ids))
 		.orderBy(asc(events.startsAt));
 
-	const catMap = await loadCategoriesForEvents(
-		rows.map((r) => r.id),
-		"event"
-	);
+	const catMap = await loadCategoriesForEvents(rows.map((r) => r.id));
 	return rows.map((r) => rowToEvent(r, catMap.get(r.id) ?? []));
 }
 
