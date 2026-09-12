@@ -22,6 +22,8 @@
 </script>
 
 <script lang="ts">
+	import { Badge } from "$lib/components/primitives";
+
 	let { event, class: className }: EventCardProps = $props();
 
 	const dateLabel = $derived(formatDate(event.startsAt));
@@ -63,6 +65,9 @@
 		</div>
 
 		<div class="flex flex-1 flex-col gap-3 p-4">
+			{#if event.status === "live"}
+				<Badge intent="success" variant="soft" size="sm" aria-label="Live event">Live now</Badge>
+			{/if}
 			<h3 class="font-display text-headline-md font-semibold leading-tight text-ink">
 				{event.title}
 			</h3>

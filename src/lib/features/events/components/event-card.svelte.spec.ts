@@ -23,6 +23,20 @@ function makeEvent(overrides: Partial<Event> = {}): Event {
 }
 
 describe("EventCard clickable pills", () => {
+	it("shows a live badge for events currently in progress", async () => {
+		render(EventCard, { event: makeEvent({ status: "live" }) });
+
+		const badge = page.getByText("Live now");
+		await expect.element(badge).toBeVisible();
+		await expect.element(badge).toHaveAttribute("aria-label", "Live event");
+	});
+
+	it("does not show a live badge for upcoming events", () => {
+		render(EventCard, { event: makeEvent() });
+
+		expect(page.getByText("Live now")).toHaveLength(0);
+	});
+
 	it("renders each category pill as a link to the filtered listing", async () => {
 		render(EventCard, { event: makeEvent() });
 
