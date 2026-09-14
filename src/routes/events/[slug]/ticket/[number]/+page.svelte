@@ -22,6 +22,32 @@
 			minute: "2-digit"
 		});
 	}
+	function calendarDate(iso: string): string {
+		return new Date(iso)
+			.toISOString()
+			.replaceAll("-", "")
+			.replaceAll(":", "")
+			.replace(".000Z", "Z");
+	}
+
+	function calendarEnd(iso: string, endsAt: string | undefined): string {
+		return calendarDate(endsAt ?? new Date(new Date(iso).getTime() + 60 * 60 * 1000).toISOString());
+	}
+
+	const calendarHref = $derived(
+		`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+			event.title
+		)}&dates=${calendarDate(event.startsAt)}/${calendarEnd(event.startsAt, event.endsAt)}&details=${encodeURIComponent(
+			event.onlineUrl ? `Link online: ${event.onlineUrl}` : event.excerpt
+		)}&location=${encodeURIComponent(event.onlineUrl ?? event.location)}`
+	);
+	const onlineLinkLabel = $derived(
+		event.onlineUrl?.includes("meet.google.com")
+			? "Buka Google Meet"
+			: event.onlineUrl?.includes("zoom.us")
+				? "Buka Zoom"
+				: "Buka link online"
+	);
 </script>
 
 <svelte:head>
@@ -102,6 +128,32 @@
 					{registration.registrationNumber}
 				</p>
 			</div>
+		</section>
+		<section
+			class="rounded-xl border border-hairline bg-surface-container-lowest p-lg flex flex-col gap-3"
+			aria-label="Akses event"
+		>
+			{#if event.onlineUrl}
+				<div>
+					<p class="label-meta text-on-surface-variant">Event online</p>
+					<a
+						href={event.onlineUrl}
+						target="_blank"
+						rel="noreferrer"
+						class="link-quiet text-label-lg text-primary"
+					>
+						{onlineLinkLabel}
+					</a>
+				</div>
+			{/if}
+			<a
+				href={calendarHref}
+				target="_blank"
+				rel="noreferrer"
+				class="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-4 text-label-md font-semibold text-on-primary hover:bg-primary/90"
+			>
+				Tambahkan ke Google Calendar
+			</a>
 		</section>
 
 		{#if isCancelled}

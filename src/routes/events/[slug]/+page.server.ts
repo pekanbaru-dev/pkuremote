@@ -1,11 +1,12 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
-import { getEventBySlug } from "$lib/server/events";
+import { getEventBySlug, toPublicEvent } from "$lib/server/events";
 import { renderMarkdown } from "$lib/server/markdown";
 import { db } from "$lib/server/db/client";
 import { profiles } from "../../../../db/schema";
 import {
 	bookEvent,
+	getRegistrationForEvent,
 	RegistrationError,
 	getRegistrationErrorMessage
 } from "$lib/server/registrations";
@@ -16,8 +17,8 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	if (!event) {
 		error(404, "Event tidak ditemukan");
 	}
-
 	let defaultAttendeeName: string | null = null;
+	let registration = null;
 	if (locals.user) {
 		const [profile] = await db
 			.select({ displayName: profiles.displayName })
@@ -25,13 +26,15 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			.where(eq(profiles.id, locals.user.id))
 			.limit(1);
 		defaultAttendeeName = profile?.displayName ?? null;
+		registration = await getRegistrationForEvent(locals.user.id, event.id);
 	}
 
 	return {
-		event,
+		event: toPublicEvent(event),
 		bodyHtml: renderMarkdown(event.body),
 		authenticated: locals.user !== null && locals.user !== undefined,
 		defaultAttendeeName,
+		registration,
 		bookingError: url.searchParams.get("error")
 			? getRegistrationErrorMessage(url.searchParams.get("error") ?? "")
 			: null

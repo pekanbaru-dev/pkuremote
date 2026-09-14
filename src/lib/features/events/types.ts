@@ -28,6 +28,7 @@ export type Event = {
 	startsAt: string;
 	endsAt?: string;
 	location: string;
+	onlineUrl?: string;
 	excerpt: string;
 	body: string;
 	bannerUrl?: string;

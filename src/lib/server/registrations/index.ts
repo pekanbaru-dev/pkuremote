@@ -7,6 +7,7 @@
 export {
 	bookEvent,
 	getMyRegistrations,
+	getRegistrationForEvent,
 	getRegistrationByNumber,
 	cancelRegistration,
 	getEventRegistrations,

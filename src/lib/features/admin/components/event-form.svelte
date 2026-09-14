@@ -191,6 +191,21 @@
 	</label>
 
 	<label class="flex flex-col gap-1">
+		<span class={labelSpan}
+			>Link online <span class="opacity-60">(Google Meet / Zoom, opsional)</span></span
+		>
+		<Input
+			type="url"
+			name="onlineUrl"
+			value={str("onlineUrl", event?.onlineUrl)}
+			placeholder="https://meet.google.com/…"
+		/>
+		{#if fieldError("onlineUrl")}
+			<p class="label-meta text-error" role="alert">{fieldError("onlineUrl")}</p>
+		{/if}
+	</label>
+
+	<label class="flex flex-col gap-1">
 		<span class={labelSpan}>Ringkasan</span>
 		<Textarea name="excerpt" rows={2} value={str("excerpt", event?.excerpt)} required></Textarea>
 		{#if fieldError("excerpt")}

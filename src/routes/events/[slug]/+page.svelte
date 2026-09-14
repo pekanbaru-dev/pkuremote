@@ -84,6 +84,7 @@
 				<EventBookingCta
 					{event}
 					authenticated={data.authenticated}
+					registrationNumber={data.registration?.registrationNumber}
 					bookingError={formError}
 					{formState}
 					mode="desktop"
@@ -95,6 +96,7 @@
 	<EventBookingCta
 		{event}
 		authenticated={data.authenticated}
+		registrationNumber={data.registration?.registrationNumber}
 		bookingError={formError}
 		{formState}
 		mode="mobile"

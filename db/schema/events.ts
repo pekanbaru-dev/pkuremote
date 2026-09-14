@@ -22,6 +22,7 @@ export const events = pgTable(
 		startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
 		endsAt: timestamp("ends_at", { withTimezone: true }),
 		location: text("location").notNull(),
+		onlineUrl: text("online_url"),
 		excerpt: text("excerpt").notNull(),
 		body: text("body").notNull(),
 		bannerUrl: text("banner_url"),

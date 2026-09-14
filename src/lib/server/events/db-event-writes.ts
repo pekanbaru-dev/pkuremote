@@ -40,6 +40,7 @@ export type EventWriteInput = {
 	startsAt: Date;
 	endsAt: Date | null;
 	location: string;
+	onlineUrl?: string | null;
 	excerpt: string;
 	body: string;
 	bannerUrl: string | null;
@@ -74,6 +75,14 @@ export function validateEventInput(input: EventWriteInput): void {
 	}
 	if (!input.location.trim())
 		throw new EventWriteError("VALIDATION", "Lokasi wajib diisi.", "location");
+	if (input.onlineUrl != null) {
+		try {
+			const url = new URL(input.onlineUrl);
+			if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error();
+		} catch {
+			throw new EventWriteError("VALIDATION", "Link online harus berupa URL http(s).", "onlineUrl");
+		}
+	}
 	if (!input.excerpt.trim())
 		throw new EventWriteError("VALIDATION", "Ringkasan wajib diisi.", "excerpt");
 	if (!input.body.trim()) throw new EventWriteError("VALIDATION", "Isi wajib diisi.", "body");
@@ -175,6 +184,7 @@ export async function createEvent(input: EventWriteInput): Promise<string> {
 					startsAt: input.startsAt,
 					endsAt: input.endsAt,
 					location: input.location.trim(),
+					onlineUrl: input.onlineUrl,
 					excerpt: input.excerpt.trim(),
 					body: input.body,
 					bannerUrl: input.bannerUrl,
@@ -238,6 +248,7 @@ export async function updateEvent(id: string, input: EventWriteInput): Promise<v
 					startsAt: input.startsAt,
 					endsAt: input.endsAt,
 					location: input.location.trim(),
+					onlineUrl: input.onlineUrl,
 					excerpt: input.excerpt.trim(),
 					body: input.body,
 					bannerUrl: input.bannerUrl,

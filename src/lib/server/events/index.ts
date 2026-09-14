@@ -8,6 +8,7 @@
 export {
 	getUpcomingEvents,
 	getPastEvents,
+	toPublicEvent,
 	getAllEvents,
 	getEventById,
 	getEventBySlug,
