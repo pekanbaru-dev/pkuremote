@@ -1,69 +1,69 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1783447286423,
-      "tag": "0000_natural_quasimodo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1786728760197,
-      "tag": "0001_nifty_garia",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1786728760200,
-      "tag": "0002_article_metadata",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1788604109814,
-      "tag": "0003_nasty_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1788939839563,
-      "tag": "0004_same_silhouette",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1788942359337,
-      "tag": "0005_daffy_blob",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1788945028313,
-      "tag": "0006_normal_doctor_strange",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1789216079326,
-      "tag": "0007_striped_meggan",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1789387769054,
-      "tag": "0008_sticky_darwin",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1783447286423,
+			"tag": "0000_natural_quasimodo",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1786728760197,
+			"tag": "0001_nifty_garia",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1786728760200,
+			"tag": "0002_article_metadata",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "7",
+			"when": 1788604109814,
+			"tag": "0003_nasty_lord_hawal",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1788939839563,
+			"tag": "0004_same_silhouette",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1788942359337,
+			"tag": "0005_daffy_blob",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1788945028313,
+			"tag": "0006_normal_doctor_strange",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1789216079326,
+			"tag": "0007_striped_meggan",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1789387769054,
+			"tag": "0008_sticky_darwin",
+			"breakpoints": true
+		}
+	]
 }
