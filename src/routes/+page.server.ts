@@ -1,4 +1,4 @@
-import { getUpcomingEvents, getPastEvents } from "$lib/server/events";
+import { getUpcomingEvents, getPastEvents, toPublicEvent } from "$lib/server/events";
 import { getPublishedArticles } from "$lib/server/articles";
 import { getPublishedCafes } from "$lib/server/cafes";
 import type { PageServerLoad } from "./$types.js";
@@ -8,8 +8,8 @@ export const load: PageServerLoad = async () => {
 	const allPast = await getPastEvents();
 	const { articles } = await getPublishedArticles(1, 4);
 	return {
-		events: allUpcoming,
-		pastEvents: allPast.slice(0, 6),
+		events: allUpcoming.map(toPublicEvent),
+		pastEvents: allPast.slice(0, 6).map(toPublicEvent),
 		pastEventsTotal: allPast.length,
 		articles,
 		cafes: await getPublishedCafes()

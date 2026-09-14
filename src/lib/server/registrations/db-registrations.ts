@@ -110,6 +110,7 @@ function rowEventToEvent(row: typeof events.$inferSelect, cats: EventCategoryRef
 		startsAt: row.startsAt.toISOString(),
 		endsAt: row.endsAt ? row.endsAt.toISOString() : undefined,
 		location: row.location,
+		onlineUrl: row.onlineUrl ?? undefined,
 		excerpt: row.excerpt,
 		body: row.body,
 		bannerUrl: row.bannerUrl ?? undefined,
@@ -263,6 +264,19 @@ export async function getMyRegistrations(userId: string): Promise<MyRegistration
 		...rowToRegistration(r.reg),
 		event: rowEventToEvent(r.event, catsByEvent.get(r.event.id) ?? [])
 	}));
+}
+/** Return a user's registration for an event, including cancelled records. */
+export async function getRegistrationForEvent(
+	userId: string,
+	eventId: string
+): Promise<Registration | null> {
+	if (!userId) return null;
+	const [row] = await db
+		.select()
+		.from(registrations)
+		.where(and(eq(registrations.userId, userId), eq(registrations.eventId, eventId)))
+		.limit(1);
+	return row ? rowToRegistration(row) : null;
 }
 
 /** Look up a single registration by its `registrationNumber`. Returns

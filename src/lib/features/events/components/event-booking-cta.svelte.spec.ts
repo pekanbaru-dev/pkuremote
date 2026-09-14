@@ -43,6 +43,18 @@ describe("EventBookingCta", () => {
 		await expect.element(phoneInput).toBeVisible();
 		await expect.element(submit).toBeVisible();
 	});
+	it("shows the registered ticket instead of booking again", async () => {
+		render(EventBookingCta, {
+			event: makeEvent(),
+			authenticated: true,
+			registrationNumber: "PKU-2026-abc123"
+		});
+
+		const ticket = page.getByRole("link", { name: /Lihat tiket/i }).first();
+		await expect.element(ticket).toBeVisible();
+		await expect.element(ticket).toHaveAttribute("href", "/events/e1/ticket/PKU-2026-abc123");
+		expect(page.getByRole("button", { name: /Booking Sekarang/i })).toHaveLength(0);
+	});
 
 	it("pre-fills the form fields from formState", async () => {
 		render(EventBookingCta, {

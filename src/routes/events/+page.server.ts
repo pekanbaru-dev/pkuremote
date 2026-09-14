@@ -1,4 +1,9 @@
-import { getCategoriesForScope, getPastEvents, getUpcomingEvents } from "$lib/server/events";
+import {
+	getCategoriesForScope,
+	getPastEvents,
+	getUpcomingEvents,
+	toPublicEvent
+} from "$lib/server/events";
 import type { PageServerLoad } from "./$types.js";
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -15,5 +20,10 @@ export const load: PageServerLoad = async ({ url }) => {
 		? allPast.filter((e) => e.categories.some((c) => c.slug === filter.slug))
 		: allPast;
 
-	return { upcoming, past, filter, categories };
+	return {
+		upcoming: upcoming.map(toPublicEvent),
+		past: past.map(toPublicEvent),
+		filter,
+		categories
+	};
 };

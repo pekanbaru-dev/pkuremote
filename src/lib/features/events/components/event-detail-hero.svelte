@@ -64,8 +64,6 @@
 		>
 			{event.title}
 		</h1>
-		<p class="label-meta text-[0.9375rem]">
-			{dateLabel} WIB · {event.location}
-		</p>
+		<p class="label-meta text-[0.9375rem]">{dateLabel} WIB · {event.location}</p>
 	</div>
 </header>

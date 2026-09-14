@@ -29,6 +29,7 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
 		startsAt: row.startsAt.toISOString(),
 		endsAt: toIso(row.endsAt),
 		location: row.location,
+		onlineUrl: row.onlineUrl ?? undefined,
 		excerpt: row.excerpt,
 		body: row.body,
 		bannerUrl: row.bannerUrl ?? undefined,
@@ -41,6 +42,11 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
 		registrationClosesAt: toIso(row.registrationClosesAt),
 		categories: cats
 	};
+}
+/** Hide meeting links from public event payloads; tickets load the full event. */
+export function toPublicEvent(event: Event): Event {
+	const { onlineUrl: _onlineUrl, ...publicEvent } = event;
+	return publicEvent;
 }
 
 /**

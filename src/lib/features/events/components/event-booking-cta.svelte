@@ -9,6 +9,7 @@
 	export type EventBookingCtaProps = {
 		event: Event;
 		authenticated: boolean;
+		registrationNumber?: string | null;
 		bookingError?: string | null;
 		formState?: { attendeeName?: string; attendeePhone?: string } | null;
 		mode?: EventBookingCtaMode;
@@ -20,6 +21,7 @@
 	let {
 		event,
 		authenticated,
+		registrationNumber = null,
 		bookingError = null,
 		formState = null,
 		mode = "both",
@@ -48,6 +50,10 @@
 	<div class={cn("hidden tablet:flex tablet:flex-col tablet:gap-3", className)}>
 		{#if !authenticated}
 			<Button href={loginHref} class="h-11 w-full">Login dulu untuk booking</Button>
+		{:else if registrationNumber}
+			<Button href={`/events/${event.slug}/ticket/${registrationNumber}`} class="h-11 w-full">
+				Lihat tiket
+			</Button>
 		{:else if isDisabled}
 			<Button disabled class="h-11 w-full">{disabledLabel}</Button>
 		{:else}
@@ -87,6 +93,14 @@
 		{#if !authenticated}
 			<Button href={loginHref} aria-label="Login dulu untuk booking" class="h-14 rounded-full">
 				Login
+			</Button>
+		{:else if registrationNumber}
+			<Button
+				href={`/events/${event.slug}/ticket/${registrationNumber}`}
+				aria-label="Lihat tiket"
+				class="h-14 rounded-full"
+			>
+				Lihat tiket
 			</Button>
 		{:else if isDisabled}
 			<Button disabled aria-label={disabledLabel} class="h-14 rounded-full">
