@@ -45,8 +45,7 @@ function rowToEvent(row: EventRow, cats: EventCategoryRef[]): Event {
 }
 /** Hide meeting links from public event payloads; tickets load the full event. */
 export function toPublicEvent(event: Event): Event {
-	const { onlineUrl: _onlineUrl, ...publicEvent } = event;
-	return publicEvent;
+	return { ...event, onlineUrl: undefined };
 }
 
 /**
